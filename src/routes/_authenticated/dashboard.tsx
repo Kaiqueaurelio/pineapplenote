@@ -199,12 +199,15 @@ function Index() {
             <Bell size={20} />
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-brand-yellow ring-2 ring-background" />
           </Button>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-violet text-sm font-bold text-brand-violet-foreground ring-4 ring-violet-soft"
-            aria-label="Abrir perfil de Marina"
+            aria-label={`Abrir perfil de ${displayName}`}
+            onClick={() => setProfileOpen(true)}
           >
-            MA
-          </button>
+            {initials}
+          </Button>
         </div>
       </header>
 
@@ -233,9 +236,12 @@ function Index() {
             <button className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
               <CircleHelp size={19} /> Ajuda
             </button>
-            <button className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
+            <Button variant="ghost" className="w-full justify-start" onClick={() => setProfileOpen(true)}>
               <Settings size={19} /> Configurações
-            </button>
+            </Button>
+            <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
+              <LogOut size={19} /> Sair
+            </Button>
             <div className="mt-4 rounded-lg bg-secondary p-3">
               <div className="mb-2 flex items-center justify-between text-xs font-semibold">
                 <span>Plano gratuito</span>
@@ -254,7 +260,7 @@ function Index() {
             <section className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
               <div>
                 <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-green-strong">
-                  <Sparkles size={16} /> Bom dia, Marina
+                  <Sparkles size={16} /> Bom dia, {displayName.split(" ")[0]}
                 </p>
                 <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">O que vamos aprender hoje?</h1>
                 <p className="mt-2 max-w-xl text-muted-foreground">
@@ -444,6 +450,27 @@ function Index() {
           />
         </div>
       </div>
+
+      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+        <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] overflow-y-auto rounded-xl sm:max-w-md">
+          <DialogHeader>
+            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-violet-soft text-brand-violet"><UserRound size={21} /></div>
+            <DialogTitle>Seu perfil acadêmico</DialogTitle>
+            <DialogDescription>Mantenha seus dados atualizados para personalizar seus estudos.</DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg bg-green-soft p-3 text-sm text-green-strong">
+            <strong className="block">E-mail confirmado</strong>
+            <span className="break-all text-xs">{user.email}</span>
+          </div>
+          <form onSubmit={saveProfile} className="space-y-4">
+            <div className="space-y-2"><Label htmlFor="display_name">Nome completo</Label><Input id="display_name" name="display_name" defaultValue={profile?.display_name ?? displayName} maxLength={80} required className="h-11" /></div>
+            <div className="space-y-2"><Label htmlFor="institution">Instituição</Label><Input id="institution" name="institution" defaultValue={profile?.institution ?? ""} maxLength={120} placeholder="Sua faculdade ou escola" className="h-11" /></div>
+            <div className="space-y-2"><Label htmlFor="course">Curso</Label><Input id="course" name="course" defaultValue={profile?.course ?? ""} maxLength={120} placeholder="Seu curso" className="h-11" /></div>
+            <Button type="submit" className="w-full" disabled={savingProfile}><Save size={17} />{savingProfile ? "Salvando..." : "Salvar perfil"}</Button>
+          </form>
+          <Button variant="ghost" className="w-full text-destructive hover:text-destructive" onClick={handleSignOut}><LogOut size={17} />Sair da conta</Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
