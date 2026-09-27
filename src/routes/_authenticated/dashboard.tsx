@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
   AudioLines,
@@ -18,15 +19,25 @@ import {
   Plus,
   Search,
   Settings,
+  LogOut,
+  Save,
+  UserRound,
   Sparkles,
   Upload,
   Video,
   X,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
+import { z } from "zod";
 
 import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -86,12 +97,61 @@ const navItems = [
 ];
 
 function Index() {
+  const { user } = Route.useRouteContext();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState("Documento");
   const [selectedFile, setSelectedFile] = useState("");
   const [activeMaterial, setActiveMaterial] = useState<string | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(async ({ data }) => {
+      if (data) return setProfile(data);
+      const metadata = user.user_metadata;
+      const initial = {
+        user_id: user.id,
+        display_name: typeof metadata.full_name === "string" ? metadata.full_name.slice(0, 80) : "",
+        institution: typeof metadata.institution === "string" ? metadata.institution.slice(0, 120) : "",
+        course: typeof metadata.course === "string" ? metadata.course.slice(0, 120) : "",
+      };
+      const { data: created } = await supabase.from("profiles").upsert(initial).select().single();
+      if (created) setProfile(created);
+    });
+  }, [user]);
+
+  const displayName = profile?.display_name || (typeof user.user_metadata.full_name === "string" ? user.user_metadata.full_name : "Estudante");
+  const initials = displayName.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "PN";
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
+  async function saveProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const result = z.object({
+      display_name: z.string().trim().min(2, "Informe seu nome.").max(80),
+      institution: z.string().trim().max(120),
+      course: z.string().trim().max(120),
+    }).safeParse({ display_name: String(form.get("display_name") ?? ""), institution: String(form.get("institution") ?? ""), course: String(form.get("course") ?? "") });
+    if (!result.success) return toast.error(result.error.issues[0]?.message ?? "Revise seus dados.");
+    setSavingProfile(true);
+    const { data, error } = await supabase.from("profiles").upsert({ user_id: user.id, ...result.data }).select().single();
+    setSavingProfile(false);
+    if (error || !data) return toast.error("Não foi possível salvar seu perfil.");
+    setProfile(data);
+    setProfileOpen(false);
+    toast.success("Perfil atualizado.");
+  }
 
   const filteredMaterials = materials.filter((material) =>
     `${material.title} ${material.subject}`.toLowerCase().includes(search.toLowerCase()),
