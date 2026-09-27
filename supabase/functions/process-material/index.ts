@@ -33,7 +33,7 @@ async function openAiResponses(apiKey: string, input: unknown) {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "gpt-5.6-luna",
+      model: "gpt-5",
       input,
       text: {
         format: {
