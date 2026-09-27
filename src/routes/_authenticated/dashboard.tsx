@@ -13,6 +13,7 @@ import {
   FolderOpen,
   Home,
   Library,
+  Loader2,
   Menu,
   Mic2,
   MoreHorizontal,
