@@ -25,6 +25,7 @@ function LibraryPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [openingId, setOpeningId] = useState<string | null>(null);
+  const [progressByMaterial, setProgressByMaterial] = useState<Record<string, number>>({});
 
   async function loadMaterials() {
     setLoading(true);
@@ -40,6 +41,19 @@ function LibraryPage() {
       return;
     }
     setMaterials(data ?? []);
+    if (data?.length) {
+      const { data: progressRows } = await supabase
+        .from("study_progress")
+        .select("material_id, progress")
+        .eq("user_id", user.id)
+        .in("material_id", data.map((item) => item.id));
+
+      setProgressByMaterial(
+        Object.fromEntries((progressRows ?? []).map((row) => [row.material_id, row.progress])),
+      );
+    } else {
+      setProgressByMaterial({});
+    }
   }
 
   useEffect(() => {
@@ -145,8 +159,17 @@ function LibraryPage() {
                     <div className="min-w-0 flex-1">
                       <h2 className="truncate font-bold">{material.title}</h2>
                       <p className="mt-1 text-xs text-muted-foreground">
-{material.source_type === "audio" ? "Áudio" : material.source_type === "video" ? "Vídeo" : "Documento"} · {material.status === "ready" ? "Pronto para estudar" : material.status === "processing" ? "Organizando conteúdo..." : material.status === "failed" ? "Não foi possível organizar" : "Pronto para organizar"}
+                        {material.source_type === "audio" ? "Áudio" : material.source_type === "video" ? "Vídeo" : "Documento"} · {material.status === "ready" ? "Pronto para estudar" : material.status === "processing" ? "Organizando conteúdo..." : material.status === "failed" ? "Não foi possível organizar" : "Pronto para organizar"}
                       </p>
+                      <div className="mt-3">
+                        <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
+                          <span>Progresso</span>
+                          <span>{progressByMaterial[material.id] ?? 0}%</span>
+                        </div>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+                          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progressByMaterial[material.id] ?? 0}%` }} />
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
