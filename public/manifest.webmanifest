@@ -16,6 +16,11 @@
   ],
   "icons": [
     {
+      "src": "/__l5e/assets-v1/7b5844c1-fa48-4fb9-9b19-793ea5aec576/pineapple-note-logo.png",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
