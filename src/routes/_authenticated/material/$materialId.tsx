@@ -308,7 +308,8 @@ function MaterialPage() {
             {flashcards.length > 0 && (
               <section id="flashcards" className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
                 <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 font-bold"><BookOpen size={18} /> Flashcards</div><span className="text-xs text-muted-foreground">{flashcardIndex + 1} / {flashcards.length}</span></div>
-                <button type="button" onClick={() => setShowAnswer((value) => !value)} className="mt-5 min-h-48 w-full rounded-2xl border border-primary/20 bg-green-soft/50 p-6 text-left transition hover:border-primary/40">
+                <button type="button" onClick={() => setShowAnswer((value) => !value)} aria-label={showAnswer ? "Mostrar pergunta do flashcard" : "Mostrar resposta do flashcard"}
+                  className="mt-5 min-h-48 w-full rounded-2xl border border-primary/20 bg-green-soft/50 p-6 text-left transition hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
                   <p className="text-xs font-bold uppercase tracking-wide text-green-strong">{showAnswer ? "Resposta" : "Pergunta"}</p>
                   <p className="mt-3 text-lg font-bold leading-relaxed">{showAnswer ? currentFlashcard?.answer : currentFlashcard?.question}</p>
                 </button>
@@ -333,7 +334,8 @@ function MaterialPage() {
                     return <article key={index} className="rounded-xl border border-border p-4">
                       <p className="font-bold">{index + 1}. {item["question"]}</p>
                       <div className="mt-3 grid gap-2">
-                        {item.options.map((option) => <button type="button" key={option} onClick={() => { setQuizAnswers((current) => ({ ...current, [index]: option })); setQuizSubmitted(false); }} className={`rounded-lg border px-3 py-3 text-left text-sm transition ${selected === option ? (correct ? "border-primary bg-green-soft" : "border-destructive bg-destructive/10") : "border-border hover:bg-secondary"}`}>{option}</button>)}
+                        {item.options.map((option) => <button type="button" key={option} onClick={() => { setQuizAnswers((current) => ({ ...current, [index]: option })); setQuizSubmitted(false); }} aria-pressed={selected === option}
+                          className={`min-h-11 rounded-lg border px-3 py-3 text-left text-sm transition ${selected === option ? (correct ? "border-primary bg-green-soft" : "border-destructive bg-destructive/10") : "border-border hover:bg-secondary"}`}>{option}</button>)}
                       </div>
                       {selected && quizSubmitted && <div className="mt-3 rounded-lg bg-secondary p-3 text-sm"><strong>{correct ? "Correto!" : `Resposta: ${item["answer"]}`}</strong><p className="mt-1 text-muted-foreground">{item["explanation"]}</p></div>}
                     </article>;
