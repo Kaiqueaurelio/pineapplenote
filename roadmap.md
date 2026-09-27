@@ -4,3 +4,5 @@
 - [x] Aplicar logo, identidade e favicon
 - [x] Adicionar interações locais principais
 - [x] Verificar desktop, celular e compilação
+- [ ] Adicionar instalação PWA sem cache offline
+- [ ] Revalidar responsividade e instalação

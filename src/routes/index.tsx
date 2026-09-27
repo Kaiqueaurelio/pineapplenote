@@ -105,7 +105,7 @@ function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-[76px] max-w-[1480px] items-center gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto grid h-[76px] max-w-[1480px] grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 px-4 sm:flex sm:gap-4 sm:px-6 lg:px-8">
           <Button
             variant="ghost"
             size="icon"
@@ -116,15 +116,15 @@ function Index() {
             {mobileMenuOpen ? <X size={21} /> : <Menu size={21} />}
           </Button>
 
-          <a href="/" className="flex min-w-0 items-center" aria-label="Pineapple Note — início">
+          <a href="/" className="flex min-w-0 items-center sm:mr-auto" aria-label="Pineapple Note — início">
             <img
               src={logoAsset.url}
               alt="Pineapple Note"
-              className="h-14 w-auto object-contain object-left sm:h-16"
+              className="h-14 max-w-full w-auto object-contain object-left sm:h-16"
             />
           </a>
 
-          <div className="ml-auto hidden w-full max-w-md items-center md:flex">
+          <div className="hidden w-full max-w-md items-center md:flex">
             <Search className="pointer-events-none relative left-9 z-10 text-muted-foreground" size={18} />
             <input
               value={search}
@@ -140,7 +140,7 @@ function Index() {
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-brand-yellow ring-2 ring-background" />
           </Button>
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-violet text-sm font-bold text-brand-violet-foreground ring-4 ring-violet-soft"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-violet text-sm font-bold text-brand-violet-foreground ring-4 ring-violet-soft"
             aria-label="Abrir perfil de Marina"
           >
             MA
