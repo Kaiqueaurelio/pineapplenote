@@ -480,7 +480,7 @@ function Index() {
                   <div className="grid gap-3 sm:grid-cols-3">
                     {[
                       { label: "Gravar áudio", detail: "Aula ou explicação", icon: Mic2 },
-                      { label: "Enviar vídeo", detail: "MP4 ou link", icon: Video },
+                      { label: "Enviar vídeo", detail: "Arquivo de vídeo", icon: Video },
                       { label: "Documento", detail: "PDF, DOC ou slides", icon: FileText },
                     ].map((item) => (
                       <button
