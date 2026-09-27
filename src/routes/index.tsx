@@ -2,14 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   BookOpen,
-  FileAudio,
   FileText,
   Mic2,
   Play,
   Upload,
-  Video,
   GraduationCap,
-  HelpCircle,
   ChevronDown,
   CheckCircle2,
 } from "lucide-react";
