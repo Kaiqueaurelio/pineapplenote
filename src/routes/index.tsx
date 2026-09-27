@@ -5,14 +5,12 @@ import {
   FileAudio,
   FileText,
   Headphones,
-  Image,
   Languages,
   MessageCircle,
   Mic2,
   Play,
   Upload,
   Video,
-  Gamepad2,
   GraduationCap,
   HelpCircle,
   ChevronDown,
@@ -20,19 +18,6 @@ import {
 
 import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
-
-const features = [
-  { icon: FileAudio, title: "Do conteúdo ao conhecimento", text: "Envie áudios, vídeos, PDFs, documentos ou grave uma aula diretamente no app." },
-  { icon: BookOpen, title: "Estudo organizado por IA", text: "Receba resumo, tópicos essenciais, transcrição, flashcards e quiz em um só lugar." },
-  { icon: MessageCircle, title: "Seu material, sempre acessível", text: "Revise na biblioteca, acompanhe o progresso e retome seus estudos de onde parou." },
-  { icon: Languages, title: "Feito para aprender melhor", text: "Uma experiência clara, responsiva e preparada para ferramentas de estudo inteligente." },
-];
-
-const steps = [
-  ["01", "Envie ou grave", "Escolha um arquivo, documento ou uma nova gravação."],
-  ["02", "Deixe a IA organizar", "A Pineapple transforma conteúdo bruto em um material de estudo estruturado."],
-  ["03", "Revise e avance", "Use resumos, flashcards e quiz para estudar com mais constância."],
-];
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -73,29 +58,9 @@ const features = [
     description: "Transcrições, resumos, tópicos e pontos importantes ficam estruturados para revisão.",
   },
   {
-    icon: MessageCircle,
-    title: "Converse com o conteúdo",
-    description: "Use suas próprias notas como contexto para encontrar respostas e esclarecer dúvidas.",
-  },
-  {
     icon: BookOpen,
     title: "Crie materiais de estudo",
     description: "Transforme o conteúdo em flashcards, quizzes e outros formatos de revisão.",
-  },
-  {
-    icon: Languages,
-    title: "Estude em outros idiomas",
-    description: "Transcreva e prepare conteúdos para revisão em diferentes idiomas.",
-  },
-  {
-    icon: Gamepad2,
-    title: "Aprenda de forma ativa",
-    description: "Recursos interativos ajudam a transformar revisão passiva em prática.",
-  },
-  {
-    icon: Headphones,
-    title: "Transforme notas em áudio",
-    description: "A experiência também foi pensada para revisar conteúdos enquanto você escuta.",
   },
   {
     icon: GraduationCap,
@@ -129,15 +94,15 @@ const faqs = [
   },
   {
     question: "Posso usar pelo celular?",
-    answer: "Sim. A experiência do Pineapple Note está sendo construída com foco mobile-first e também funciona em telas maiores.",
+    answer: "Sim. A interface é responsiva e foi construída com foco em uso confortável no celular e em telas maiores.",
   },
   {
     question: "Que tipos de conteúdo posso enviar?",
-    answer: "O fluxo foi projetado para trabalhar com gravações, áudios, vídeos e documentos, além de evoluir para outros formatos de conteúdo.",
+    answer: "Hoje o fluxo trabalha com gravações de áudio, vídeos e documentos compatíveis. Outros formatos podem ser adicionados futuramente.",
   },
   {
     question: "O Pineapple Note é um projeto da Decode Analytics?",
-    answer: "Sim. O Pineapple Note é mais um projeto criado pela Decode Analytics, dentro da sua linha de produtos e experiências digitais com tecnologia e inteligência artificial.",
+    answer: "Sim. O Pineapple Note é desenvolvido pela Decode Analytics.",
   },
   {
     question: "Preciso anotar tudo durante a aula?",
@@ -212,7 +177,7 @@ function LandingPage() {
             </div>
 
             <p className="mt-5 text-xs text-muted-foreground">
-              Um projeto criado por <strong className="text-foreground">Decode Analytics</strong>.
+              Desenvolvido pela <strong className="text-foreground">Decode Analytics</strong>.
             </p>
           </div>
 
@@ -338,7 +303,7 @@ function LandingPage() {
               <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Recursos</span>
               <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Capture. Organize. Aprenda.</h2>
               <p className="mt-4 text-muted-foreground">
-                A landing do Pineapple Note agora apresenta o produto como uma experiência completa, seguindo o mesmo raciocínio de descoberta usado pelo Coconote.
+                Capture o conteúdo, deixe a organização acontecer e volte para estudar quando quiser.
               </p>
             </div>
 
@@ -422,7 +387,7 @@ function LandingPage() {
             <img src={logoAsset.url} alt="" className="h-8 w-auto" />
             <span>© {new Date().getFullYear()} Pineapple Note</span>
           </div>
-          <span>Um projeto criado por Decode Analytics.</span>
+          <span>Desenvolvido pela Decode Analytics.</span>
         </div>
       </footer>
     </div>
