@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      material_outputs: {
+        Row: {
+          id: string
+          material_id: string
+          user_id: string
+          summary: string
+          topics: Json
+          flashcards: Json
+          quiz: Json
+          transcript: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          material_id: string
+          user_id: string
+          summary?: string
+          topics?: Json
+          flashcards?: Json
+          quiz?: Json
+          transcript?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          material_id?: string
+          user_id?: string
+          summary?: string
+          topics?: Json
+          flashcards?: Json
+          quiz?: Json
+          transcript?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      study_progress: {
+        Row: {
+          id: string
+          user_id: string
+          material_id: string
+          progress: number
+          last_opened_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          material_id: string
+          progress?: number
+          last_opened_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          material_id?: string
+          progress?: number
+          last_opened_at?: string
+        }
+        Relationships: []
+      }
       study_materials: {
         Row: {
           created_at: string
