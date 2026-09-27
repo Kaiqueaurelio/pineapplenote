@@ -4,7 +4,6 @@ import {
   ArrowRight,
   AudioLines,
   BookOpen,
-  ChevronRight,
   CircleStop,
   CircleHelp,
   FileText,
@@ -13,7 +12,6 @@ import {
   Loader2,
   Menu,
   Mic2,
-  MoreHorizontal,
   Play,
   Plus,
   Search,
@@ -73,7 +71,6 @@ function Index() {
   const [selectedType, setSelectedType] = useState("Documento");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const MAX_FILE_SIZE = 500 * 1024 * 1024;
-  const [activeMaterial, setActiveMaterial] = useState<string | null>(null);
   const [recording, setRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [uploadingMaterial, setUploadingMaterial] = useState(false);
@@ -133,7 +130,7 @@ function Index() {
   }, [user]);
 
   useEffect(() => {
-    supabase.from("study_materials").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6).then(async ({ data, error }) => {
+    supabase.from("study_materials").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(12).then(async ({ data, error }) => {
       if (error) {
         toast.error("Não foi possível carregar seus materiais.");
         return;
@@ -511,11 +508,12 @@ function Index() {
                   </div>
 
                   {selectedFile && (
-                    <div className="mt-4 rounded-lg border border-primary/30 bg-green-soft p-4 text-sm">
+                    <div className="mt-4 rounded-lg border border-primary/30 bg-green-soft p-4 text-sm" aria-live="polite">
                       <div className="flex items-center justify-between gap-3">
                         <span className="min-w-0 truncate font-medium">{selectedFile.name}</span>
                         <span className="shrink-0 font-semibold text-green-strong">Pronto</span>
                       </div>
+                      {uploadingMaterial && <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-background/70" aria-label="Enviando material"><div className="h-full w-2/5 animate-[pulse_1.4s_ease-in-out_infinite] rounded-full bg-primary" /></div>}
                       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
                         <Button type="button" className="w-full sm:w-auto" onClick={() => void saveMaterial()} disabled={uploadingMaterial}>
                           {uploadingMaterial && <Loader2 className="animate-spin" size={17} />}
@@ -551,9 +549,9 @@ function Index() {
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-bold">Continue estudando</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">Seus materiais mais recentes</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{search ? `Resultados recentes para “${search}”` : "Seus materiais mais recentes"}</p>
                 </div>
-                <Button variant="ghost" className="hidden sm:inline-flex" onClick={() => navigate({ to: "/library" })}>
+                <Button variant="ghost" className="hidden min-h-10 sm:inline-flex" onClick={() => navigate({ to: "/library" })}>
                   Ver biblioteca <ArrowRight size={16} />
                 </Button>
               </div>
@@ -566,9 +564,9 @@ function Index() {
                     <article key={material.id} className="rounded-xl border border-border bg-card p-5 shadow-card">
                       <div className="flex items-start justify-between gap-4">
                         <div className="material-icon material-icon-green"><Icon size={21} /></div>
-                        <Button size="icon" variant="ghost" aria-label={`Abrir opções para ${material.title}`} className="-mr-2 -mt-2" onClick={() => navigate({ to: "/material/$materialId", params: { materialId: material.id } })}>
-                          <MoreHorizontal size={19} />
-                        </Button>
+                        <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+                          {progress}% concluído
+                        </span>
                       </div>
                       <p className="mt-5 text-xs font-bold uppercase text-muted-foreground">{material.source_type === "audio" ? "Áudio" : material.source_type === "video" ? "Vídeo" : "Documento"}</p>
                       <h3 className="mt-1 min-h-12 truncate text-base font-bold leading-snug">{material.title}</h3>
@@ -577,8 +575,8 @@ function Index() {
                         <span>{new Date(material.created_at).toLocaleDateString("pt-BR")}</span>
                         <strong className="text-foreground">{progress}%</strong>
                       </div>
-                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} /></div>
-                      <Button variant="secondary" className="mt-5 w-full" onClick={() => navigate({ to: "/material/$materialId", params: { materialId: material.id } })}>
+                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} /></div>
+                      <Button variant="secondary" className="mt-5 w-full min-h-11" onClick={() => navigate({ to: "/material/$materialId", params: { materialId: material.id } })}>
                         <Play size={16} /> Continuar
                       </Button>
                     </article>
@@ -590,7 +588,7 @@ function Index() {
                 <div className="rounded-xl border border-dashed border-border py-14 text-center">
                   <Search className="mx-auto text-muted-foreground" size={24} />
                   <p className="mt-3 font-semibold">Nenhum material encontrado</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Tente buscar outro assunto.</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{search ? "Tente buscar outro assunto ou abra a biblioteca para pesquisar todos os materiais." : "Adicione seu primeiro material para começar."}</p>
                 </div>
               )}
             </section>
