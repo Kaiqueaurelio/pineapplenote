@@ -28,7 +28,7 @@ import { useRef, useState } from "react";
 import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Pineapple Note — Sua aula. Organizada pela IA." },
