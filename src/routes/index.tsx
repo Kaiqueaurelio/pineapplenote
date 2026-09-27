@@ -1,10 +1,28 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, BadgeCheck, BrainCircuit, FileAudio, Languages, MessageCircleMore, PlayCircle, Sparkles, Upload, Youtube } from "lucide-react";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  ArrowRight,
+  Brain,
+  FileAudio,
+  FileText,
+  Headphones,
+  Image,
+  Languages,
+  MessageCircle,
+  Mic2,
+  Play,
+  Sparkles,
+  Upload,
+  Video,
+  Gamepad2,
+  GraduationCap,
+  HelpCircle,
+  WandSparkles,
+  Zap,
+  ChevronDown,
+} from "lucide-react";
 
 import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 
 const features = [
   { icon: FileAudio, title: "Do conteúdo ao conhecimento", text: "Envie áudios, vídeos, PDFs, documentos ou grave uma aula diretamente no app." },
@@ -22,10 +40,18 @@ const steps = [
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Pineapple Note — Estude melhor com IA" },
-      { name: "description", content: "Transforme aulas, documentos e vídeos em materiais de estudo organizados pela IA." },
-      { property: "og:title", content: "Pineapple Note — Estude melhor com IA" },
-      { property: "og:description", content: "Sua aula organizada em resumo, flashcards e quiz." },
+      { title: "Pineapple Note — Transforme conteúdo em conhecimento" },
+      {
+        name: "description",
+        content:
+          "Pineapple Note transforma aulas, áudios, vídeos e documentos em notas, transcrições e materiais de estudo com IA.",
+      },
+      { property: "og:title", content: "Pineapple Note — Transforme conteúdo em conhecimento" },
+      {
+        property: "og:description",
+        content:
+          "Grave, envie ou importe seu conteúdo. O Pineapple Note organiza, transcreve e cria materiais para você estudar.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -33,45 +59,375 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
+const features = [
+  {
+    icon: Mic2,
+    title: "Grave aulas e reuniões",
+    description: "Capture o áudio direto pelo navegador e continue focado no que está sendo explicado.",
+  },
+  {
+    icon: Upload,
+    title: "Envie qualquer material",
+    description: "Áudios, vídeos e documentos entram no mesmo espaço para você não perder nada.",
+  },
+  {
+    icon: FileText,
+    title: "Receba notas organizadas",
+    description: "Transcrições, resumos, tópicos e pontos importantes ficam estruturados para revisão.",
+  },
+  {
+    icon: MessageCircle,
+    title: "Converse com o conteúdo",
+    description: "Use suas próprias notas como contexto para encontrar respostas e esclarecer dúvidas.",
+  },
+  {
+    icon: Brain,
+    title: "Crie materiais de estudo",
+    description: "Transforme o conteúdo em flashcards, quizzes e outros formatos de revisão.",
+  },
+  {
+    icon: Languages,
+    title: "Estude em outros idiomas",
+    description: "Transcreva e prepare conteúdos para revisão em diferentes idiomas.",
+  },
+  {
+    icon: Gamepad2,
+    title: "Aprenda de forma ativa",
+    description: "Recursos interativos ajudam a transformar revisão passiva em prática.",
+  },
+  {
+    icon: Headphones,
+    title: "Transforme notas em áudio",
+    description: "A experiência também foi pensada para revisar conteúdos enquanto você escuta.",
+  },
+  {
+    icon: GraduationCap,
+    title: "Tudo no seu espaço",
+    description: "Biblioteca, materiais e progresso reunidos em uma experiência simples.",
+  },
+];
+
+const steps = [
+  {
+    number: "01",
+    title: "Grave ou envie",
+    description: "Comece com uma aula, reunião, áudio, vídeo ou documento.",
+  },
+  {
+    number: "02",
+    title: "Deixe a IA organizar",
+    description: "O conteúdo é processado e transformado em uma base de estudo mais clara.",
+  },
+  {
+    number: "03",
+    title: "Revise e aprenda",
+    description: "Leia, escute, pesquise, converse e use materiais de revisão.",
+  },
+];
+
+const faqs = [
+  {
+    question: "O que é o Pineapple Note?",
+    answer: "É uma plataforma de estudo com IA criada para transformar conteúdos como aulas, áudios, vídeos e documentos em materiais mais fáceis de entender e revisar.",
+  },
+  {
+    question: "Posso usar pelo celular?",
+    answer: "Sim. A experiência do Pineapple Note está sendo construída com foco mobile-first e também funciona em telas maiores.",
+  },
+  {
+    question: "Que tipos de conteúdo posso enviar?",
+    answer: "O fluxo foi projetado para trabalhar com gravações, áudios, vídeos e documentos, além de evoluir para outros formatos de conteúdo.",
+  },
+  {
+    question: "O Pineapple Note é um projeto da Decode Analytics?",
+    answer: "Sim. O Pineapple Note é mais um projeto criado pela Decode Analytics, dentro da sua linha de produtos e experiências digitais com tecnologia e inteligência artificial.",
+  },
+  {
+    question: "Preciso anotar tudo durante a aula?",
+    answer: "A proposta é justamente reduzir esse trabalho manual: você captura o conteúdo e usa o Pineapple Note para organizar e revisar depois.",
+  },
+];
+
 function LandingPage() {
-  const navigate = useNavigate();
-  const [signedIn, setSignedIn] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setSignedIn(Boolean(data.user?.email_confirmed_at)));
-  }, []);
-
-  const openApp = () => navigate({ to: signedIn ? "/dashboard" : "/auth" });
-
   return (
-    <main className="min-h-[100dvh] overflow-hidden bg-background text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:h-20 sm:px-6">
-          <a href="#inicio" className="flex items-center" aria-label="Pineapple Note"><img src={logoAsset.url} alt="Pineapple Note" className="h-10 w-auto sm:h-12" /></a>
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-muted-foreground md:flex" aria-label="Navegação principal"><a href="#como-funciona" className="hover:text-foreground">Como funciona</a><a href="#recursos" className="hover:text-foreground">Recursos</a><a href="#sobre" className="hover:text-foreground">Sobre</a></nav>
-          <Button size="sm" onClick={openApp}>{signedIn ? "Abrir meus estudos" : "Entrar"}<ArrowRight size={16} /></Button>
-        </div>
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
+      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-xl">
+        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-[72px] sm:px-6 lg:px-8">
+          <Link to="/" className="flex items-center" aria-label="Pineapple Note — início">
+            <img
+              src={logoAsset.url}
+              alt="Pineapple Note"
+              className="h-10 w-auto object-contain sm:h-12"
+            />
+          </Link>
+
+          <div className="hidden items-center gap-7 md:flex">
+            <a href="#como-funciona" className="text-sm font-medium text-muted-foreground transition hover:text-foreground">Como funciona</a>
+            <a href="#recursos" className="text-sm font-medium text-muted-foreground transition hover:text-foreground">Recursos</a>
+            <a href="#perguntas" className="text-sm font-medium text-muted-foreground transition hover:text-foreground">Dúvidas</a>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link to="/auth" search={{ mode: "login" }}>
+              <Button variant="ghost" className="hidden sm:inline-flex">Entrar</Button>
+            </Link>
+            <Link to="/auth" search={{ mode: "signup" }}>
+              <Button className="rounded-xl px-4">Começar grátis <ArrowRight size={16} /></Button>
+            </Link>
+          </div>
+        </nav>
       </header>
 
-      <section id="inicio" className="relative"><div className="pineapple-grid absolute inset-0 -z-10 opacity-[0.05]" />
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1.08fr_.92fr] lg:py-28">
-          <div><p className="inline-flex items-center gap-2 rounded-full border border-violet-border bg-violet-soft px-3 py-1.5 text-xs font-extrabold text-brand-violet"><Sparkles size={14} /> Estudo inteligente, do seu jeito</p>
-            <h1 className="mt-6 max-w-3xl text-4xl font-extrabold leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">Sua aula vira um plano de estudo que realmente funciona.</h1>
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">O Pineapple Note transforma conteúdos longos em materiais claros para você compreender, revisar e avançar com confiança.</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row"><Button size="lg" onClick={openApp}>Começar gratuitamente <ArrowRight size={18} /></Button><Button size="lg" variant="outline" onClick={() => document.getElementById("como-funciona")?.scrollIntoView({ behavior: "smooth" })}>Ver como funciona <PlayCircle size={18} /></Button></div>
-            <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-muted-foreground"><span className="inline-flex items-center gap-2"><BadgeCheck className="text-green-strong" size={17} /> Perfil e materiais privados</span><span className="inline-flex items-center gap-2"><BadgeCheck className="text-green-strong" size={17} /> Feito para celular e computador</span></div>
+      <main>
+        <section className="relative isolate overflow-hidden px-4 pb-20 pt-14 sm:px-6 sm:pb-28 sm:pt-24 lg:px-8 lg:pt-28">
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[720px] bg-[radial-gradient(circle_at_50%_-10%,hsl(var(--primary)/0.20),transparent_58%)]" />
+          <div className="pointer-events-none absolute left-1/2 top-40 -z-10 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
+
+          <div className="mx-auto max-w-5xl text-center">
+            <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3.5 py-2 text-xs font-bold text-primary">
+              <Sparkles size={14} />
+              Seu novo espaço de estudo com IA
+            </div>
+
+            <h1 className="mx-auto max-w-5xl text-balance text-4xl font-black leading-[0.98] tracking-[-0.04em] sm:text-6xl lg:text-7xl">
+              Nunca mais passe a aula inteira
+              <span className="block text-primary">tentando anotar tudo.</span>
+            </h1>
+
+            <p className="mx-auto mt-7 max-w-2xl text-base leading-7 text-muted-foreground sm:text-xl sm:leading-8">
+              Grave, envie ou importe seu conteúdo. O Pineapple Note ajuda a transformar
+              informação bruta em notas, transcrições e materiais de estudo organizados.
+            </p>
+
+            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link to="/auth" search={{ mode: "signup" }}>
+                <Button size="lg" className="h-12 w-full rounded-xl px-7 text-base font-bold shadow-lg sm:w-auto">
+                  Começar grátis
+                  <ArrowRight size={18} />
+                </Button>
+              </Link>
+              <a href="#como-funciona">
+                <Button size="lg" variant="outline" className="h-12 w-full rounded-xl px-7 text-base sm:w-auto">
+                  <Play size={17} />
+                  Conhecer o Pineapple Note
+                </Button>
+              </a>
+            </div>
+
+            <p className="mt-5 text-xs text-muted-foreground">
+              Um projeto criado por <strong className="text-foreground">Decode Analytics</strong>.
+            </p>
           </div>
-          <div className="relative mx-auto w-full max-w-md"><div className="absolute inset-8 rounded-[2.5rem] bg-brand-yellow/30 blur-3xl" /><div className="relative overflow-hidden rounded-[2rem] border border-border bg-card p-5 shadow-soft sm:p-7"><div className="flex items-center justify-between"><span className="rounded-full bg-green-soft px-3 py-1 text-xs font-bold text-green-strong">Pineapple AI</span><Sparkles className="text-brand-violet" size={21} /></div><div className="mt-6 rounded-2xl bg-secondary p-4"><p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Seu material está pronto</p><h2 className="mt-2 text-xl font-extrabold">Biologia celular</h2><div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-bold"><div className="rounded-xl bg-card p-3 text-green-strong">Resumo</div><div className="rounded-xl bg-card p-3 text-brand-violet">Flashcards</div><div className="rounded-xl bg-card p-3 text-yellow-strong">Quiz</div></div></div><div className="mt-5 flex items-center gap-3 rounded-2xl border border-primary/20 bg-green-soft/50 p-4"><div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground"><Upload size={19} /></div><div><p className="font-bold">Importe seu conteúdo</p><p className="text-xs text-muted-foreground">Áudio, vídeo, PDF ou documento</p></div></div></div></div>
+
+          <div className="mx-auto mt-14 max-w-6xl sm:mt-20">
+            <div className="relative rounded-[30px] border border-border bg-card p-1.5 shadow-[0_30px_90px_-35px_hsl(var(--foreground)/0.35)] sm:p-2.5">
+              <div className="overflow-hidden rounded-[24px] border border-border/70 bg-background">
+                <div className="flex h-10 items-center gap-2 border-b border-border px-4">
+                  <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-brand-yellow" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+                  <div className="ml-4 h-6 flex-1 rounded-md bg-secondary" />
+                </div>
+                <div className="grid min-h-[330px] md:grid-cols-[210px_1fr]">
+                  <aside className="hidden border-r border-border bg-secondary/35 p-5 md:block">
+                    <div className="mb-7 flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-xl bg-primary/15" />
+                      <div className="h-4 w-24 rounded bg-foreground/10" />
+                    </div>
+                    <div className="space-y-2.5">
+                      <div className="h-10 rounded-xl bg-primary/10" />
+                      <div className="h-10 rounded-xl bg-muted" />
+                      <div className="h-10 rounded-xl bg-muted" />
+                      <div className="h-10 rounded-xl bg-muted" />
+                    </div>
+                  </aside>
+
+                  <div className="p-5 sm:p-8">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div>
+                        <div className="h-3 w-24 rounded bg-primary/20" />
+                        <div className="mt-3 h-8 w-72 max-w-full rounded bg-foreground/10" />
+                      </div>
+                      <div className="rounded-lg bg-primary px-3 py-2 text-xs font-bold text-primary-foreground">Material pronto</div>
+                    </div>
+
+                    <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                      {[
+                        { icon: FileText, label: "Notas organizadas" },
+                        { icon: Brain, label: "Resumo com IA" },
+                        { icon: MessageCircle, label: "Pergunte ao conteúdo" },
+                      ].map(({ icon: Icon, label }) => (
+                        <div key={label} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                            <Icon size={20} />
+                          </div>
+                          <div className="mt-4 h-3 w-28 rounded bg-foreground/10" />
+                          <div className="mt-3 h-2 w-full rounded bg-muted" />
+                          <div className="mt-2 h-2 w-4/5 rounded bg-muted" />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_.6fr]">
+                      <div className="rounded-2xl border border-border p-5">
+                        <div className="flex items-center justify-between">
+                          <div className="h-3 w-32 rounded bg-foreground/10" />
+                          <div className="h-7 w-20 rounded-lg bg-primary/10" />
+                        </div>
+                        <div className="mt-5 space-y-2.5">
+                          <div className="h-2.5 w-full rounded bg-muted" />
+                          <div className="h-2.5 w-11/12 rounded bg-muted" />
+                          <div className="h-2.5 w-4/5 rounded bg-muted" />
+                          <div className="h-2.5 w-9/12 rounded bg-muted" />
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-border p-5">
+                        <div className="h-3 w-20 rounded bg-foreground/10" />
+                        <div className="mt-4 flex items-end gap-2">
+                          <div className="h-16 w-3 rounded-t bg-primary/20" />
+                          <div className="h-24 w-3 rounded-t bg-primary/35" />
+                          <div className="h-20 w-3 rounded-t bg-primary/25" />
+                          <div className="h-28 w-3 rounded-t bg-primary/45" />
+                          <div className="h-32 w-3 rounded-t bg-primary" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-y border-border bg-secondary/30 px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              Feito para acompanhar sua rotina
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-3 text-sm font-semibold text-muted-foreground sm:grid-cols-4">
+              <div className="rounded-xl border border-border bg-card px-4 py-4">Estudantes</div>
+              <div className="rounded-xl border border-border bg-card px-4 py-4">Profissionais</div>
+              <div className="rounded-xl border border-border bg-card px-4 py-4">Professores</div>
+              <div className="rounded-xl border border-border bg-card px-4 py-4">Pesquisadores</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="como-funciona" className="px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <div className="max-w-2xl">
+              <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Como funciona</span>
+              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">O processo é simples.</h2>
+              <p className="mt-4 text-base leading-7 text-muted-foreground">
+                A referência do Coconote é direta: capturar, organizar e estudar. O Pineapple Note segue essa mesma lógica, com identidade própria.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-5 md:grid-cols-3">
+              {steps.map((step) => (
+                <article key={step.number} className="relative rounded-3xl border border-border bg-card p-7 shadow-sm">
+                  <span className="text-sm font-black text-primary">{step.number}</span>
+                  <h3 className="mt-10 text-2xl font-extrabold">{step.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{step.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="recursos" className="border-y border-border bg-secondary/30 px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Recursos</span>
+              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Capture. Organize. Aprenda.</h2>
+              <p className="mt-4 text-muted-foreground">
+                A landing do Pineapple Note agora apresenta o produto como uma experiência completa, seguindo o mesmo raciocínio de descoberta usado pelo Coconote.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature) => {
+                const Icon = feature.icon;
+                return (
+                  <article key={feature.title} className="group rounded-3xl border border-border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Icon size={21} />
+                    </div>
+                    <h3 className="mt-5 font-extrabold">{feature.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{feature.description}</p>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+          <div className="mx-auto max-w-6xl overflow-hidden rounded-[32px] border border-border bg-foreground px-6 py-12 text-background sm:px-12 sm:py-16">
+            <div className="grid items-center gap-10 lg:grid-cols-[1fr_auto]">
+              <div className="max-w-2xl">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-background/15 bg-background/10 px-3 py-1.5 text-xs font-bold">
+                  <Zap size={14} />
+                  Menos trabalho. Mais foco.
+                </div>
+                <h2 className="text-3xl font-black tracking-tight sm:text-5xl">Sua atenção deve estar na aula — não no bloco de notas.</h2>
+                <p className="mt-5 leading-7 text-background/70">
+                  Capture o que importa e volte depois para revisar com calma. O Pineapple Note foi pensado para transformar informação em uma experiência de estudo.
+                </p>
+              </div>
+              <Link to="/auth" search={{ mode: "signup" }}>
+                <Button size="lg" className="h-12 w-full rounded-xl bg-background px-7 text-foreground hover:bg-background/90 sm:w-auto">
+                  Criar minha conta
+                  <ArrowRight size={18} />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section id="perguntas" className="border-t border-border px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+          <div className="mx-auto max-w-4xl">
+            <div className="text-center">
+              <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Perguntas frequentes</span>
+              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Antes de começar.</h2>
+            </div>
+
+            <div className="mt-10 divide-y divide-border rounded-3xl border border-border bg-card">
+              {faqs.map((faq) => (
+                <details key={faq.question} className="group p-5 sm:p-6">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-5 font-bold">
+                    <span>{faq.question}</span>
+                    <ChevronDown size={19} className="shrink-0 text-muted-foreground transition group-open:rotate-180" />
+                  </summary>
+                  <p className="mt-4 max-w-3xl pr-8 text-sm leading-6 text-muted-foreground">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="decode-analytics" className="border-t border-border bg-secondary/30 px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-5xl text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Sparkles size={22} />
+            </div>
+            <h2 className="mt-5 text-2xl font-black">Mais um projeto criado por Decode Analytics.</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+              O Pineapple Note faz parte do ecossistema de projetos da Decode Analytics, unindo tecnologia, dados e inteligência artificial para criar experiências digitais úteis.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-border px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 text-center text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:text-left">
+          <div className="flex items-center justify-center gap-3 sm:justify-start">
+            <img src={logoAsset.url} alt="" className="h-8 w-auto" />
+            <span>© {new Date().getFullYear()} Pineapple Note</span>
+          </div>
+          <span>Um projeto criado por Decode Analytics.</span>
         </div>
-      </section>
-
-      <section id="recursos" className="border-y border-border bg-card py-16 sm:py-24"><div className="mx-auto max-w-6xl px-4 sm:px-6"><div className="max-w-2xl"><p className="text-sm font-extrabold uppercase tracking-wider text-green-strong">Tudo no mesmo lugar</p><h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">Menos tempo organizando. Mais tempo aprendendo.</h2></div><div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{features.map(({ icon: Icon, title, text }) => <article key={title} className="rounded-2xl border border-border bg-background p-5"><div className="grid h-11 w-11 place-items-center rounded-xl bg-green-soft text-green-strong"><Icon size={21} /></div><h3 className="mt-5 font-extrabold">{title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{text}</p></article>)}</div></div></section>
-
-      <section id="como-funciona" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24"><div className="max-w-2xl"><p className="text-sm font-extrabold uppercase tracking-wider text-brand-violet">Como funciona</p><h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">Do conteúdo bruto à revisão em três passos.</h2></div><div className="mt-10 grid gap-4 lg:grid-cols-3">{steps.map(([number, title, text]) => <article key={number} className="rounded-2xl border border-border bg-card p-6 shadow-card"><span className="text-4xl font-extrabold text-primary/30">{number}</span><h3 className="mt-8 text-xl font-extrabold">{title}</h3><p className="mt-2 leading-relaxed text-muted-foreground">{text}</p></article>)}</div></section>
-
-      <section className="bg-ink py-16 text-ink-foreground sm:py-24"><div className="mx-auto flex max-w-4xl flex-col items-center px-4 text-center sm:px-6"><div className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-violet text-brand-violet-foreground"><Youtube size={25} /></div><h2 className="mt-6 text-3xl font-extrabold sm:text-4xl">Sua próxima revisão começa aqui.</h2><p className="mt-4 max-w-2xl text-ink-muted">Crie uma conta, envie seu primeiro conteúdo e transforme o jeito como você estuda.</p><Button size="lg" variant="violet" className="mt-8" onClick={openApp}>Criar minha conta <ArrowRight size={18} /></Button></div></section>
-
-      <footer id="sobre" className="border-t border-border bg-background"><div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-8 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6"><div><img src={logoAsset.url} alt="Pineapple Note" className="h-9 w-auto" /><p className="mt-2 text-muted-foreground">Estudo organizado para caber na sua rotina.</p></div><p className="font-semibold text-muted-foreground">Um projeto criado por <span className="text-foreground">Decode Analytics</span>.</p></div></footer>
-    </main>
+      </footer>
+    </div>
   );
 }
