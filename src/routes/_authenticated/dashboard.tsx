@@ -8,7 +8,6 @@ import {
   ChevronRight,
   CircleStop,
   CircleHelp,
-  Clock3,
   FileText,
   FolderOpen,
   Home,
