@@ -15,7 +15,6 @@ import {
   Gamepad2,
   GraduationCap,
   HelpCircle,
-  Zap,
   ChevronDown,
 } from "lucide-react";
 
@@ -365,7 +364,7 @@ function LandingPage() {
             <div className="grid items-center gap-10 lg:grid-cols-[1fr_auto]">
               <div className="max-w-2xl">
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-background/15 bg-background/10 px-3 py-1.5 text-xs font-bold">
-                  <Zap size={14} />
+                  <ArrowRight size={14} />
                   Menos trabalho. Mais foco.
                 </div>
                 <h2 className="text-3xl font-black tracking-tight sm:text-5xl">Sua atenção deve estar na aula — não no bloco de notas.</h2>
