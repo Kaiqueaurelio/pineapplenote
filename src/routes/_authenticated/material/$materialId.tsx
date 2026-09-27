@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, FileText, HelpCircle, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, HelpCircle, Loader2, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,13 +12,13 @@ type Flashcard = { question: string; answer: string };
 type Quiz = { question: string; options: string[]; answer: string; explanation: string };
 
 function asTopics(value: Json): Topic[] {
-  return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ title: String(item.title ?? ""), explanation: String(item.explanation ?? "") })) : [];
+  return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ title: String(item["title"] ?? ""), explanation: String(item["explanation"] ?? "") })) : [];
 }
 function asFlashcards(value: Json): Flashcard[] {
-  return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ question: String(item.question ?? ""), answer: String(item.answer ?? "") })) : [];
+  return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ question: String(item["question"] ?? ""), answer: String(item["answer"] ?? "") })) : [];
 }
 function asQuiz(value: Json): Quiz[] {
-  return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ question: String(item.question ?? ""), options: Array.isArray(item.options) ? item.options.map(String) : [], answer: String(item.answer ?? ""), explanation: String(item.explanation ?? "") })) : [];
+  return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ question: String(item["question"] ?? ""), options: Array.isArray(item.options) ? item.options.map(String) : [], answer: String(item["answer"] ?? ""), explanation: String(item["explanation"] ?? "") })) : [];
 }
 
 export const Route = createFileRoute("/_authenticated/material/$materialId")({
@@ -62,13 +62,6 @@ function MaterialPage() {
   async function processMaterial() {
     if (!material || processing) return;
     setProcessing(true);
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData.session?.access_token;
-    if (!token) {
-      setProcessing(false);
-      toast.error("Sua sessão expirou. Entre novamente.");
-      return;
-    }
     const { data, error } = await supabase.functions.invoke("process-material", { body: { materialId } });
     setProcessing(false);
     if (error || data?.error) {
@@ -162,13 +155,13 @@ function MaterialPage() {
                 <div className="mt-5 space-y-6">
                   {quiz.map((item, index) => {
                     const selected = quizAnswers[index];
-                    const correct = selected === item.answer;
+                    const correct = selected === item["answer"];
                     return <article key={index} className="rounded-xl border border-border p-4">
-                      <p className="font-bold">{index + 1}. {item.question}</p>
+                      <p className="font-bold">{index + 1}. {item["question"]}</p>
                       <div className="mt-3 grid gap-2">
                         {item.options.map((option) => <button type="button" key={option} onClick={() => setQuizAnswers((current) => ({ ...current, [index]: option }))} className={`rounded-lg border px-3 py-3 text-left text-sm transition ${selected === option ? (correct ? "border-primary bg-green-soft" : "border-destructive bg-destructive/10") : "border-border hover:bg-secondary"}`}>{option}</button>)}
                       </div>
-                      {selected && <div className="mt-3 rounded-lg bg-secondary p-3 text-sm"><strong>{correct ? "Correto!" : `Resposta: ${item.answer}`}</strong><p className="mt-1 text-muted-foreground">{item.explanation}</p></div>}
+                      {selected && <div className="mt-3 rounded-lg bg-secondary p-3 text-sm"><strong>{correct ? "Correto!" : `Resposta: ${item["answer"]}`}</strong><p className="mt-1 text-muted-foreground">{item["explanation"]}</p></div>}
                     </article>;
                   })}
                 </div>
