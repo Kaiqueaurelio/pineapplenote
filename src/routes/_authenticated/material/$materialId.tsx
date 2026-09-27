@@ -60,7 +60,14 @@ function MaterialPage() {
     const { data: signedSource } = await supabase.storage.from("study-materials").createSignedUrl(materialData.storage_path, 60 * 60);
     setSourceUrl(signedSource?.signedUrl ?? null);
     setOutput(outputData);
-    setProgress(progressData?.progress ?? 0);
+    const savedProgress = Math.max(0, Math.min(100, progressData?.progress ?? 0));
+    setProgress(savedProgress);
+    void supabase.from("study_progress").upsert({
+      user_id: user.id,
+      material_id: materialId,
+      progress: savedProgress,
+      last_opened_at: new Date().toISOString(),
+    }, { onConflict: "user_id,material_id" });
   }
 
   useEffect(() => {
