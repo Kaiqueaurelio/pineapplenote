@@ -53,16 +53,8 @@ function LibraryPage() {
 
   async function openMaterial(material: Tables<"study_materials">) {
     setOpeningId(material.id);
-    const { data, error } = await supabase.storage
-      .from("study-materials")
-      .createSignedUrl(material.storage_path, 60 * 60);
-
     setOpeningId(null);
-    if (error || !data?.signedUrl) {
-      toast.error("Não foi possível abrir este material.");
-      return;
-    }
-    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    navigate({ to: "/material/$materialId", params: { materialId: material.id } });
   }
 
   async function deleteMaterial(material: Tables<"study_materials">) {
