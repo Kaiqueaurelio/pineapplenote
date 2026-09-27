@@ -24,7 +24,6 @@ import {
   Save,
   KeyRound,
   UserRound,
-  Sparkles,
   Upload,
   Video,
   X,
@@ -443,7 +442,7 @@ function Index() {
             <section className="mb-7 flex flex-col justify-between gap-4 sm:mb-8 sm:flex-row sm:items-end">
               <div>
                 <p className="mb-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-green-strong">
-                  <Sparkles size={16} /> {greeting}, {displayName.split(" ")[0]}
+                  <BookOpen size={16} /> {greeting}, {displayName.split(" ")[0]}
                   {isAdmin && <span className="rounded-full bg-violet-soft px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-brand-violet">Admin</span>}
                 </p>
                 <h1 className="text-[1.75rem] font-extrabold leading-tight sm:text-4xl">O que vamos aprender hoje?</h1>
@@ -529,7 +528,7 @@ function Index() {
                   <div className="pineapple-grid absolute inset-0 opacity-20" />
                   <div className="relative">
                     <span className="inline-flex items-center gap-2 rounded-full border border-ink-foreground/20 px-3 py-1 text-xs font-semibold">
-                      <Sparkles size={14} /> Organização inteligente
+                      <BookOpen size={14} /> Organização inteligente
                     </span>
                     <h2 className="mt-4 max-w-sm text-[1.35rem] font-bold leading-tight sm:mt-5 sm:text-2xl">Do conteúdo bruto ao estudo organizado.</h2>
                     <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-muted">
@@ -615,7 +614,7 @@ function Index() {
               <div className="flex flex-col justify-between rounded-xl border border-violet-border bg-violet-soft p-6 sm:flex-row sm:items-center sm:gap-8">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-brand-violet text-brand-violet-foreground">
-                    <Sparkles size={22} />
+                    <BookOpen size={22} />
                   </div>
                   <div>
                     <p className="text-sm font-bold text-brand-violet">Seu próximo passo</p>
