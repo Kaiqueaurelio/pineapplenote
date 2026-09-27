@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, FileText, Headphones, Loader2, Search, Trash2, Video } from "lucide-react";
+import { ArrowLeft, FileText, Headphones, Loader2, Search, Trash2, Video, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ function LibraryPage() {
   const [filter, setFilter] = useState<"todos" | "audio" | "video" | "documento" | "pendentes">("todos");
   const [deleteTarget, setDeleteTarget] = useState<Tables<"study_materials"> | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [sort, setSort] = useState<"recent" | "name">("recent");
 
   async function loadMaterials() {
     setLoading(true);
@@ -79,6 +80,12 @@ function LibraryPage() {
       return matchesSearch && matchesFilter;
     });
   }, [materials, search, filter]);
+
+  const sortedMaterials = useMemo(() => {
+    const result = [...filtered];
+    if (sort === "name") result.sort((a, b) => a.title.localeCompare(b.title, "pt-BR"));
+    return result;
+  }, [filtered, sort]);
 
   function openMaterial(material: Tables<"study_materials">) {
     setOpeningId(material.id);
@@ -147,8 +154,9 @@ function LibraryPage() {
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar materiais"
             aria-label="Buscar materiais"
-            className="h-11 pl-10"
+            className="h-11 pl-10 pr-10"
           />
+          {search && <button type="button" aria-label="Limpar busca" onClick={() => setSearch("")} className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={16} /></button>}
         </div>
 
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Filtrar biblioteca">
@@ -174,6 +182,19 @@ function LibraryPage() {
           ))}
         </div>
 
+        {!loading && filtered.length > 0 && (
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">{sortedMaterials.length} {sortedMaterials.length === 1 ? "material encontrado" : "materiais encontrados"}</p>
+            <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+              <span className="sr-only">Ordenar biblioteca</span>
+              <select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)} className="h-9 rounded-lg border border-border bg-card px-2 text-xs font-semibold text-foreground outline-none focus:border-primary/50">
+                <option value="recent">Mais recentes</option>
+                <option value="name">Nome A–Z</option>
+              </select>
+            </label>
+          </div>
+        )}
+
         {loading ? (
           <div className="mt-6 grid gap-3 sm:grid-cols-2" aria-label="Carregando biblioteca">
             {[1, 2, 3, 4].map((item) => <div key={item} className="h-44 animate-pulse rounded-2xl border border-border bg-card" />)}
@@ -193,7 +214,7 @@ function LibraryPage() {
           </div>
         ) : (
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {filtered.map((material) => {
+            {sortedMaterials.map((material) => {
               const Icon = iconFor(material.source_type);
               return (
                 <article key={material.id} className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5">
@@ -212,7 +233,7 @@ function LibraryPage() {
                           <span>{progressByMaterial[material.id] ?? 0}%</span>
                         </div>
                         <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
-                          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progressByMaterial[material.id] ?? 0}%` }} />
+                          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.min(100, Math.max(0, progressByMaterial[material.id] ?? 0))}%` }} />
                         </div>
                       </div>
                     </div>
