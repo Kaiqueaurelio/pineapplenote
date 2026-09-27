@@ -63,36 +63,6 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Index,
 });
 
-const materials = [
-  {
-    title: "Introdução à Biologia Celular",
-    subject: "Biologia",
-    detail: "Resumo • 12 páginas",
-    time: "Há 2 horas",
-    progress: 72,
-    icon: FileText,
-    tone: "green",
-  },
-  {
-    title: "Revolução Industrial",
-    subject: "História",
-    detail: "Áudio • 38 minutos",
-    time: "Ontem",
-    progress: 45,
-    icon: AudioLines,
-    tone: "violet",
-  },
-  {
-    title: "Funções de Segundo Grau",
-    subject: "Matemática",
-    detail: "Videoaula • 24 minutos",
-    time: "12 set",
-    progress: 88,
-    icon: Video,
-    tone: "yellow",
-  },
-];
-
 const navItems = [
   { label: "Início", icon: Home, active: true },
   { label: "Biblioteca", icon: Library },
@@ -116,6 +86,8 @@ function Index() {
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
+  const [dashboardMaterials, setDashboardMaterials] = useState<Tables<"study_materials">[]>([]);
+  const [dashboardProgress, setDashboardProgress] = useState<Record<string, number>>({});
   const fileRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordingChunksRef = useRef<Blob[]>([]);
@@ -162,6 +134,19 @@ function Index() {
       if (created) setProfile(created);
     });
   }, [user]);
+
+  useEffect(() => {
+    supabase.from("study_materials").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6).then(async ({ data, error }) => {
+      if (error) {
+        toast.error("Não foi possível carregar seus materiais.");
+        return;
+      }
+      setDashboardMaterials(data ?? []);
+      if (!data?.length) return;
+      const { data: progressRows } = await supabase.from("study_progress").select("material_id, progress").eq("user_id", user.id).in("material_id", data.map((item) => item.id));
+      setDashboardProgress(Object.fromEntries((progressRows ?? []).map((row) => [row.material_id, row.progress])));
+    });
+  }, [user.id]);
 
   const displayName = profile?.display_name || (typeof user.user_metadata['full_name'] === "string" ? user.user_metadata['full_name'] : "Estudante");
   const initials = displayName.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "PN";
@@ -242,8 +227,8 @@ function Index() {
     toast.success("Senha alterada com sucesso.");
   }
 
-  const filteredMaterials = materials.filter((material) =>
-    `${material.title} ${material.subject}`.toLowerCase().includes(search.toLowerCase()),
+  const filteredMaterials = dashboardMaterials.filter((material) =>
+    material.title.toLowerCase().includes(search.toLowerCase()),
   );
 
   useEffect(() => {
@@ -578,35 +563,31 @@ function Index() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredMaterials.map((material) => (
-                  <article key={material.title} className="rounded-xl border border-border bg-card p-5 shadow-card">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className={`material-icon material-icon-${material.tone}`}>
-                        <material.icon size={21} />
+                {filteredMaterials.map((material) => {
+                  const progress = dashboardProgress[material.id] ?? 0;
+                  const Icon = material.source_type === "audio" ? AudioLines : material.source_type === "video" ? Video : FileText;
+                  return (
+                    <article key={material.id} className="rounded-xl border border-border bg-card p-5 shadow-card">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="material-icon material-icon-green"><Icon size={21} /></div>
+                        <Button size="icon" variant="ghost" aria-label={`Abrir opções para ${material.title}`} className="-mr-2 -mt-2" onClick={() => navigate({ to: "/material/$materialId", params: { materialId: material.id } })}>
+                          <MoreHorizontal size={19} />
+                        </Button>
                       </div>
-                      <Button size="icon" variant="ghost" aria-label={`Mais opções para ${material.title}`} className="-mr-2 -mt-2" onClick={() => toast.info("Mais opções do material serão exibidas aqui.")}>
-                        <MoreHorizontal size={19} />
+                      <p className="mt-5 text-xs font-bold uppercase text-muted-foreground">{material.source_type === "audio" ? "Áudio" : material.source_type === "video" ? "Vídeo" : "Documento"}</p>
+                      <h3 className="mt-1 min-h-12 truncate text-base font-bold leading-snug">{material.title}</h3>
+                      <p className="mt-2 text-sm text-muted-foreground">{material.status === "ready" ? "Organizado pela IA" : material.status === "processing" ? "Processando..." : "Aguardando organização"}</p>
+                      <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
+                        <span>{new Date(material.created_at).toLocaleDateString("pt-BR")}</span>
+                        <strong className="text-foreground">{progress}%</strong>
+                      </div>
+                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} /></div>
+                      <Button variant="secondary" className="mt-5 w-full" onClick={() => navigate({ to: "/material/$materialId", params: { materialId: material.id } })}>
+                        <Play size={16} /> Continuar
                       </Button>
-                    </div>
-                    <p className="mt-5 text-xs font-bold uppercase text-muted-foreground">{material.subject}</p>
-                    <h3 className="mt-1 min-h-12 text-base font-bold leading-snug">{material.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">{material.detail}</p>
-                    <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{material.time}</span>
-                      <strong className="text-foreground">{material.progress}%</strong>
-                    </div>
-                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${material.progress}%` }} />
-                    </div>
-                    <Button
-                      variant="secondary"
-                      className="mt-5 w-full"
-                      onClick={() => setActiveMaterial(material.title)}
-                    >
-                      <Play size={16} /> {activeMaterial === material.title ? "Material aberto" : "Continuar"}
-                    </Button>
-                  </article>
-                ))}
+                    </article>
+                  );
+                })}
               </div>
 
               {filteredMaterials.length === 0 && (
