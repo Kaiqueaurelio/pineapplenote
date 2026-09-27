@@ -45,9 +45,27 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/dashboard", replace: true });
+      if (data.user?.email_confirmed_at) navigate({ to: "/dashboard", replace: true });
     });
   }, [navigate]);
+
+  async function resendConfirmation(email: string) {
+    const parsed = z.string().trim().email().safeParse(email);
+    if (!parsed.success) {
+      setError("Informe um e-mail válido para reenviar a confirmação.");
+      return;
+    }
+    setPending(true);
+    setError("");
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email: parsed.data,
+      options: { emailRedirectTo: `${window.location.origin}/auth` },
+    });
+    setPending(false);
+    if (resendError) return setError("Não foi possível reenviar agora. Aguarde um pouco e tente novamente.");
+    setMessage("Novo link de confirmação enviado. Confira também a pasta de spam.");
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -84,8 +102,8 @@ function AuthPage() {
       });
       setPending(false);
       if (signupError) return setError(signupError.message);
-      if (!data.session) {
-        setMessage("Enviamos um link de confirmação. Abra seu e-mail para ativar a conta.");
+      if (!data.user?.email_confirmed_at) {
+        setMessage("Conta criada. Enviamos um link de confirmação para seu e-mail. Confirme o endereço antes de entrar.");
         return;
       }
       navigate({ to: "/dashboard", replace: true });
@@ -93,9 +111,17 @@ function AuthPage() {
     }
 
     const loginData = credentialsSchema.parse(raw);
-    const { error: loginError } = await supabase.auth.signInWithPassword(loginData);
+    const { data, error: loginError } = await supabase.auth.signInWithPassword(loginData);
     setPending(false);
-    if (loginError) return setError("E-mail ou senha incorretos, ou e-mail ainda não confirmado.");
+    if (loginError) {
+      return setError("E-mail ou senha incorretos. Se a conta foi criada agora, confirme o e-mail antes de entrar.");
+    }
+    if (!data.user.email_confirmed_at) {
+      await supabase.auth.signOut();
+      setError("Seu e-mail ainda não foi confirmado.");
+      setMessage("Confirme o link enviado para seu e-mail antes de acessar a central de estudos.");
+      return;
+    }
     navigate({ to: "/dashboard", replace: true });
   }
 
@@ -128,6 +154,8 @@ function AuthPage() {
     setMessage("Se este e-mail estiver cadastrado, você receberá um link para criar uma nova senha.");
   }
 
+  const emailValue = () => document.querySelector<HTMLInputElement>('input[name="email"]')?.value ?? "";
+
   return (
     <main className="min-h-screen bg-background lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(440px,0.95fr)]">
       <section className="relative hidden overflow-hidden bg-ink p-12 text-ink-foreground lg:flex lg:flex-col lg:justify-between">
@@ -145,8 +173,8 @@ function AuthPage() {
         <div className="w-full max-w-md">
           <img src={logoAsset.url} alt="Pineapple Note" className="mx-auto mb-8 h-20 w-auto lg:hidden" />
           <div className="mb-8 grid grid-cols-2 rounded-lg bg-secondary p-1" aria-label="Escolher acesso ou cadastro">
-            <Button variant={mode === "login" ? "secondary" : "ghost"} size="sm" onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Entrar</Button>
-            <Button variant={mode === "signup" ? "secondary" : "ghost"} size="sm" onClick={() => { setMode("signup"); setError(""); setMessage(""); }}>Criar conta</Button>
+            <Button type="button" variant={mode === "login" ? "secondary" : "ghost"} size="sm" onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Entrar</Button>
+            <Button type="button" variant={mode === "signup" ? "secondary" : "ghost"} size="sm" onClick={() => { setMode("signup"); setError(""); setMessage(""); }}>Criar conta</Button>
           </div>
 
           <h2 className="text-3xl font-extrabold">{mode === "login" ? "Que bom ter você de volta" : "Comece a estudar melhor"}</h2>
@@ -168,8 +196,14 @@ function AuthPage() {
             <Button type="submit" className="w-full" disabled={pending}>{pending && <Loader2 className="animate-spin" size={17} />}{mode === "login" ? "Entrar" : "Criar conta"}</Button>
           </form>
 
+          {mode === "login" && (
+            <Button type="button" variant="ghost" className="mt-3 w-full text-sm" disabled={pending} onClick={() => resendConfirmation(emailValue())}>
+              Reenviar confirmação de e-mail
+            </Button>
+          )}
+
           <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />ou continue com<span className="h-px flex-1 bg-border" /></div>
-          <Button variant="outline" className="w-full" onClick={signInWithGoogle} disabled={pending}><span className="text-base font-extrabold">G</span> Google</Button>
+          <Button type="button" variant="outline" className="w-full" onClick={signInWithGoogle} disabled={pending}><span className="text-base font-extrabold">G</span> Google</Button>
           <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">Ao continuar, você concorda com o uso seguro dos seus dados para manter sua conta e seus estudos.</p>
         </div>
       </section>
