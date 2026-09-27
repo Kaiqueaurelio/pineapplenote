@@ -4,7 +4,6 @@ import {
   BookOpen,
   FileAudio,
   FileText,
-  MessageCircle,
   Mic2,
   Play,
   Upload,
@@ -12,6 +11,7 @@ import {
   GraduationCap,
   HelpCircle,
   ChevronDown,
+  CheckCircle2,
 } from "lucide-react";
 
 import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
@@ -215,7 +215,7 @@ function LandingPage() {
                       {[
                         { icon: FileText, label: "Notas organizadas" },
                         { icon: BookOpen, label: "Resumo com IA" },
-                        { icon: MessageCircle, label: "Pergunte ao conteúdo" },
+                        { icon: CheckCircle2, label: "Revisão e progresso" },
                       ].map(({ icon: Icon, label }) => (
                         <div key={label} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
                           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
