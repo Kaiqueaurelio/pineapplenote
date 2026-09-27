@@ -99,7 +99,7 @@ function MaterialPage() {
   }, [material?.status, output, materialId, user.id]);
 
   async function processMaterial() {
-    if (!material || processing || retrying) return;
+    if (!material || processing) return;
 
     setProcessing(true);
     setMaterial({ ...material, status: "processing" });
