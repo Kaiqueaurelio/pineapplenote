@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
-  Brain,
+  BookOpen,
   FileAudio,
   FileText,
   Headphones,
@@ -24,8 +24,8 @@ import { Button } from "@/components/ui/button";
 
 const features = [
   { icon: FileAudio, title: "Do conteúdo ao conhecimento", text: "Envie áudios, vídeos, PDFs, documentos ou grave uma aula diretamente no app." },
-  { icon: BrainCircuit, title: "Estudo organizado por IA", text: "Receba resumo, tópicos essenciais, transcrição, flashcards e quiz em um só lugar." },
-  { icon: MessageCircleMore, title: "Seu material, sempre acessível", text: "Revise na biblioteca, acompanhe o progresso e retome seus estudos de onde parou." },
+  { icon: BookOpen, title: "Estudo organizado por IA", text: "Receba resumo, tópicos essenciais, transcrição, flashcards e quiz em um só lugar." },
+  { icon: MessageCircle, title: "Seu material, sempre acessível", text: "Revise na biblioteca, acompanhe o progresso e retome seus estudos de onde parou." },
   { icon: Languages, title: "Feito para aprender melhor", text: "Uma experiência clara, responsiva e preparada para ferramentas de estudo inteligente." },
 ];
 
@@ -79,7 +79,7 @@ const features = [
     description: "Use suas próprias notas como contexto para encontrar respostas e esclarecer dúvidas.",
   },
   {
-    icon: Brain,
+    icon: BookOpen,
     title: "Crie materiais de estudo",
     description: "Transforme o conteúdo em flashcards, quizzes e outros formatos de revisão.",
   },
@@ -252,7 +252,7 @@ function LandingPage() {
                     <div className="mt-8 grid gap-4 sm:grid-cols-3">
                       {[
                         { icon: FileText, label: "Notas organizadas" },
-                        { icon: Brain, label: "Resumo com IA" },
+                        { icon: BookOpen, label: "Resumo com IA" },
                         { icon: MessageCircle, label: "Pergunte ao conteúdo" },
                       ].map(({ icon: Icon, label }) => (
                         <div key={label} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
