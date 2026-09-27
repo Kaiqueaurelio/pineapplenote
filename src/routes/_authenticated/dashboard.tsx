@@ -130,7 +130,7 @@ function Index() {
   }, [user]);
 
   useEffect(() => {
-    supabase.from("study_materials").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(12).then(async ({ data, error }) => {
+    supabase.from("study_materials").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(async ({ data, error }) => {
       if (error) {
         toast.error("Não foi possível carregar seus materiais.");
         return;
@@ -222,8 +222,9 @@ function Index() {
   }
 
   const filteredMaterials = dashboardMaterials.filter((material) =>
-    material.title.toLowerCase().includes(search.toLowerCase()),
+    material.title.toLowerCase().includes(search.trim().toLowerCase()),
   );
+  const visibleMaterials = search.trim() ? filteredMaterials : filteredMaterials.slice(0, 6);
 
   useEffect(() => {
     return () => {
@@ -453,7 +454,7 @@ function Index() {
                 </p>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <BookOpen size={17} /> <strong className="text-foreground">{dashboardMaterials.length}</strong> {dashboardMaterials.length === 1 ? "material" : "materiais"} recentes
+                <BookOpen size={17} /> <strong className="text-foreground">{dashboardMaterials.length}</strong> {dashboardMaterials.length === 1 ? "material" : "materiais"} na biblioteca
               </div>
             </section>
 
@@ -549,7 +550,7 @@ function Index() {
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-bold">Continue estudando</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">{search ? `Resultados recentes para “${search}”` : "Seus materiais mais recentes"}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{search ? `Resultados para “${search.trim()}”` : "Seus materiais mais recentes"}</p>
                 </div>
                 <Button variant="ghost" className="hidden min-h-10 sm:inline-flex" onClick={() => navigate({ to: "/library" })}>
                   Ver biblioteca <ArrowRight size={16} />
@@ -557,7 +558,7 @@ function Index() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredMaterials.map((material) => {
+                {visibleMaterials.map((material) => {
                   const progress = dashboardProgress[material.id] ?? 0;
                   const Icon = material.source_type === "audio" ? AudioLines : material.source_type === "video" ? Video : FileText;
                   return (
@@ -584,11 +585,11 @@ function Index() {
                 })}
               </div>
 
-              {filteredMaterials.length === 0 && (
+              {visibleMaterials.length === 0 && (
                 <div className="rounded-xl border border-dashed border-border py-14 text-center">
                   <Search className="mx-auto text-muted-foreground" size={24} />
                   <p className="mt-3 font-semibold">Nenhum material encontrado</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{search ? "Tente buscar outro assunto ou abra a biblioteca para pesquisar todos os materiais." : "Adicione seu primeiro material para começar."}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{search ? "Nenhum material da sua biblioteca corresponde à busca." : "Adicione seu primeiro material para começar."}</p>
                 </div>
               )}
             </section>
