@@ -40,6 +40,7 @@ function MaterialPage() {
   const [progress, setProgress] = useState(0);
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState("resumo");
+  const [retrying, setRetrying] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -61,23 +62,78 @@ function MaterialPage() {
     setProgress(progressData?.progress ?? 0);
   }
 
-  useEffect(() => { void load(); }, [materialId, user.id]);
+  useEffect(() => {
+    let cancelled = false;
+
+    const refresh = async () => {
+      if (cancelled) return;
+      await load();
+    };
+
+    void refresh();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [materialId, user.id]);
+
+  useEffect(() => {
+    if (material?.status !== "processing" || output) return;
+
+    const interval = window.setInterval(async () => {
+      const { data } = await supabase
+        .from("study_materials")
+        .select("status")
+        .eq("id", materialId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!data) return;
+
+      if (data.status === "ready" || data.status === "failed") {
+        await load();
+      }
+    }, 3000);
+
+    return () => window.clearInterval(interval);
+  }, [material?.status, output, materialId, user.id]);
 
   async function processMaterial() {
-    if (!material || processing) return;
+    if (!material || processing || retrying) return;
+
     setProcessing(true);
-    const { data, error } = await supabase.functions.invoke("process-material", { body: { materialId } });
+    setMaterial({ ...material, status: "processing" });
+
+    const timeout = new Promise<{ data: null; error: Error }>((resolve) =>
+      window.setTimeout(
+        () => resolve({ data: null, error: new Error("O processamento está demorando mais que o esperado.") }),
+        90_000,
+      ),
+    );
+
+    const request = supabase.functions.invoke("process-material", { body: { materialId } });
+    const { data, error } = await Promise.race([request, timeout]);
+
     setProcessing(false);
+
     if (error || data?.error) {
       toast.error(data?.error ?? "Não foi possível processar este material.");
       await load();
       return;
     }
-    toast.success("Pronto para estudar pela IA.");
+
+    toast.success("Pronto para estudar.");
     setOutput(data.output as Tables<"material_outputs">);
     setMaterial({ ...material, status: "ready" });
     setProgress(10);
     await saveProgress(10);
+  }
+
+  async function retryProcessing() {
+    if (!material || retrying) return;
+    setRetrying(true);
+    await processMaterial();
+    setRetrying(false);
   }
 
   async function saveProgress(value: number) {
@@ -137,7 +193,27 @@ function MaterialPage() {
             {material.source_type === "video" && <video className="max-h-[60dvh] w-full rounded-xl bg-black" controls src={sourceUrl} />}
           </section>
         )}
-        {!output && (
+        {!output && material.status === "failed" && (
+          <section className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 sm:p-8">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
+                <HelpCircle size={22} />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-xl font-extrabold">Não conseguimos organizar este material</h2>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                  O arquivo continua salvo. Você pode tentar o processamento novamente sem precisar enviá-lo de novo.
+                </p>
+                <Button className="mt-5" onClick={() => void retryProcessing()} disabled={retrying}>
+                  {retrying && <Loader2 className="animate-spin" size={17} />}
+                  {retrying ? "Tentando novamente..." : "Tentar novamente"}
+                </Button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {!output && material.status !== "failed" && (
           <section className="rounded-2xl border border-violet-border bg-violet-soft p-6 sm:p-8">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-violet text-brand-violet-foreground"><BookOpen size={22} /></div>
@@ -148,6 +224,18 @@ function MaterialPage() {
                   {processing && <Loader2 className="animate-spin" size={17} />}
                   {processing ? "Transcrevendo e organizando..." : (material.source_type === "audio" || material.source_type === "video" ? "Transcrever e organizar com IA" : "Organizar com IA")}
                 </Button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {material.status === "processing" && !output && (
+          <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6">
+            <div className="flex items-center gap-3">
+              <Loader2 className="shrink-0 animate-spin text-primary" size={20} />
+              <div>
+                <p className="font-bold">Organizando seu material...</p>
+                <p className="mt-1 text-xs text-muted-foreground">Você pode permanecer nesta página. Se sair, o processamento continua e retomamos quando voltar.</p>
               </div>
             </div>
           </section>
