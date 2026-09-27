@@ -75,10 +75,12 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/_authenticated/material/$materialId': typeof AuthenticatedMaterialMaterialIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/reset-password' | '/dashboard' | '/library' | `/material/${string}`
+  fullPaths: '/' | '/auth' | '/reset-password' | '/dashboard' | '/library' | '/material/$materialId'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/auth' | '/reset-password' | '/dashboard' | '/library' | '/material/$materialId'
   id:
@@ -134,6 +136,20 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/library': {
+      id: '/_authenticated/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof AuthenticatedLibraryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/material/$materialId': {
+      id: '/_authenticated/material/$materialId'
+      path: '/material/$materialId'
+      fullPath: '/material/$materialId'
+      preLoaderRoute: typeof AuthenticatedMaterialMaterialIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
