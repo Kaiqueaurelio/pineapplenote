@@ -418,7 +418,12 @@ function Index() {
             {navItems.map((item) => (
               <button
                 key={item.label}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (item.label === "Biblioteca" || item.label === "Minhas matérias") {
+                    navigate({ to: "/library" });
+                  }
+                }}
                 className={`flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold transition-colors ${
                   item.active
                     ? "bg-green-soft text-green-strong"
@@ -565,7 +570,7 @@ function Index() {
                   <h2 className="text-xl font-bold">Continue estudando</h2>
                   <p className="mt-1 text-sm text-muted-foreground">Seus materiais mais recentes</p>
                 </div>
-                <Button variant="ghost" className="hidden sm:inline-flex" onClick={() => toast.info("A biblioteca completa será aberta aqui.")}>
+                <Button variant="ghost" className="hidden sm:inline-flex" onClick={() => navigate({ to: "/library" })}>
                   Ver biblioteca <ArrowRight size={16} />
                 </Button>
               </div>
@@ -669,7 +674,7 @@ function Index() {
 
       <nav className="fixed inset-x-0 bottom-0 z-30 flex h-[4.4rem] items-center justify-around border-t border-border bg-card/95 px-3 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_color-mix(in_oklab,var(--foreground)_6%,transparent)] backdrop-blur md:hidden" aria-label="Navegação móvel">
         <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-bold text-green-strong" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><Home size={20} />Início</button>
-        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => document.getElementById("materiais")?.scrollIntoView({ behavior: "smooth" })}><Library size={20} />Notas</button>
+        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => navigate({ to: "/library" })}><Library size={20} />Notas</button>
         <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => setProfileOpen(true)}><Settings size={20} />Perfil</button>
       </nav>
 
