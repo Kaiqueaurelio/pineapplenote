@@ -72,7 +72,7 @@ function MaterialPage() {
       await load();
       return;
     }
-    toast.success("Material organizado pela IA.");
+    toast.success("Pronto para estudar pela IA.");
     setOutput(data.output as Tables<"material_outputs">);
     setMaterial({ ...material, status: "ready" });
     setProgress(10);
@@ -105,7 +105,7 @@ function MaterialPage() {
           <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/library" })} aria-label="Voltar"><ArrowLeft size={20} /></Button>
           <div className="min-w-0 flex-1">
             <h1 className="truncate font-extrabold">{material.title}</h1>
-            <p className="text-xs text-muted-foreground">{material.status === "ready" ? "Material organizado" : material.status === "processing" ? "Processando..." : "Aguardando processamento"}</p>
+            <p className="text-xs text-muted-foreground">{material.status === "ready" ? "Material organizado" : material.status === "processing" ? "Organizando conteúdo..." : "Pronto para organizar"}</p>
           </div>
           <div className="hidden items-center gap-2 sm:flex"><span className="text-xs text-muted-foreground">{progress}%</span><div className="h-2 w-28 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-primary" style={{ width: `${progress}%` }} /></div></div>
         </div>
@@ -128,7 +128,7 @@ function MaterialPage() {
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-violet text-brand-violet-foreground"><Sparkles size={22} /></div>
               <div className="min-w-0">
                 <h2 className="text-xl font-extrabold">Transforme este conteúdo em estudo</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">A Pineapple AI pode organizar o arquivo em resumo, tópicos, flashcards e quiz. Para áudio e vídeo, primeiro fazemos a transcrição.</p>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">A organização inteligente transforma o arquivo em resumo, tópicos, flashcards e quiz. Para áudio e vídeo, primeiro fazemos a transcrição.</p>
                 <Button className="mt-5" onClick={() => void processMaterial()} disabled={processing}>
                   {processing && <Loader2 className="animate-spin" size={17} />}
                   {processing ? "Transcrevendo e organizando..." : (material.source_type === "audio" || material.source_type === "video" ? "Transcrever e organizar com IA" : "Organizar com IA")}
