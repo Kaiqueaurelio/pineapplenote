@@ -157,7 +157,7 @@ function AuthPage() {
   const emailValue = () => document.querySelector<HTMLInputElement>('input[name="email"]')?.value ?? "";
 
   return (
-    <main className="min-h-screen bg-background lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(440px,0.95fr)]">
+    <main className="min-h-[100dvh] bg-background lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(440px,0.95fr)]">
       <section className="relative hidden overflow-hidden bg-ink p-12 text-ink-foreground lg:flex lg:flex-col lg:justify-between">
         <div className="pineapple-grid absolute inset-0 opacity-15" />
         <img src={logoAsset.url} alt="Pineapple Note" className="relative h-20 w-fit rounded-lg bg-background px-3" />
@@ -169,8 +169,8 @@ function AuthPage() {
         <p className="relative text-sm text-ink-muted">Estude com clareza. Revise com constância.</p>
       </section>
 
-      <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-10">
-        <div className="w-full max-w-md">
+      <section className="flex min-h-[100dvh] items-center justify-center px-4 py-[max(2rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-10">
+        <div className="w-full max-w-md px-0.5">
           <img src={logoAsset.url} alt="Pineapple Note" className="mx-auto mb-8 h-20 w-auto lg:hidden" />
           <div className="mb-8 grid grid-cols-2 rounded-lg bg-secondary p-1" aria-label="Escolher acesso ou cadastro">
             <Button type="button" variant={mode === "login" ? "secondary" : "ghost"} size="sm" onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Entrar</Button>
@@ -185,10 +185,10 @@ function AuthPage() {
 
           <form onSubmit={submit} className="mt-7 space-y-4">
             {mode === "signup" && <>
-              <div className="space-y-2"><Label htmlFor="name">Nome completo</Label><Input id="name" name="name" autoComplete="name" maxLength={80} required className="h-11" /></div>
+              <div className="space-y-2"><Label htmlFor="name">Nome completo</Label><Input id="name" name="name" autoComplete="name" maxLength={80} required className="h-12 text-base" /></div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2"><Label htmlFor="institution">Instituição</Label><Input id="institution" name="institution" maxLength={120} placeholder="Sua faculdade" className="h-11" /></div>
-                <div className="space-y-2"><Label htmlFor="course">Curso</Label><Input id="course" name="course" maxLength={120} placeholder="Seu curso" className="h-11" /></div>
+                <div className="space-y-2"><Label htmlFor="institution">Instituição</Label><Input id="institution" name="institution" maxLength={120} placeholder="Sua faculdade" className="h-12 text-base" /></div>
+                <div className="space-y-2"><Label htmlFor="course">Curso</Label><Input id="course" name="course" maxLength={120} placeholder="Seu curso" className="h-12 text-base" /></div>
               </div>
             </>}
             <div className="space-y-2"><Label htmlFor="email">E-mail</Label><div className="relative"><Mail className="absolute left-3 top-3 text-muted-foreground" size={18} /><Input id="email" name="email" type="email" autoComplete="email" maxLength={255} required className="h-11 pl-10" placeholder="voce@instituicao.edu.br" /></div></div>

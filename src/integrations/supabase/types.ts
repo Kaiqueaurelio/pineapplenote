@@ -21,7 +21,7 @@ export type Database = {
           created_at: string
           display_name: string
           institution: string
-          role: "student" | "admin"
+          role: "user" | "admin"
           updated_at: string
           user_id: string
         }
@@ -31,7 +31,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           institution?: string
-          role?: "student" | "admin"
+          role?: "user" | "admin"
           updated_at?: string
           user_id: string
         }
@@ -41,7 +41,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           institution?: string
-          role?: "student" | "admin"
+          role?: "user" | "admin"
           updated_at?: string
           user_id?: string
         }

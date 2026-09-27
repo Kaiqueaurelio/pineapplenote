@@ -168,6 +168,8 @@
     font-family: var(--font-sans);
     letter-spacing: 0;
     min-width: 320px;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
   }
 
   button, input {
