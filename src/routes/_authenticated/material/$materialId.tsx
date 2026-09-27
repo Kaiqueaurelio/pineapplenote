@@ -78,6 +78,28 @@ function MaterialPage() {
   }, [materialId, user.id]);
 
   useEffect(() => {
+    if (!output) return;
+
+    const sectionIds = ["resumo", "transcricao", "flashcards", "quiz"];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible?.target.id) setActiveSection(visible.target.id);
+      },
+      { rootMargin: "-20% 0px -60% 0px", threshold: [0.1, 0.35, 0.6] },
+    );
+
+    sectionIds.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, [output]);
+
+  useEffect(() => {
     if (material?.status !== "processing" || output) return;
 
     const interval = window.setInterval(async () => {
