@@ -39,6 +39,7 @@ function MaterialPage() {
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
   const [progress, setProgress] = useState(0);
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState("resumo");
 
   async function load() {
     setLoading(true);
@@ -95,7 +96,7 @@ function MaterialPage() {
   const quiz = useMemo(() => output ? asQuiz(output.quiz) : [], [output]);
   const currentFlashcard = flashcards[flashcardIndex];
 
-  if (loading) return <div className="flex min-h-[100dvh] items-center justify-center"><Loader2 className="animate-spin" /></div>;
+  if (loading) return <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 px-6 text-center"><Loader2 className="animate-spin text-primary" size={26} /><p className="text-sm font-medium text-muted-foreground">Carregando seu material...</p></div>;
   if (!material) return null;
 
   return (
@@ -111,7 +112,21 @@ function MaterialPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-5 px-4 py-6 sm:px-6 sm:py-8">
+      <main className="mx-auto max-w-6xl space-y-5 px-4 pb-10 pt-4 sm:px-6 sm:py-8">
+        {output && (
+          <nav className="sticky top-[4.25rem] z-10 -mx-1 flex gap-1 overflow-x-auto rounded-xl border border-border bg-card/95 p-1 shadow-soft backdrop-blur-xl sm:top-[4.75rem]" aria-label="Seções do material">
+            {[
+              ["resumo", "Resumo"],
+              ...(output.transcript ? [["transcricao", "Transcrição"]] : []),
+              ...(flashcards.length ? [["flashcards", "Flashcards"]] : []),
+              ...(quiz.length ? [["quiz", "Quiz"]] : []),
+            ].map(([id, label]) => (
+              <button key={id} type="button" onClick={() => { setActiveSection(id); document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className={`min-w-max rounded-lg px-3 py-2 text-xs font-bold transition ${activeSection === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
+                {label}
+              </button>
+            ))}
+          </nav>
+        )}
         {sourceUrl && (
           <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5">
             <div className="mb-3 flex items-center justify-between gap-3">
@@ -148,7 +163,7 @@ function MaterialPage() {
                     <p className="mt-1 text-xs text-muted-foreground">Texto extraído do áudio ou vídeo para você revisar e estudar.</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => { void navigator.clipboard.writeText(output.transcript); toast.success("Transcrição copiada."); }}><Copy size={15} />Copiar</Button>
+                    <Button variant="outline" size="sm" onClick={() => { if (!navigator.clipboard) { toast.error("Seu navegador não permite copiar automaticamente."); return; } void navigator.clipboard.writeText(output.transcript); toast.success("Transcrição copiada."); }}><Copy size={15} />Copiar</Button>
                     <Button variant="outline" size="sm" onClick={() => {
                       const blob = new Blob([output.transcript], { type: "text/plain;charset=utf-8" });
                       const url = URL.createObjectURL(blob);
