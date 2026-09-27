@@ -131,7 +131,7 @@ function MaterialPage() {
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">A Pineapple AI pode organizar o arquivo em resumo, tópicos, flashcards e quiz. Para áudio e vídeo, primeiro fazemos a transcrição.</p>
                 <Button className="mt-5" onClick={() => void processMaterial()} disabled={processing}>
                   {processing && <Loader2 className="animate-spin" size={17} />}
-                  {processing ? "Organizando..." : "Organizar com IA"}
+                  {processing ? "Transcrevendo e organizando..." : (material.source_type === "audio" || material.source_type === "video" ? "Transcrever e organizar com IA" : "Organizar com IA")}
                 </Button>
               </div>
             </div>
