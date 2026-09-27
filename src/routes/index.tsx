@@ -408,7 +408,7 @@ function LandingPage() {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <BookOpen size={22} />
             </div>
-            <h2 className="mt-5 text-2xl font-black">Mais um projeto criado por Decode Analytics.</h2>
+            <h2 className="mt-5 text-2xl font-black">Desenvolvido pela Decode Analytics.</h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
               O Pineapple Note faz parte do ecossistema de projetos da Decode Analytics, unindo tecnologia, dados e inteligência artificial para criar experiências digitais úteis.
             </p>
