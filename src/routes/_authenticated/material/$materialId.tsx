@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, FileText, HelpCircle, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, FileText, HelpCircle, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -125,7 +125,7 @@ function MaterialPage() {
         {!output && (
           <section className="rounded-2xl border border-violet-border bg-violet-soft p-6 sm:p-8">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-violet text-brand-violet-foreground"><Sparkles size={22} /></div>
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-violet text-brand-violet-foreground"><BookOpen size={22} /></div>
               <div className="min-w-0">
                 <h2 className="text-xl font-extrabold">Transforme este conteúdo em estudo</h2>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">A organização inteligente transforma o arquivo em resumo, tópicos, flashcards e quiz. Para áudio e vídeo, primeiro fazemos a transcrição.</p>
@@ -174,7 +174,7 @@ function MaterialPage() {
 
             {flashcards.length > 0 && (
               <section className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
-                <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 font-bold"><Sparkles size={18} /> Flashcards</div><span className="text-xs text-muted-foreground">{flashcardIndex + 1} / {flashcards.length}</span></div>
+                <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 font-bold"><BookOpen size={18} /> Flashcards</div><span className="text-xs text-muted-foreground">{flashcardIndex + 1} / {flashcards.length}</span></div>
                 <button type="button" onClick={() => setShowAnswer((value) => !value)} className="mt-5 min-h-48 w-full rounded-2xl border border-primary/20 bg-green-soft/50 p-6 text-left transition hover:border-primary/40">
                   <p className="text-xs font-bold uppercase tracking-wide text-green-strong">{showAnswer ? "Resposta" : "Pergunta"}</p>
                   <p className="mt-3 text-lg font-bold leading-relaxed">{showAnswer ? currentFlashcard?.answer : currentFlashcard?.question}</p>
