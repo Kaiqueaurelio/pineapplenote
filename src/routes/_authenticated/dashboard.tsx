@@ -6,6 +6,7 @@ import {
   Bell,
   BookOpen,
   ChevronRight,
+  CircleStop,
   CircleHelp,
   Clock3,
   FileText,
@@ -104,14 +105,20 @@ function Index() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState("Documento");
-  const [selectedFile, setSelectedFile] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [activeMaterial, setActiveMaterial] = useState<string | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [uploadingMaterial, setUploadingMaterial] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordingChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 1024px)");
@@ -238,10 +245,118 @@ function Index() {
     `${material.title} ${material.subject}`.toLowerCase().includes(search.toLowerCase()),
   );
 
+  useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current !== null) window.clearInterval(recordingTimerRef.current);
+      mediaRecorderRef.current?.stream.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  function getRecordingMimeType() {
+    const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
+    return candidates.find((type) => MediaRecorder.isTypeSupported(type)) ?? "";
+  }
+
+  async function toggleRecording() {
+    if (recording) {
+      mediaRecorderRef.current?.stop();
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      toast.error("Seu navegador não oferece gravação de áudio. Use um navegador atualizado.");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = getRecordingMimeType();
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      recordingChunksRef.current = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) recordingChunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        const type = recorder.mimeType || "audio/webm";
+        const extension = type.includes("mp4") ? "m4a" : "webm";
+        const blob = new Blob(recordingChunksRef.current, { type });
+        if (blob.size === 0) {
+          toast.error("A gravação ficou vazia. Tente novamente.");
+        } else {
+          setSelectedFile(new File([blob], `gravacao-${new Date().toISOString().replace(/[:.]/g, "-")}.${extension}`, { type }));
+          toast.success("Gravação pronta para salvar.");
+        }
+        stream.getTracks().forEach((track) => track.stop());
+        mediaRecorderRef.current = null;
+        setRecording(false);
+        if (recordingTimerRef.current !== null) {
+          window.clearInterval(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
+      };
+      recorder.onerror = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setRecording(false);
+        toast.error("Não foi possível concluir a gravação.");
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start(250);
+      setSelectedType("Gravar áudio");
+      setRecordingSeconds(0);
+      setRecording(true);
+      recordingTimerRef.current = window.setInterval(() => setRecordingSeconds((seconds) => seconds + 1), 1000);
+    } catch {
+      toast.error("Permita o acesso ao microfone para gravar sua aula.");
+    }
+  }
+
   const chooseFile = (type: string) => {
+    if (type === "Gravar áudio") {
+      void toggleRecording();
+      return;
+    }
     setSelectedType(type);
     fileRef.current?.click();
   };
+
+  async function saveMaterial() {
+    if (!selectedFile || uploadingMaterial) return;
+    setUploadingMaterial(true);
+    const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(-120);
+    const path = `${user.id}/${crypto.randomUUID()}-${safeName}`;
+    const sourceType = selectedType === "Gravar áudio" ? "audio" : selectedType === "Enviar vídeo" ? "video" : "document";
+
+    const { error: uploadError } = await supabase.storage
+      .from("study-materials")
+      .upload(path, selectedFile, { contentType: selectedFile.type || "application/octet-stream", upsert: false });
+
+    if (uploadError) {
+      setUploadingMaterial(false);
+      toast.error("Não foi possível enviar o arquivo. Tente novamente.");
+      return;
+    }
+
+    const { error: rowError } = await supabase.from("study_materials").insert({
+      user_id: user.id,
+      title: selectedFile.name,
+      source_type: sourceType,
+      mime_type: selectedFile.type || "application/octet-stream",
+      storage_path: path,
+      status: "uploaded",
+    });
+
+    if (rowError) {
+      await supabase.storage.from("study-materials").remove([path]);
+      setUploadingMaterial(false);
+      toast.error("O arquivo foi enviado, mas não conseguimos registrar o material.");
+      return;
+    }
+
+    setUploadingMaterial(false);
+    setSelectedFile(null);
+    if (fileRef.current) fileRef.current.value = "";
+    toast.success("Material salvo na sua biblioteca.");
+  }
 
   const isAdmin = profile?.role === "admin";
 
@@ -373,8 +488,8 @@ function Index() {
                     ref={fileRef}
                     type="file"
                     className="sr-only"
-                    accept="audio/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.txt"
-                    onChange={(event) => setSelectedFile(event.target.files?.[0]?.name ?? "")}
+                    accept={selectedType === "Gravar áudio" ? "audio/*" : selectedType === "Enviar vídeo" ? "video/*" : ".pdf,.doc,.docx,.ppt,.pptx,.txt"}
+                    onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
                   />
 
                   <div className="grid gap-3 sm:grid-cols-3">
@@ -385,6 +500,7 @@ function Index() {
                     ].map((item) => (
                       <button
                         key={item.label}
+                        type="button"
                         onClick={() => chooseFile(item.label)}
                         className={`group flex min-h-32 flex-col items-start justify-between rounded-lg border p-4 text-left transition ${
                           selectedType === item.label
@@ -392,7 +508,11 @@ function Index() {
                             : "border-border bg-background hover:border-primary/40 hover:bg-secondary/50"
                         }`}
                       >
-                        <item.icon className="text-green-strong" size={23} />
+                        {item.label === "Gravar áudio" && recording ? (
+                          <CircleStop className="text-destructive" size={23} />
+                        ) : (
+                          <item.icon className="text-green-strong" size={23} />
+                        )}
                         <span>
                           <strong className="block text-sm">{item.label}</strong>
                           <span className="mt-1 block text-xs text-muted-foreground">{item.detail}</span>
@@ -402,9 +522,20 @@ function Index() {
                   </div>
 
                   {selectedFile && (
-                    <div className="mt-4 flex items-center justify-between rounded-lg border border-primary/30 bg-green-soft px-4 py-3 text-sm">
-                      <span className="min-w-0 truncate font-medium">{selectedFile}</span>
-                      <span className="ml-3 shrink-0 font-semibold text-green-strong">Pronto para organizar</span>
+                    <div className="mt-4 rounded-lg border border-primary/30 bg-green-soft p-4 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="min-w-0 truncate font-medium">{selectedFile.name}</span>
+                        <span className="shrink-0 font-semibold text-green-strong">Pronto</span>
+                      </div>
+                      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <Button type="button" className="w-full sm:w-auto" onClick={() => void saveMaterial()} disabled={uploadingMaterial}>
+                          {uploadingMaterial && <Loader2 className="animate-spin" size={17} />}
+                          {uploadingMaterial ? "Salvando..." : "Salvar na biblioteca"}
+                        </Button>
+                        <Button type="button" variant="ghost" className="w-full sm:w-auto" onClick={() => { setSelectedFile(null); if (fileRef.current) fileRef.current.value = ""; }}>
+                          Remover
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
