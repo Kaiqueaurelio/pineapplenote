@@ -12,3 +12,4 @@
 - Keep Pineapple Note as a responsive single-screen study dashboard; it keeps the primary learning workflow immediately accessible.
 - Use the uploaded Pineapple Note logo as the canonical brand asset and derive the favicon from it; this preserves brand consistency.
 - Keep PWA support manifest-only unless offline behavior is explicitly requested; this avoids stale preview caches.
+- Keep the study dashboard at `/dashboard` behind the managed authenticated layout; public account flows live at `/auth` and `/reset-password`.
