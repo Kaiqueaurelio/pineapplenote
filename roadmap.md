@@ -6,7 +6,7 @@
 - [x] Verificar desktop, celular e compilação
 - [x] Adicionar instalação PWA sem cache offline
 - [x] Revalidar responsividade e instalação
-- [ ] Criar cadastro, login e confirmação de e-mail
-- [ ] Adicionar acesso por Google e recuperação de senha
-- [ ] Proteger a central e criar perfil acadêmico individual
-- [ ] Validar segurança, acesso e responsividade
+- [x] Criar cadastro, login e confirmação de e-mail
+- [x] Adicionar acesso por Google e recuperação de senha
+- [x] Proteger a central e criar perfil acadêmico individual
+- [x] Validar segurança, acesso e responsividade
