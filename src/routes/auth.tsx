@@ -22,6 +22,7 @@ const signupSchema = credentialsSchema.extend({
 });
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: z.object({ mode: z.enum(["login", "signup"]).optional() }).catch({}),
   head: () => ({
     meta: [
       { title: "Entrar ou criar conta — Pineapple Note" },
@@ -37,11 +38,16 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const searchParams = Route.useSearch();
+  const [mode, setMode] = useState<"login" | "signup">(searchParams.mode ?? "login");
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (searchParams.mode) setMode(searchParams.mode);
+  }, [searchParams.mode]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
