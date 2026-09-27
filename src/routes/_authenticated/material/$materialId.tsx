@@ -38,6 +38,7 @@ function MaterialPage() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
   const [progress, setProgress] = useState(0);
+  const [sourceUrl, setSourceUrl] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -53,6 +54,8 @@ function MaterialPage() {
       return;
     }
     setMaterial(materialData);
+    const { data: signedSource } = await supabase.storage.from("study-materials").createSignedUrl(materialData.storage_path, 60 * 60);
+    setSourceUrl(signedSource?.signedUrl ?? null);
     setOutput(outputData);
     setProgress(progressData?.progress ?? 0);
   }
@@ -109,6 +112,16 @@ function MaterialPage() {
       </header>
 
       <main className="mx-auto max-w-6xl space-y-5 px-4 py-6 sm:px-6 sm:py-8">
+        {sourceUrl && (
+          <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div><p className="font-bold">Conteúdo original</p><p className="text-xs text-muted-foreground">Acesso privado e temporário</p></div>
+              <Button variant="outline" onClick={() => window.open(sourceUrl, "_blank", "noopener,noreferrer")}>Abrir arquivo</Button>
+            </div>
+            {material.source_type === "audio" && <audio className="w-full" controls src={sourceUrl} />}
+            {material.source_type === "video" && <video className="max-h-[60dvh] w-full rounded-xl bg-black" controls src={sourceUrl} />}
+          </section>
+        )}
         {!output && (
           <section className="rounded-2xl border border-violet-border bg-violet-soft p-6 sm:p-8">
             <div className="flex items-start gap-4">
