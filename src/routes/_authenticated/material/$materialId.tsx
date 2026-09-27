@@ -260,7 +260,7 @@ function MaterialPage() {
         )}
 
         {material.status === "processing" && !output && (
-          <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6">
+          <section aria-live="polite" className="rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6">
             <div className="flex items-center gap-3">
               <Loader2 className="shrink-0 animate-spin text-primary" size={20} />
               <div>
