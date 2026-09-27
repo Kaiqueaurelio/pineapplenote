@@ -72,6 +72,7 @@ function Index() {
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState("Documento");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const MAX_FILE_SIZE = 500 * 1024 * 1024;
   const [activeMaterial, setActiveMaterial] = useState<string | null>(null);
   const [recording, setRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
@@ -79,6 +80,7 @@ function Index() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const [dashboardMaterials, setDashboardMaterials] = useState<Tables<"study_materials">[]>([]);
@@ -300,6 +302,16 @@ function Index() {
     fileRef.current?.click();
   };
 
+  function handleFileSelection(file: File | null) {
+    if (!file) return;
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("O arquivo é maior que 500 MB. Escolha um arquivo menor.");
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
+    setSelectedFile(file);
+  }
+
   async function saveMaterial() {
     if (!selectedFile || uploadingMaterial) return;
     setUploadingMaterial(true);
@@ -417,7 +429,7 @@ function Index() {
           </nav>
 
           <div className="mt-auto space-y-1 border-t border-border pt-5">
-            <button type="button" onClick={() => toast.info("Em caso de dúvida, use o suporte da sua conta.")} className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
+            <button type="button" onClick={() => setHelpOpen(true)} className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
               <CircleHelp size={19} /> Ajuda
             </button>
             <Button variant="ghost" className="w-full justify-start" onClick={() => setProfileOpen(true)}>
@@ -466,7 +478,7 @@ function Index() {
                     type="file"
                     className="sr-only"
                     accept={selectedType === "Gravar áudio" ? "audio/*" : selectedType === "Enviar vídeo" ? "video/*" : ".pdf,.doc,.docx,.ppt,.pptx,.txt"}
-                    onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
+                    onChange={(event) => handleFileSelection(event.target.files?.[0] ?? null)}
                   />
 
                   <div className="grid gap-3 sm:grid-cols-3">
@@ -644,6 +656,23 @@ function Index() {
         <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => navigate({ to: "/library" })}><Library size={20} />Notas</button>
         <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => setProfileOpen(true)}><Settings size={20} />Perfil</button>
       </nav>
+
+      <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
+        <DialogContent className="w-[calc(100%-1rem)] rounded-2xl sm:max-w-md">
+          <DialogHeader>
+            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-green-soft text-green-strong"><CircleHelp size={21} /></div>
+            <DialogTitle>Ajuda do Pineapple Note</DialogTitle>
+            <DialogDescription>Um resumo rápido para você começar.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 text-sm text-muted-foreground">
+            <p><strong className="text-foreground">1. Adicione um conteúdo.</strong> Grave uma aula ou envie um vídeo ou documento.</p>
+            <p><strong className="text-foreground">2. Abra o material.</strong> A partir dele você pode gerar e revisar os materiais de estudo disponíveis.</p>
+            <p><strong className="text-foreground">3. Continue estudando.</strong> Seu progresso fica associado ao material.</p>
+            <p className="rounded-lg bg-secondary p-3 text-xs">Se um processamento falhar, abra o material novamente para tentar de novo.</p>
+          </div>
+          <Button className="w-full" onClick={() => setHelpOpen(false)}>Entendi</Button>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
         <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto rounded-2xl p-5 sm:w-[calc(100%-2rem)] sm:max-w-md sm:p-6">
