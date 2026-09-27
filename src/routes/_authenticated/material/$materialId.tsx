@@ -325,7 +325,7 @@ function MaterialPage() {
                 <div className="flex items-center gap-2 font-bold"><HelpCircle size={18} /> Quiz</div>
                 <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-secondary p-3 text-sm">
                   <span className="font-semibold">{answeredQuizCount} de {quiz.length} respondidas</span>
-                  {quizCompleted && <span className="font-extrabold text-green-strong">Resultado: {correctQuizCount}/{quiz.length}</span>}
+                  {quizSubmitted && quizCompleted && <span className="font-extrabold text-green-strong">Resultado: {correctQuizCount}/{quiz.length}</span>}
                 </div>
                 <div className="mt-5 space-y-6">
                   {quiz.map((item, index) => {
@@ -335,7 +335,7 @@ function MaterialPage() {
                       <p className="font-bold">{index + 1}. {item["question"]}</p>
                       <div className="mt-3 grid gap-2">
                         {item.options.map((option) => <button type="button" key={option} onClick={() => { setQuizAnswers((current) => ({ ...current, [index]: option })); setQuizSubmitted(false); }} aria-pressed={selected === option}
-                          className={`min-h-11 rounded-lg border px-3 py-3 text-left text-sm transition ${selected === option ? (correct ? "border-primary bg-green-soft" : "border-destructive bg-destructive/10") : "border-border hover:bg-secondary"}`}>{option}</button>)}
+                          className={`min-h-11 rounded-lg border px-3 py-3 text-left text-sm transition ${selected === option ? (quizSubmitted ? (correct ? "border-primary bg-green-soft" : "border-destructive bg-destructive/10") : "border-primary bg-primary/5") : "border-border hover:bg-secondary"}`}>{option}</button>)}
                       </div>
                       {selected && quizSubmitted && <div className="mt-3 rounded-lg bg-secondary p-3 text-sm"><strong>{correct ? "Correto!" : `Resposta: ${item["answer"]}`}</strong><p className="mt-1 text-muted-foreground">{item["explanation"]}</p></div>}
                     </article>;
