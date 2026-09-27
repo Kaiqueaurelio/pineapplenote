@@ -513,7 +513,14 @@ function Index() {
             <DialogDescription>Mantenha seus dados atualizados para personalizar seus estudos.</DialogDescription>
           </DialogHeader>
           <div className="rounded-lg bg-green-soft p-3 text-sm text-green-strong">
-            <strong className="block">E-mail confirmado</strong>
+            <div className="flex items-center justify-between gap-3">
+              <strong className="block">E-mail confirmado</strong>
+              {profile?.role === "admin" && (
+                <span className="shrink-0 rounded-full bg-brand-violet px-2.5 py-1 text-[11px] font-bold text-brand-violet-foreground">
+                  Administrador
+                </span>
+              )}
+            </div>
             <span className="break-all text-xs">{user.email}</span>
           </div>
           <form onSubmit={saveProfile} className="space-y-4">
