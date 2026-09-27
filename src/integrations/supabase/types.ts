@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      study_materials: {
+        Row: {
+          created_at: string
+          id: string
+          mime_type: string
+          source_type: "audio" | "video" | "document"
+          status: "uploaded" | "processing" | "ready" | "failed"
+          storage_path: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mime_type: string
+          source_type: "audio" | "video" | "document"
+          status?: "uploaded" | "processing" | "ready" | "failed"
+          storage_path: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mime_type?: string
+          source_type?: "audio" | "video" | "document"
+          status?: "uploaded" | "processing" | "ready" | "failed"
+          storage_path?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
