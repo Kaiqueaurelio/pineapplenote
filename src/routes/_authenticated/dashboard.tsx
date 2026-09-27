@@ -216,8 +216,10 @@ function Index() {
     fileRef.current?.click();
   };
 
+  const isAdmin = profile?.role === "admin";
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background pb-36 text-foreground md:pb-0">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/95 backdrop-blur-xl">
         <div className="mx-auto grid h-[76px] max-w-[1480px] grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 px-4 sm:flex sm:gap-4 sm:px-6 lg:px-8">
           <Button
@@ -313,8 +315,9 @@ function Index() {
           <div className="mx-auto max-w-6xl">
             <section className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
               <div>
-                <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-green-strong">
+                <p className="mb-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-green-strong">
                   <Sparkles size={16} /> Bom dia, {displayName.split(" ")[0]}
+                  {isAdmin && <span className="rounded-full bg-violet-soft px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-brand-violet">Admin</span>}
                 </p>
                 <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">O que vamos aprender hoje?</h1>
                 <p className="mt-2 max-w-xl text-muted-foreground">
@@ -397,7 +400,7 @@ function Index() {
               </div>
             </section>
 
-            <section className="mt-10">
+            <section id="materiais" className="mt-10 scroll-mt-24">
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-bold">Continue estudando</h2>
@@ -492,7 +495,7 @@ function Index() {
         </main>
       </div>
 
-      <div className="fixed bottom-4 left-4 right-4 z-20 md:hidden">
+      <div className="fixed bottom-[4.9rem] left-4 right-4 z-20 md:hidden">
         <div className="flex items-center rounded-xl border border-border bg-card p-2 shadow-soft">
           <Search className="ml-2 text-muted-foreground" size={18} />
           <input
@@ -504,6 +507,12 @@ function Index() {
           />
         </div>
       </div>
+
+      <nav className="fixed inset-x-0 bottom-0 z-30 flex h-[4.4rem] items-center justify-around border-t border-border bg-card/95 px-3 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_color-mix(in_oklab,var(--foreground)_6%,transparent)] backdrop-blur md:hidden" aria-label="Navegação móvel">
+        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-bold text-green-strong" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><Home size={20} />Início</button>
+        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => document.getElementById("materiais")?.scrollIntoView({ behavior: "smooth" })}><Library size={20} />Notas</button>
+        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => setProfileOpen(true)}><Settings size={20} />Perfil</button>
+      </nav>
 
       <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
         <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] overflow-y-auto rounded-xl sm:max-w-md">
