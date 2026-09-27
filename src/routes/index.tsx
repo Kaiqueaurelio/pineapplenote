@@ -10,13 +10,11 @@ import {
   MessageCircle,
   Mic2,
   Play,
-  Sparkles,
   Upload,
   Video,
   Gamepad2,
   GraduationCap,
   HelpCircle,
-  WandSparkles,
   Zap,
   ChevronDown,
 } from "lucide-react";
@@ -185,7 +183,7 @@ function LandingPage() {
 
           <div className="mx-auto max-w-5xl text-center">
             <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3.5 py-2 text-xs font-bold text-primary">
-              <Sparkles size={14} />
+              <ArrowRight size={14} />
               Seu novo espaço de estudo com IA
             </div>
 
@@ -409,7 +407,7 @@ function LandingPage() {
         <section id="decode-analytics" className="border-t border-border bg-secondary/30 px-4 py-16 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-5xl text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Sparkles size={22} />
+              <BookOpen size={22} />
             </div>
             <h2 className="mt-5 text-2xl font-black">Mais um projeto criado por Decode Analytics.</h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
