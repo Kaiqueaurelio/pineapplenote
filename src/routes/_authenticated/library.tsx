@@ -53,7 +53,6 @@ function LibraryPage() {
 
   async function openMaterial(material: Tables<"study_materials">) {
     setOpeningId(material.id);
-    setOpeningId(null);
     navigate({ to: "/material/$materialId", params: { materialId: material.id } });
   }
 
@@ -144,7 +143,7 @@ function LibraryPage() {
                     <div className="min-w-0 flex-1">
                       <h2 className="truncate font-bold">{material.title}</h2>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {material.source_type === "audio" ? "Áudio" : material.source_type === "video" ? "Vídeo" : "Documento"} · {material.status}
+{material.source_type === "audio" ? "Áudio" : material.source_type === "video" ? "Vídeo" : "Documento"} · {material.status === "ready" ? "Pronto para estudar" : material.status === "processing" ? "Organizando conteúdo..." : material.status === "failed" ? "Não foi possível organizar" : "Pronto para organizar"}
                       </p>
                     </div>
                   </div>
