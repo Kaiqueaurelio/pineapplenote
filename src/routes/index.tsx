@@ -45,7 +45,7 @@ const features = [
   {
     icon: Upload,
     title: "Envie qualquer material",
-    description: "Áudios, vídeos e documentos entram no mesmo espaço para você não perder nada.",
+    description: "Áudios, vídeos e documentos ficam no mesmo espaço para você estudar sem espalhar seus materiais.",
   },
   {
     icon: FileText,
@@ -78,7 +78,7 @@ const steps = [
   {
     number: "03",
     title: "Revise e aprenda",
-    description: "Leia, escute, pesquise, converse e use materiais de revisão.",
+    description: "Leia, revise, responda quizzes e use flashcards para fixar o conteúdo.",
   },
 ];
 
