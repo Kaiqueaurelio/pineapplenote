@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, HelpCircle, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, HelpCircle, Loader2, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -140,6 +140,30 @@ function MaterialPage() {
 
         {output && (
           <>
+            {output?.transcript && (
+              <section className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2 font-bold"><FileText size={18} /> Transcrição</div>
+                    <p className="mt-1 text-xs text-muted-foreground">Texto extraído do áudio ou vídeo para você revisar e estudar.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => { void navigator.clipboard.writeText(output.transcript); toast.success("Transcrição copiada."); }}><Copy size={15} />Copiar</Button>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      const blob = new Blob([output.transcript], { type: "text/plain;charset=utf-8" });
+                      const url = URL.createObjectURL(blob);
+                      const anchor = document.createElement("a");
+                      anchor.href = url;
+                      anchor.download = `${material.title.replace(/[^a-z0-9-_]+/gi, "-")}-transcricao.txt`;
+                      anchor.click();
+                      URL.revokeObjectURL(url);
+                    }}><Download size={15} />TXT</Button>
+                  </div>
+                </div>
+                <div className="mt-5 max-h-[55dvh] overflow-y-auto whitespace-pre-wrap rounded-xl bg-secondary p-5 text-sm leading-7 text-muted-foreground">{output.transcript}</div>
+              </section>
+            )}
+
             <section className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
               <div className="flex items-center gap-2 text-sm font-bold text-brand-violet"><BookOpen size={18} /> Resumo</div>
               <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground sm:text-base">{output.summary}</p>
