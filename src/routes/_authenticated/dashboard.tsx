@@ -624,7 +624,7 @@ function Index() {
         </main>
       </div>
 
-      <div className="fixed inset-x-3 bottom-[max(5.25rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-20 md:hidden">
+      <div className="mt-10 border-t border-border pt-6 text-center text-xs text-muted-foreground">Pineapple Note · Desenvolvido pela Decode Analytics</div>\n\n      <div className="fixed inset-x-3 bottom-[max(5.25rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-20 md:hidden">
         <div className="flex min-h-12 items-center rounded-2xl border border-border bg-card/95 p-1.5 shadow-soft backdrop-blur-xl">
           <Search className="ml-2 text-muted-foreground" size={18} />
           <input
