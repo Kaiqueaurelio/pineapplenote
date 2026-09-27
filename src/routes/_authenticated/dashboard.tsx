@@ -250,6 +250,8 @@ function Index() {
     }
 
     try {
+      setSelectedFile(null);
+      if (fileRef.current) fileRef.current.value = "";
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mimeType = getRecordingMimeType();
       const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
@@ -277,7 +279,12 @@ function Index() {
       };
       recorder.onerror = () => {
         stream.getTracks().forEach((track) => track.stop());
+        mediaRecorderRef.current = null;
         setRecording(false);
+        if (recordingTimerRef.current !== null) {
+          window.clearInterval(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
         toast.error("Não foi possível concluir a gravação.");
       };
       mediaRecorderRef.current = recorder;
@@ -296,9 +303,23 @@ function Index() {
       void toggleRecording();
       return;
     }
+    if (recording) {
+      toast.error("Pare a gravação atual antes de escolher outro tipo.");
+      return;
+    }
+    if (selectedType !== type) {
+      setSelectedFile(null);
+      if (fileRef.current) fileRef.current.value = "";
+    }
     setSelectedType(type);
     fileRef.current?.click();
   };
+
+  function formatRecordingTime(totalSeconds: number) {
+    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+    const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  }
 
   function handleFileSelection(file: File | null) {
     if (!file) return;
@@ -327,16 +348,16 @@ function Index() {
       return;
     }
 
-    const { error: rowError } = await supabase.from("study_materials").insert({
+    const { data: savedMaterial, error: rowError } = await supabase.from("study_materials").insert({
       user_id: user.id,
       title: selectedFile.name,
       source_type: sourceType,
       mime_type: selectedFile.type || "application/octet-stream",
       storage_path: path,
       status: "uploaded",
-    });
+    }).select("id").single();
 
-    if (rowError) {
+    if (rowError || !savedMaterial) {
       await supabase.storage.from("study-materials").remove([path]);
       setUploadingMaterial(false);
       toast.error("O arquivo foi enviado, mas não conseguimos registrar o material.");
@@ -347,8 +368,7 @@ function Index() {
     setSelectedFile(null);
     if (fileRef.current) fileRef.current.value = "";
     toast.success("Material salvo na sua biblioteca.");
-    const { data: savedMaterial } = await supabase.from("study_materials").select("id").eq("storage_path", path).eq("user_id", user.id).single();
-    if (savedMaterial) navigate({ to: "/material/$materialId", params: { materialId: savedMaterial.id } });
+    navigate({ to: "/material/$materialId", params: { materialId: savedMaterial.id } });
   }
 
   const isAdmin = profile?.role === "admin";
@@ -496,7 +516,10 @@ function Index() {
                         }`}
                       >
                         {item.label === "Gravar áudio" && recording ? (
-                          <CircleStop className="text-destructive" size={23} />
+                          <div className="flex items-center gap-2 text-destructive">
+                            <CircleStop size={23} />
+                            <span className="text-sm font-extrabold tabular-nums">{formatRecordingTime(recordingSeconds)}</span>
+                          </div>
                         ) : (
                           <item.icon className="text-green-strong" size={23} />
                         )}
@@ -512,7 +535,7 @@ function Index() {
                     <div className="mt-4 rounded-lg border border-primary/30 bg-green-soft p-4 text-sm" aria-live="polite">
                       <div className="flex items-center justify-between gap-3">
                         <span className="min-w-0 truncate font-medium">{selectedFile.name}</span>
-                        <span className="shrink-0 font-semibold text-green-strong">Pronto</span>
+                        <span className="shrink-0 font-semibold text-green-strong">{uploadingMaterial ? "Enviando..." : "Pronto"}</span>
                       </div>
                       {uploadingMaterial && <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-background/70" aria-label="Enviando material"><div className="h-full w-2/5 animate-[pulse_1.4s_ease-in-out_infinite] rounded-full bg-primary" /></div>}
                       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
