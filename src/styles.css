@@ -19,6 +19,7 @@
  */
 
 @theme inline {
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -59,29 +60,53 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-green-soft: var(--green-soft);
+  --color-green-strong: var(--green-strong);
+  --color-yellow-soft: var(--yellow-soft);
+  --color-yellow-strong: var(--yellow-strong);
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-violet: var(--brand-violet);
+  --color-brand-violet-foreground: var(--brand-violet-foreground);
+  --color-violet-soft: var(--violet-soft);
+  --color-violet-border: var(--violet-border);
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-ink-muted: var(--ink-muted);
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --radius: 0.65rem;
+  --background: oklch(0.985 0.008 105);
+  --foreground: oklch(0.19 0.045 267);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
+  --primary: oklch(0.62 0.18 145);
+  --primary-foreground: oklch(0.99 0.01 145);
+  --secondary: oklch(0.965 0.012 105);
   --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
+  --muted: oklch(0.965 0.012 105);
+  --muted-foreground: oklch(0.49 0.025 264);
+  --accent: oklch(0.94 0.06 142);
   --accent-foreground: oklch(0.208 0.042 265.755);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.9 0.018 110);
+  --input: oklch(0.9 0.018 110);
+  --ring: oklch(0.62 0.18 145);
+  --green-soft: oklch(0.94 0.07 145);
+  --green-strong: oklch(0.46 0.16 145);
+  --brand-yellow: oklch(0.82 0.17 87);
+  --yellow-soft: oklch(0.95 0.09 91);
+  --yellow-strong: oklch(0.54 0.14 72);
+  --brand-violet: oklch(0.58 0.24 291);
+  --brand-violet-foreground: oklch(0.99 0.01 291);
+  --violet-soft: oklch(0.95 0.035 294);
+  --violet-border: oklch(0.86 0.07 294);
+  --ink: oklch(0.19 0.055 269);
+  --ink-foreground: oklch(0.98 0.01 105);
+  --ink-muted: oklch(0.79 0.025 270);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +165,46 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    letter-spacing: 0;
+    min-width: 320px;
   }
+
+  button, input {
+    font: inherit;
+  }
+}
+
+@layer utilities {
+  .shadow-soft {
+    box-shadow: 0 18px 50px color-mix(in oklab, var(--foreground) 8%, transparent);
+  }
+
+  .shadow-card {
+    box-shadow: 0 8px 24px color-mix(in oklab, var(--foreground) 5%, transparent);
+  }
+
+  .pineapple-grid {
+    background-image:
+      linear-gradient(45deg, transparent 46%, color-mix(in oklab, var(--brand-violet) 70%, transparent) 48%, color-mix(in oklab, var(--brand-violet) 70%, transparent) 52%, transparent 54%),
+      linear-gradient(-45deg, transparent 46%, color-mix(in oklab, var(--primary) 70%, transparent) 48%, color-mix(in oklab, var(--primary) 70%, transparent) 52%, transparent 54%);
+    background-size: 46px 46px;
+  }
+
+  .material-icon {
+    display: flex;
+    height: 2.75rem;
+    width: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+  }
+
+  .material-icon-green { background: var(--green-soft); color: var(--green-strong); }
+  .material-icon-violet { background: var(--violet-soft); color: var(--brand-violet); }
+  .material-icon-yellow { background: var(--yellow-soft); color: var(--yellow-strong); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  article, button, a { transition-duration: 180ms; }
 }
