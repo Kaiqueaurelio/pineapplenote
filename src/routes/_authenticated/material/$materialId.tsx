@@ -156,7 +156,7 @@ function MaterialPage() {
         {output && (
           <>
             {output?.transcript && (
-              <section className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
+              <section id="transcricao" className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2 font-bold"><FileText size={18} /> Transcrição</div>
@@ -179,7 +179,7 @@ function MaterialPage() {
               </section>
             )}
 
-            <section className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
+            <section id="resumo" className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
               <div className="flex items-center gap-2 text-sm font-bold text-brand-violet"><BookOpen size={18} /> Resumo</div>
               <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground sm:text-base">{output.summary}</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -188,7 +188,7 @@ function MaterialPage() {
             </section>
 
             {flashcards.length > 0 && (
-              <section className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
+              <section id="flashcards" className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
                 <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 font-bold"><BookOpen size={18} /> Flashcards</div><span className="text-xs text-muted-foreground">{flashcardIndex + 1} / {flashcards.length}</span></div>
                 <button type="button" onClick={() => setShowAnswer((value) => !value)} className="mt-5 min-h-48 w-full rounded-2xl border border-primary/20 bg-green-soft/50 p-6 text-left transition hover:border-primary/40">
                   <p className="text-xs font-bold uppercase tracking-wide text-green-strong">{showAnswer ? "Resposta" : "Pergunta"}</p>
@@ -202,7 +202,7 @@ function MaterialPage() {
             )}
 
             {quiz.length > 0 && (
-              <section className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
+              <section id="quiz" className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
                 <div className="flex items-center gap-2 font-bold"><HelpCircle size={18} /> Quiz</div>
                 <div className="mt-5 space-y-6">
                   {quiz.map((item, index) => {
