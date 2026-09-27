@@ -3,13 +3,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
   AudioLines,
-  Bell,
   BookOpen,
   ChevronRight,
   CircleStop,
   CircleHelp,
   FileText,
-  FolderOpen,
   Home,
   Library,
   Loader2,
@@ -64,7 +62,6 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 const navItems = [
   { label: "Início", icon: Home, active: true },
   { label: "Biblioteca", icon: Library },
-  { label: "Minhas matérias", icon: FolderOpen },
 ];
 
 function Index() {
@@ -381,11 +378,7 @@ function Index() {
             />
           </div>
 
-          <Button variant="ghost" size="icon" aria-label="Notificações" className="relative max-[380px]:hidden" onClick={() => toast.info("Você não tem novas notificações.")}>
-            <Bell size={20} />
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-brand-yellow ring-2 ring-background" />
-          </Button>
-          <Button
+                    <Button
             variant="ghost"
             size="icon"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-violet text-sm font-bold text-brand-violet-foreground ring-4 ring-violet-soft"
