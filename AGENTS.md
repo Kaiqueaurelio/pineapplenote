@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep Pineapple Note as a responsive single-screen study dashboard; it keeps the primary learning workflow immediately accessible.
+- Use the uploaded Pineapple Note logo as the canonical brand asset and derive the favicon from it; this preserves brand consistency.
