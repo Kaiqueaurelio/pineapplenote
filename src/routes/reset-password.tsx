@@ -55,15 +55,15 @@ function ResetPasswordPage() {
     setDone(true);
   }
 
-  return <main className="grid min-h-screen place-items-center bg-background px-5 py-10">
-    <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-soft sm:p-8">
+  return <main className="grid min-h-[100dvh] place-items-center bg-background px-4 py-[max(2rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))]">
+    <div className="w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-soft sm:p-8">
       <img src={logoAsset.url} alt="Pineapple Note" className="mx-auto h-20 w-auto" />
       {done ? <div className="mt-8 text-center"><CheckCircle2 className="mx-auto text-green-strong" size={42} /><h1 className="mt-4 text-2xl font-extrabold">Senha atualizada</h1><p className="mt-2 text-sm text-muted-foreground">Você já pode continuar seus estudos.</p><Button className="mt-6 w-full" onClick={() => navigate({ to: "/dashboard", replace: true })}>Ir para meus estudos</Button></div> : <>
         <div className="mt-8 flex h-12 w-12 items-center justify-center rounded-lg bg-green-soft text-green-strong"><KeyRound size={22} /></div>
         <h1 className="mt-4 text-2xl font-extrabold">Crie uma nova senha</h1><p className="mt-2 text-sm text-muted-foreground">Escolha uma senha forte e diferente das anteriores.</p>
         {!recoveryReady && <p role="alert" className="mt-5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">Abra esta página pelo link enviado ao seu e-mail.</p>}
         {error && <p role="alert" className="mt-5 text-sm text-destructive">{error}</p>}
-        <form onSubmit={submit} className="mt-6 space-y-4"><div className="space-y-2"><Label htmlFor="password">Nova senha</Label><Input id="password" name="password" type="password" autoComplete="new-password" minLength={8} maxLength={72} required className="h-11" /></div><div className="space-y-2"><Label htmlFor="confirmation">Confirmar nova senha</Label><Input id="confirmation" name="confirmation" type="password" autoComplete="new-password" minLength={8} maxLength={72} required className="h-11" /></div><Button type="submit" className="w-full" disabled={!recoveryReady || pending}>{pending && <Loader2 className="animate-spin" size={17} />}Salvar nova senha</Button></form>
+        <form onSubmit={submit} className="mt-6 space-y-4"><div className="space-y-2"><Label htmlFor="password">Nova senha</Label><Input id="password" name="password" type="password" autoComplete="new-password" minLength={8} maxLength={72} required className="h-12 text-base" /></div><div className="space-y-2"><Label htmlFor="confirmation">Confirmar nova senha</Label><Input id="confirmation" name="confirmation" type="password" autoComplete="new-password" minLength={8} maxLength={72} required className="h-12 text-base" /></div><Button type="submit" className="w-full" disabled={!recoveryReady || pending}>{pending && <Loader2 className="animate-spin" size={17} />}Salvar nova senha</Button></form>
       </>}
     </div>
   </main>;
