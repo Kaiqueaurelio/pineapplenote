@@ -357,6 +357,8 @@ function Index() {
     setSelectedFile(null);
     if (fileRef.current) fileRef.current.value = "";
     toast.success("Material salvo na sua biblioteca.");
+    const { data: savedMaterial } = await supabase.from("study_materials").select("id").eq("storage_path", path).eq("user_id", user.id).single();
+    if (savedMaterial) navigate({ to: "/material/$materialId", params: { materialId: savedMaterial.id } });
   }
 
   const isAdmin = profile?.role === "admin";
