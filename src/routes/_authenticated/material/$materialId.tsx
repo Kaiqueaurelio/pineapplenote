@@ -41,6 +41,7 @@ function MaterialPage() {
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState("resumo");
   const [retrying, setRetrying] = useState(false);
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -168,6 +169,11 @@ function MaterialPage() {
     0,
   );
   const quizCompleted = quiz.length > 0 && answeredQuizCount === quiz.length;
+
+  function resetQuiz() {
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+  }
 
   if (loading) return <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 px-6 text-center"><Loader2 className="animate-spin text-primary" size={26} /><p className="text-sm font-medium text-muted-foreground">Carregando seu material...</p></div>;
   if (!material) return null;
@@ -320,16 +326,19 @@ function MaterialPage() {
                     return <article key={index} className="rounded-xl border border-border p-4">
                       <p className="font-bold">{index + 1}. {item["question"]}</p>
                       <div className="mt-3 grid gap-2">
-                        {item.options.map((option) => <button type="button" key={option} onClick={() => setQuizAnswers((current) => ({ ...current, [index]: option }))} className={`rounded-lg border px-3 py-3 text-left text-sm transition ${selected === option ? (correct ? "border-primary bg-green-soft" : "border-destructive bg-destructive/10") : "border-border hover:bg-secondary"}`}>{option}</button>)}
+                        {item.options.map((option) => <button type="button" key={option} onClick={() => { setQuizAnswers((current) => ({ ...current, [index]: option })); setQuizSubmitted(false); }} className={`rounded-lg border px-3 py-3 text-left text-sm transition ${selected === option ? (correct ? "border-primary bg-green-soft" : "border-destructive bg-destructive/10") : "border-border hover:bg-secondary"}`}>{option}</button>)}
                       </div>
-                      {selected && <div className="mt-3 rounded-lg bg-secondary p-3 text-sm"><strong>{correct ? "Correto!" : `Resposta: ${item["answer"]}`}</strong><p className="mt-1 text-muted-foreground">{item["explanation"]}</p></div>}
+                      {selected && quizSubmitted && <div className="mt-3 rounded-lg bg-secondary p-3 text-sm"><strong>{correct ? "Correto!" : `Resposta: ${item["answer"]}`}</strong><p className="mt-1 text-muted-foreground">{item["explanation"]}</p></div>}
                     </article>;
                   })}
                 </div>
-                <Button className="mt-5" variant="secondary" onClick={() => void saveProgress(100)} disabled={!quizCompleted}>
-                  <CheckCircle2 size={17} />
-                  {quizCompleted ? "Concluir material" : "Responda todas as questões"}
-                </Button>
+                <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+                  <Button variant="outline" className="w-full sm:w-auto" onClick={resetQuiz} disabled={answeredQuizCount === 0}>Refazer quiz</Button>
+                  <Button className="w-full sm:w-auto" variant="secondary" onClick={() => { setQuizSubmitted(true); if (quizCompleted) void saveProgress(100); }} disabled={!quizCompleted}>
+                    <CheckCircle2 size={17} />
+                    {quizCompleted ? (quizSubmitted ? "Resultado atualizado" : "Ver resultado") : "Responda todas as questões"}
+                  </Button>
+                </div>
               </section>
             )}
           </>
