@@ -173,6 +173,12 @@ function MaterialPage() {
   const flashcards = useMemo(() => output ? asFlashcards(output.flashcards) : [], [output]);
   const quiz = useMemo(() => output ? asQuiz(output.quiz) : [], [output]);
   const currentFlashcard = flashcards[flashcardIndex];
+  const answeredQuizCount = Object.keys(quizAnswers).length;
+  const correctQuizCount = quiz.reduce(
+    (total, item, index) => total + (quizAnswers[index] === item.answer ? 1 : 0),
+    0,
+  );
+  const quizCompleted = quiz.length > 0 && answeredQuizCount === quiz.length;
 
   if (loading) return <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 px-6 text-center"><Loader2 className="animate-spin text-primary" size={26} /><p className="text-sm font-medium text-muted-foreground">Carregando seu material...</p></div>;
   if (!material) return null;
@@ -314,6 +320,10 @@ function MaterialPage() {
             {quiz.length > 0 && (
               <section id="quiz" className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
                 <div className="flex items-center gap-2 font-bold"><HelpCircle size={18} /> Quiz</div>
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-secondary p-3 text-sm">
+                  <span className="font-semibold">{answeredQuizCount} de {quiz.length} respondidas</span>
+                  {quizCompleted && <span className="font-extrabold text-green-strong">Resultado: {correctQuizCount}/{quiz.length}</span>}
+                </div>
                 <div className="mt-5 space-y-6">
                   {quiz.map((item, index) => {
                     const selected = quizAnswers[index];
@@ -327,7 +337,10 @@ function MaterialPage() {
                     </article>;
                   })}
                 </div>
-                <Button className="mt-5" variant="secondary" onClick={() => void saveProgress(100)}><CheckCircle2 size={17} />Concluir material</Button>
+                <Button className="mt-5" variant="secondary" onClick={() => void saveProgress(100)} disabled={!quizCompleted}>
+                  <CheckCircle2 size={17} />
+                  {quizCompleted ? "Concluir material" : "Responda todas as questões"}
+                </Button>
               </section>
             )}
           </>
