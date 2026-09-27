@@ -294,7 +294,7 @@ function Index() {
 
       <div className="mx-auto flex max-w-[1480px]">
         <aside
-          className={`${mobileMenuOpen ? "flex" : "hidden"} fixed inset-x-0 top-16 z-30 h-[calc(100dvh-4rem)] sm:top-[72px] sm:h-[calc(100dvh-72px)] lg:top-[76px] lg:h-[calc(100dvh-76px)] w-full flex-col border-r border-border bg-background px-4 py-6 lg:sticky lg:top-[76px] lg:flex lg:h-[calc(100vh-76px)] lg:w-60 lg:shrink-0 lg:px-5`}
+          className={`${mobileMenuOpen ? "flex" : "hidden"} fixed inset-x-0 top-16 z-30 h-[calc(100dvh-4rem)] sm:top-[72px] sm:h-[calc(100dvh-72px)] lg:top-[76px] lg:h-[calc(100dvh-76px)] w-full flex-col border-r border-border bg-background px-4 py-6 lg:sticky lg:top-[76px] lg:flex lg:h-[calc(100dvh-76px)] lg:w-60 lg:shrink-0 lg:px-5`}
         >
           <nav className="space-y-1" aria-label="Navegação principal">
             {navItems.map((item) => (
