@@ -219,7 +219,7 @@ function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto grid h-[76px] max-w-[1480px] grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 px-4 sm:flex sm:gap-4 sm:px-6 lg:px-8">
+        <div className="mx-auto grid h-16 max-w-[1480px] grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-1.5 px-3 sm:h-[72px] sm:flex sm:gap-4 sm:px-6 lg:h-[76px] lg:px-8">
           <Button
             variant="ghost"
             size="icon"
@@ -234,7 +234,7 @@ function Index() {
             <img
               src={logoAsset.url}
               alt="Pineapple Note"
-              className="h-14 max-w-full w-auto object-contain object-left sm:h-16"
+              className="h-10 max-w-[150px] w-auto object-contain object-left sm:h-12 sm:max-w-[190px] lg:h-14 lg:max-w-[230px]"
             />
           </a>
 
@@ -249,14 +249,14 @@ function Index() {
             />
           </div>
 
-          <Button variant="ghost" size="icon" aria-label="Notificações" className="relative">
+          <Button variant="ghost" size="icon" aria-label="Notificações" className="relative max-[380px]:hidden">
             <Bell size={20} />
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-brand-yellow ring-2 ring-background" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-violet text-sm font-bold text-brand-violet-foreground ring-4 ring-violet-soft"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-violet text-sm font-bold text-brand-violet-foreground ring-4 ring-violet-soft"
             aria-label={`Abrir perfil de ${displayName}`}
             onClick={() => setProfileOpen(true)}
           >
@@ -267,7 +267,7 @@ function Index() {
 
       <div className="mx-auto flex max-w-[1480px]">
         <aside
-          className={`${mobileMenuOpen ? "flex" : "hidden"} fixed inset-x-0 top-[76px] z-30 h-[calc(100vh-76px)] w-full flex-col border-r border-border bg-background px-4 py-6 lg:sticky lg:top-[76px] lg:flex lg:h-[calc(100vh-76px)] lg:w-60 lg:shrink-0 lg:px-5`}
+          className={`${mobileMenuOpen ? "flex" : "hidden"} fixed inset-x-0 top-16 z-30 h-[calc(100vh-4rem)] sm:top-[72px] sm:h-[calc(100vh-72px)] lg:top-[76px] lg:h-[calc(100vh-76px)] w-full flex-col border-r border-border bg-background px-4 py-6 lg:sticky lg:top-[76px] lg:flex lg:h-[calc(100vh-76px)] lg:w-60 lg:shrink-0 lg:px-5`}
         >
           <nav className="space-y-1" aria-label="Navegação principal">
             {navItems.map((item) => (
@@ -309,14 +309,14 @@ function Index() {
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 py-8 sm:px-8 lg:px-10 lg:py-10">
+        <main className="min-w-0 flex-1 px-4 py-6 pb-28 sm:px-8 sm:py-8 sm:pb-28 lg:px-10 lg:py-10 lg:pb-10">
           <div className="mx-auto max-w-6xl">
-            <section className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+            <section className="mb-7 flex flex-col justify-between gap-4 sm:mb-8 sm:flex-row sm:items-end">
               <div>
                 <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-green-strong">
                   <Sparkles size={16} /> Bom dia, {displayName.split(" ")[0]}
                 </p>
-                <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">O que vamos aprender hoje?</h1>
+                <h1 className="text-[1.75rem] font-extrabold leading-tight sm:text-4xl">O que vamos aprender hoje?</h1>
                 <p className="mt-2 max-w-xl text-muted-foreground">
                   Sua aula. Organizada pela IA. Envie um conteúdo e receba um material pronto para estudar.
                 </p>
@@ -379,13 +379,13 @@ function Index() {
                   )}
                 </div>
 
-                <div className="relative flex min-h-64 flex-col justify-between overflow-hidden bg-ink p-7 text-ink-foreground lg:p-8">
+                <div className="relative flex min-h-56 flex-col justify-between overflow-hidden bg-ink p-6 text-ink-foreground sm:min-h-64 sm:p-7 lg:p-8">
                   <div className="pineapple-grid absolute inset-0 opacity-20" />
                   <div className="relative">
                     <span className="inline-flex items-center gap-2 rounded-full border border-ink-foreground/20 px-3 py-1 text-xs font-semibold">
                       <Sparkles size={14} /> Pineapple AI
                     </span>
-                    <h2 className="mt-5 max-w-sm text-2xl font-bold leading-tight">Do conteúdo bruto ao estudo organizado.</h2>
+                    <h2 className="mt-4 max-w-sm text-[1.35rem] font-bold leading-tight sm:mt-5 sm:text-2xl">Do conteúdo bruto ao estudo organizado.</h2>
                     <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-muted">
                       Resumos, tópicos essenciais, perguntas e flashcards em poucos instantes.
                     </p>
@@ -408,7 +408,7 @@ function Index() {
                 </Button>
               </div>
 
-              <div className="grid gap-4 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredMaterials.map((material) => (
                   <article key={material.title} className="rounded-xl border border-border bg-card p-5 shadow-card">
                     <div className="flex items-start justify-between gap-4">
@@ -449,7 +449,7 @@ function Index() {
               )}
             </section>
 
-            <section className="mt-10 grid gap-4 lg:grid-cols-[1fr_1.4fr]">
+            <section className="mt-8 grid gap-4 sm:mt-10 lg:grid-cols-[1fr_1.4fr]">
               <div className="rounded-xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between">
                   <div>
@@ -492,21 +492,21 @@ function Index() {
         </main>
       </div>
 
-      <div className="fixed bottom-4 left-4 right-4 z-20 md:hidden">
-        <div className="flex items-center rounded-xl border border-border bg-card p-2 shadow-soft">
+      <div className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-20 md:hidden">
+        <div className="flex min-h-12 items-center rounded-2xl border border-border bg-card/95 p-1.5 shadow-soft backdrop-blur-xl">
           <Search className="ml-2 text-muted-foreground" size={18} />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar materiais"
             aria-label="Buscar materiais"
-            className="h-10 min-w-0 flex-1 bg-transparent px-3 text-sm outline-none"
+            className="h-10 min-w-0 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
       </div>
 
       <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-        <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] overflow-y-auto rounded-xl sm:max-w-md">
+        <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto rounded-2xl p-5 sm:w-[calc(100%-2rem)] sm:max-w-md sm:p-6">
           <DialogHeader>
             <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-violet-soft text-brand-violet"><UserRound size={21} /></div>
             <DialogTitle>Seu perfil acadêmico</DialogTitle>
@@ -530,7 +530,7 @@ function Index() {
       </Dialog>
 
       <Dialog open={passwordOpen} onOpenChange={setPasswordOpen}>
-        <DialogContent className="w-[calc(100%-2rem)] rounded-xl sm:max-w-md">
+        <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto rounded-2xl p-5 sm:w-[calc(100%-2rem)] sm:max-w-md sm:p-6">
           <DialogHeader>
             <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-violet-soft text-brand-violet"><KeyRound size={21} /></div>
             <DialogTitle>Alterar senha</DialogTitle>
