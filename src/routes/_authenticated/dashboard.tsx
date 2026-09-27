@@ -21,6 +21,7 @@ import {
   Settings,
   LogOut,
   Save,
+  KeyRound,
   UserRound,
   Sparkles,
   Upload,
@@ -107,6 +108,8 @@ function Index() {
   const [activeMaterial, setActiveMaterial] = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -157,6 +160,51 @@ function Index() {
     setProfile(data);
     setProfileOpen(false);
     toast.success("Perfil atualizado.");
+  }
+
+  async function changePassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const result = z.object({
+      current_password: z.string().min(1, "Informe sua senha atual."),
+      new_password: z.string().min(8, "A nova senha precisa ter pelo menos 8 caracteres.").max(72),
+      confirmation: z.string().min(1, "Confirme a nova senha."),
+    }).safeParse({
+      current_password: String(form.get("current_password") ?? ""),
+      new_password: String(form.get("new_password") ?? ""),
+      confirmation: String(form.get("confirmation") ?? ""),
+    });
+    if (!result.success) {
+      toast.error(result.error.issues[0]?.message ?? "Revise os dados.");
+      return;
+    }
+    if (result.data.new_password !== result.data.confirmation) {
+      toast.error("As novas senhas não são iguais.");
+      return;
+    }
+    if (!user.email) {
+      toast.error("Sua conta não possui e-mail para validar a senha atual.");
+      return;
+    }
+    setSavingPassword(true);
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: result.data.current_password,
+    });
+    if (reauthError) {
+      setSavingPassword(false);
+      toast.error("A senha atual está incorreta.");
+      return;
+    }
+    const { error: updateError } = await supabase.auth.updateUser({ password: result.data.new_password });
+    setSavingPassword(false);
+    if (updateError) {
+      toast.error("Não foi possível alterar a senha. Tente novamente.");
+      return;
+    }
+    setPasswordOpen(false);
+    event.currentTarget.reset();
+    toast.success("Senha alterada com sucesso.");
   }
 
   const filteredMaterials = materials.filter((material) =>
@@ -474,7 +522,26 @@ function Index() {
             <div className="space-y-2"><Label htmlFor="course">Curso</Label><Input id="course" name="course" defaultValue={profile?.course ?? ""} maxLength={120} placeholder="Seu curso" className="h-11" /></div>
             <Button type="submit" className="w-full" disabled={savingProfile}><Save size={17} />{savingProfile ? "Salvando..." : "Salvar perfil"}</Button>
           </form>
+          <Button type="button" variant="outline" className="w-full" onClick={() => { setProfileOpen(false); setPasswordOpen(true); }}>
+            <KeyRound size={17} />Alterar senha
+          </Button>
           <Button variant="ghost" className="w-full text-destructive hover:text-destructive" onClick={handleSignOut}><LogOut size={17} />Sair da conta</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={passwordOpen} onOpenChange={setPasswordOpen}>
+        <DialogContent className="w-[calc(100%-2rem)] rounded-xl sm:max-w-md">
+          <DialogHeader>
+            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-violet-soft text-brand-violet"><KeyRound size={21} /></div>
+            <DialogTitle>Alterar senha</DialogTitle>
+            <DialogDescription>Por segurança, informe sua senha atual antes de definir uma nova.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={changePassword} className="space-y-4">
+            <div className="space-y-2"><Label htmlFor="current_password">Senha atual</Label><Input id="current_password" name="current_password" type="password" autoComplete="current-password" maxLength={72} required className="h-11" /></div>
+            <div className="space-y-2"><Label htmlFor="new_password">Nova senha</Label><Input id="new_password" name="new_password" type="password" autoComplete="new-password" minLength={8} maxLength={72} required className="h-11" /></div>
+            <div className="space-y-2"><Label htmlFor="confirmation">Confirmar nova senha</Label><Input id="confirmation" name="confirmation" type="password" autoComplete="new-password" minLength={8} maxLength={72} required className="h-11" /></div>
+            <Button type="submit" className="w-full" disabled={savingPassword}>{savingPassword ? "Validando..." : "Alterar senha"}</Button>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
