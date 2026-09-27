@@ -347,6 +347,8 @@ function Index() {
   }
 
   const isAdmin = profile?.role === "admin";
+  const currentHour = new Date().getHours();
+  const greeting = currentHour < 12 ? "Bom dia" : currentHour < 18 ? "Boa tarde" : "Boa noite";
 
   return (
     <div className="min-h-screen bg-background pb-36 text-foreground md:pb-0">
@@ -381,7 +383,7 @@ function Index() {
             />
           </div>
 
-          <Button variant="ghost" size="icon" aria-label="Notificações" className="relative max-[380px]:hidden" onClick={() => toast.info("As notificações serão exibidas aqui.")}>
+          <Button variant="ghost" size="icon" aria-label="Notificações" className="relative max-[380px]:hidden" onClick={() => toast.info("Você não tem novas notificações.")}>
             <Bell size={20} />
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-brand-yellow ring-2 ring-background" />
           </Button>
@@ -424,7 +426,7 @@ function Index() {
           </nav>
 
           <div className="mt-auto space-y-1 border-t border-border pt-5">
-            <button type="button" onClick={() => toast.info("A central de ajuda será disponibilizada aqui.")} className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
+            <button type="button" onClick={() => toast.info("Em caso de dúvida, use o suporte da sua conta.")} className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
               <CircleHelp size={19} /> Ajuda
             </button>
             <Button variant="ghost" className="w-full justify-start" onClick={() => setProfileOpen(true)}>
@@ -433,16 +435,7 @@ function Index() {
             <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
               <LogOut size={19} /> Sair
             </Button>
-            <div className="mt-4 rounded-lg bg-secondary p-3">
-              <div className="mb-2 flex items-center justify-between text-xs font-semibold">
-                <span>Plano gratuito</span>
-                <span>3/5</span>
-              </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-border">
-                <div className="h-full w-3/5 rounded-full bg-primary" />
-              </div>
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">2 processamentos disponíveis</p>
-            </div>
+
           </div>
         </aside>
 
@@ -451,7 +444,7 @@ function Index() {
             <section className="mb-7 flex flex-col justify-between gap-4 sm:mb-8 sm:flex-row sm:items-end">
               <div>
                 <p className="mb-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-green-strong">
-                  <Sparkles size={16} /> Bom dia, {displayName.split(" ")[0]}
+                  <Sparkles size={16} /> {greeting}, {displayName.split(" ")[0]}
                   {isAdmin && <span className="rounded-full bg-violet-soft px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-brand-violet">Admin</span>}
                 </p>
                 <h1 className="text-[1.75rem] font-extrabold leading-tight sm:text-4xl">O que vamos aprender hoje?</h1>
@@ -460,11 +453,11 @@ function Index() {
                 </p>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock3 size={17} /> Sequência de <strong className="text-foreground">7 dias</strong>
+                <BookOpen size={17} /> <strong className="text-foreground">{dashboardMaterials.length}</strong> {dashboardMaterials.length === 1 ? "material" : "materiais"} recentes
               </div>
             </section>
 
-            <section className="overflow-hidden rounded-xl border border-border bg-card shadow-soft">
+            <section id="novo-material" className="overflow-hidden rounded-xl border border-border bg-card shadow-soft">
               <div className="grid lg:grid-cols-[1.5fr_1fr]">
                 <div className="p-5 sm:p-7 lg:p-8">
                   <div className="mb-5 flex items-start gap-4">
@@ -537,7 +530,7 @@ function Index() {
                   <div className="pineapple-grid absolute inset-0 opacity-20" />
                   <div className="relative">
                     <span className="inline-flex items-center gap-2 rounded-full border border-ink-foreground/20 px-3 py-1 text-xs font-semibold">
-                      <Sparkles size={14} /> Pineapple AI
+                      <Sparkles size={14} /> Organização inteligente
                     </span>
                     <h2 className="mt-4 max-w-sm text-[1.35rem] font-bold leading-tight sm:mt-5 sm:text-2xl">Do conteúdo bruto ao estudo organizado.</h2>
                     <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-muted">
@@ -576,7 +569,7 @@ function Index() {
                       </div>
                       <p className="mt-5 text-xs font-bold uppercase text-muted-foreground">{material.source_type === "audio" ? "Áudio" : material.source_type === "video" ? "Vídeo" : "Documento"}</p>
                       <h3 className="mt-1 min-h-12 truncate text-base font-bold leading-snug">{material.title}</h3>
-                      <p className="mt-2 text-sm text-muted-foreground">{material.status === "ready" ? "Organizado pela IA" : material.status === "processing" ? "Processando..." : "Aguardando organização"}</p>
+                      <p className="mt-2 text-sm text-muted-foreground">{material.status === "ready" ? "Pronto para estudar" : material.status === "processing" ? "Organizando conteúdo..." : material.status === "failed" ? "Não foi possível organizar" : "Pronto para organizar"}</p>
                       <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
                         <span>{new Date(material.created_at).toLocaleDateString("pt-BR")}</span>
                         <strong className="text-foreground">{progress}%</strong>
@@ -603,23 +596,21 @@ function Index() {
               <div className="rounded-xl border border-border bg-card p-6 shadow-card">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-muted-foreground">Esta semana</p>
-                    <p className="mt-1 text-3xl font-extrabold">4h 35min</p>
+                    <p className="text-sm font-semibold text-muted-foreground">Sua biblioteca</p>
+                    <p className="mt-1 text-3xl font-extrabold">{dashboardMaterials.length}</p>
                   </div>
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-soft text-yellow-strong">
                     <BookOpen size={22} />
                   </div>
                 </div>
-                <div className="mt-7 flex h-20 items-end gap-2" aria-label="Atividade de estudo semanal">
-                  {[38, 64, 48, 78, 58, 92, 42].map((height, index) => (
-                    <div key={index} className="flex flex-1 flex-col items-center gap-2">
-                      <div className="w-full rounded-sm bg-green-soft" style={{ height: `${height}%` }}>
-                        <div className="h-full w-full rounded-sm bg-primary opacity-80" />
-                      </div>
-                      <span className="text-[10px] font-semibold text-muted-foreground">{["S", "T", "Q", "Q", "S", "S", "D"][index]}</span>
-                    </div>
-                  ))}
-                </div>
+                <p className="mt-6 text-sm leading-6 text-muted-foreground">
+                  {dashboardMaterials.length
+                    ? "Seus materiais recentes ficam aqui para você continuar de onde parou."
+                    : "Adicione sua primeira aula ou documento para começar sua biblioteca."}
+                </p>
+                <Button variant="secondary" className="mt-5" onClick={() => navigate({ to: "/library" })}>
+                  Ver biblioteca <ArrowRight size={16} />
+                </Button>
               </div>
 
               <div className="flex flex-col justify-between rounded-xl border border-violet-border bg-violet-soft p-6 sm:flex-row sm:items-center sm:gap-8">
@@ -628,13 +619,13 @@ function Index() {
                     <Sparkles size={22} />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-brand-violet">Dica da Pineapple</p>
-                    <h3 className="mt-1 text-lg font-bold">Revise por poucos minutos todos os dias.</h3>
-                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">Seus flashcards estão prontos para uma revisão rápida.</p>
+                    <p className="text-sm font-bold text-brand-violet">Seu próximo passo</p>
+                    <h3 className="mt-1 text-lg font-bold">Adicione um conteúdo para começar.</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">O Pineapple Note organiza o material e prepara a revisão.</p>
                   </div>
                 </div>
-                <Button variant="violet" className="mt-5 w-full sm:mt-0 sm:w-auto" onClick={() => toast.info("A revisão rápida será aberta aqui.")}>
-                  Revisar agora <ChevronRight size={16} />
+                <Button variant="violet" className="mt-5 w-full sm:mt-0 sm:w-auto" onClick={() => document.getElementById("novo-material")?.scrollIntoView({ behavior: "smooth" })}>
+                  Adicionar material <Plus size={16} />
                 </Button>
               </div>
             </section>
