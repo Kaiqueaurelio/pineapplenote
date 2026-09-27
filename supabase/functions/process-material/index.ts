@@ -103,8 +103,10 @@ Deno.serve(async (req) => {
   const apiKey = Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) return json({ error: "Processamento IA não configurado no servidor." }, 503);
 
+  let processingMaterialId: string | null = null;
   try {
     const { materialId } = await req.json();
+    processingMaterialId = materialId;
     if (typeof materialId !== "string") return json({ error: "materialId é obrigatório." }, 400);
 
     const { data: material, error: materialError } = await supabase
@@ -172,7 +174,9 @@ Deno.serve(async (req) => {
     await supabase.from("study_materials").update({ status: "ready" }).eq("id", material.id).eq("user_id", user.id);
     return json({ ok: true, output });
   } catch (error) {
-    await supabase.from("study_materials").update({ status: "failed" }).eq("user_id", user.id).eq("status", "processing");
+    if (processingMaterialId) {
+      await supabase.from("study_materials").update({ status: "failed" }).eq("id", processingMaterialId).eq("user_id", user.id);
+    }
     return json({ error: error instanceof Error ? error.message : "Falha no processamento." }, 500);
   }
 });
