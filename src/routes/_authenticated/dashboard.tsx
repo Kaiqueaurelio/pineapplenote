@@ -114,7 +114,30 @@ function Index() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(async ({ data }) => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => {
+      if (media.matches) setMobileMenuOpen(false);
+    };
+    closeOnDesktop();
+    media.addEventListener("change", closeOnDesktop);
+    return () => media.removeEventListener("change", closeOnDesktop);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(async ({ data, error }) => {
+      if (error) {
+        toast.error("Não foi possível carregar seu perfil.");
+        return;
+      }
       if (data) return setProfile(data);
       const metadata = user.user_metadata;
       const initial = {
@@ -123,7 +146,11 @@ function Index() {
         institution: typeof metadata['institution'] === "string" ? metadata['institution'].slice(0, 120) : "",
         course: typeof metadata['course'] === "string" ? metadata['course'].slice(0, 120) : "",
       };
-      const { data: created } = await supabase.from("profiles").upsert(initial).select().single();
+      const { data: created, error: createError } = await supabase.from("profiles").upsert(initial).select().single();
+      if (createError) {
+        toast.error("Não foi possível criar seu perfil.");
+        return;
+      }
       if (created) setProfile(created);
     });
   }, [user]);
@@ -240,7 +267,7 @@ function Index() {
             />
           </a>
 
-          <div className="hidden w-full max-w-md items-center md:flex">
+          <div className="hidden w-full max-w-md items-center lg:flex">
             <Search className="pointer-events-none relative left-9 z-10 text-muted-foreground" size={18} />
             <input
               value={search}
@@ -251,7 +278,7 @@ function Index() {
             />
           </div>
 
-          <Button variant="ghost" size="icon" aria-label="Notificações" className="relative max-[380px]:hidden">
+          <Button variant="ghost" size="icon" aria-label="Notificações" className="relative max-[380px]:hidden" onClick={() => toast.info("As notificações serão exibidas aqui.")}>
             <Bell size={20} />
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-brand-yellow ring-2 ring-background" />
           </Button>
@@ -269,7 +296,7 @@ function Index() {
 
       <div className="mx-auto flex max-w-[1480px]">
         <aside
-          className={`${mobileMenuOpen ? "flex" : "hidden"} fixed inset-x-0 top-16 z-30 h-[calc(100vh-4rem)] sm:top-[72px] sm:h-[calc(100vh-72px)] lg:top-[76px] lg:h-[calc(100vh-76px)] w-full flex-col border-r border-border bg-background px-4 py-6 lg:sticky lg:top-[76px] lg:flex lg:h-[calc(100vh-76px)] lg:w-60 lg:shrink-0 lg:px-5`}
+          className={`${mobileMenuOpen ? "flex" : "hidden"} fixed inset-x-0 top-16 z-30 h-[calc(100dvh-4rem)] sm:top-[72px] sm:h-[calc(100dvh-72px)] lg:top-[76px] lg:h-[calc(100dvh-76px)] w-full flex-col border-r border-border bg-background px-4 py-6 lg:sticky lg:top-[76px] lg:flex lg:h-[calc(100dvh-76px)] lg:w-60 lg:shrink-0 lg:px-5`}
         >
           <nav className="space-y-1" aria-label="Navegação principal">
             {navItems.map((item) => (
@@ -289,7 +316,7 @@ function Index() {
           </nav>
 
           <div className="mt-auto space-y-1 border-t border-border pt-5">
-            <button className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
+            <button type="button" onClick={() => toast.info("A central de ajuda será disponibilizada aqui.")} className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
               <CircleHelp size={19} /> Ajuda
             </button>
             <Button variant="ghost" className="w-full justify-start" onClick={() => setProfileOpen(true)}>
@@ -406,7 +433,7 @@ function Index() {
                   <h2 className="text-xl font-bold">Continue estudando</h2>
                   <p className="mt-1 text-sm text-muted-foreground">Seus materiais mais recentes</p>
                 </div>
-                <Button variant="ghost" className="hidden sm:inline-flex">
+                <Button variant="ghost" className="hidden sm:inline-flex" onClick={() => toast.info("A biblioteca completa será aberta aqui.")}>
                   Ver biblioteca <ArrowRight size={16} />
                 </Button>
               </div>
@@ -418,7 +445,7 @@ function Index() {
                       <div className={`material-icon material-icon-${material.tone}`}>
                         <material.icon size={21} />
                       </div>
-                      <Button size="icon" variant="ghost" aria-label={`Mais opções para ${material.title}`} className="-mr-2 -mt-2">
+                      <Button size="icon" variant="ghost" aria-label={`Mais opções para ${material.title}`} className="-mr-2 -mt-2" onClick={() => toast.info("Mais opções do material serão exibidas aqui.")}>
                         <MoreHorizontal size={19} />
                       </Button>
                     </div>
@@ -486,7 +513,7 @@ function Index() {
                     <p className="mt-1 text-sm leading-relaxed text-muted-foreground">Seus flashcards estão prontos para uma revisão rápida.</p>
                   </div>
                 </div>
-                <Button variant="violet" className="mt-5 w-full sm:mt-0 sm:w-auto">
+                <Button variant="violet" className="mt-5 w-full sm:mt-0 sm:w-auto" onClick={() => toast.info("A revisão rápida será aberta aqui.")}>
                   Revisar agora <ChevronRight size={16} />
                 </Button>
               </div>
