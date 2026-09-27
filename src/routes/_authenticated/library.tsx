@@ -26,6 +26,7 @@ function LibraryPage() {
   const [loading, setLoading] = useState(true);
   const [openingId, setOpeningId] = useState<string | null>(null);
   const [progressByMaterial, setProgressByMaterial] = useState<Record<string, number>>({});
+  const [filter, setFilter] = useState<"todos" | "audio" | "video" | "documento" | "pendentes">("todos");
 
   async function loadMaterials() {
     setLoading(true);
@@ -60,10 +61,21 @@ function LibraryPage() {
     void loadMaterials();
   }, [user.id]);
 
-  const filtered = useMemo(
-    () => materials.filter((item) => item.title.toLowerCase().includes(search.trim().toLowerCase())),
-    [materials, search],
-  );
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    return materials.filter((item) => {
+      const matchesSearch = item.title.toLowerCase().includes(query);
+      const matchesFilter =
+        filter === "todos" ||
+        (filter === "audio" && item.source_type === "audio") ||
+        (filter === "video" && item.source_type === "video") ||
+        (filter === "documento" && item.source_type === "document") ||
+        (filter === "pendentes" && (item.status === "processing" || item.status === "failed" || item.status === "uploaded"));
+
+      return matchesSearch && matchesFilter;
+    });
+  }, [materials, search, filter]);
 
   function openMaterial(material: Tables<"study_materials">) {
     setOpeningId(material.id);
@@ -127,6 +139,29 @@ function LibraryPage() {
             aria-label="Buscar materiais"
             className="h-11 pl-10"
           />
+        </div>
+
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Filtrar biblioteca">
+          {[
+            ["todos", "Todos"],
+            ["audio", "Áudios"],
+            ["video", "Vídeos"],
+            ["documento", "Documentos"],
+            ["pendentes", "Pendentes"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setFilter(value as typeof filter)}
+              className={`min-h-9 shrink-0 rounded-full border px-3.5 text-xs font-bold transition ${
+                filter === value
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
         {loading ? (
