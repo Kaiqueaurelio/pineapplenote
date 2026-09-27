@@ -116,16 +116,16 @@ function Index() {
       const metadata = user.user_metadata;
       const initial = {
         user_id: user.id,
-        display_name: typeof metadata.full_name === "string" ? metadata.full_name.slice(0, 80) : "",
-        institution: typeof metadata.institution === "string" ? metadata.institution.slice(0, 120) : "",
-        course: typeof metadata.course === "string" ? metadata.course.slice(0, 120) : "",
+        display_name: typeof metadata['full_name'] === "string" ? metadata['full_name'].slice(0, 80) : "",
+        institution: typeof metadata['institution'] === "string" ? metadata['institution'].slice(0, 120) : "",
+        course: typeof metadata['course'] === "string" ? metadata['course'].slice(0, 120) : "",
       };
       const { data: created } = await supabase.from("profiles").upsert(initial).select().single();
       if (created) setProfile(created);
     });
   }, [user]);
 
-  const displayName = profile?.display_name || (typeof user.user_metadata.full_name === "string" ? user.user_metadata.full_name : "Estudante");
+  const displayName = profile?.display_name || (typeof user.user_metadata['full_name'] === "string" ? user.user_metadata['full_name'] : "Estudante");
   const initials = displayName.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "PN";
 
   async function handleSignOut() {
@@ -143,11 +143,17 @@ function Index() {
       institution: z.string().trim().max(120),
       course: z.string().trim().max(120),
     }).safeParse({ display_name: String(form.get("display_name") ?? ""), institution: String(form.get("institution") ?? ""), course: String(form.get("course") ?? "") });
-    if (!result.success) return toast.error(result.error.issues[0]?.message ?? "Revise seus dados.");
+    if (!result.success) {
+      toast.error(result.error.issues[0]?.message ?? "Revise seus dados.");
+      return;
+    }
     setSavingProfile(true);
     const { data, error } = await supabase.from("profiles").upsert({ user_id: user.id, ...result.data }).select().single();
     setSavingProfile(false);
-    if (error || !data) return toast.error("Não foi possível salvar seu perfil.");
+    if (error || !data) {
+      toast.error("Não foi possível salvar seu perfil.");
+      return;
+    }
     setProfile(data);
     setProfileOpen(false);
     toast.success("Perfil atualizado.");
