@@ -3,6 +3,7 @@ import { ArrowLeft, FileText, Headphones, Loader2, Search, Trash2, Video } from 
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -27,6 +28,8 @@ function LibraryPage() {
   const [openingId, setOpeningId] = useState<string | null>(null);
   const [progressByMaterial, setProgressByMaterial] = useState<Record<string, number>>({});
   const [filter, setFilter] = useState<"todos" | "audio" | "video" | "documento" | "pendentes">("todos");
+  const [deleteTarget, setDeleteTarget] = useState<Tables<"study_materials"> | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   async function loadMaterials() {
     setLoading(true);
@@ -83,8 +86,8 @@ function LibraryPage() {
   }
 
   async function deleteMaterial(material: Tables<"study_materials">) {
-    const confirmed = window.confirm("Remover \"" + material.title + "\"? Esta ação não pode ser desfeita.");
-    if (!confirmed) return;
+    if (deleting) return;
+    setDeleting(true);
 
     const { error: rowError } = await supabase
       .from("study_materials")
@@ -93,6 +96,7 @@ function LibraryPage() {
       .eq("user_id", user.id);
 
     if (rowError) {
+      setDeleting(false);
       toast.error("Não foi possível remover o material.");
       return;
     }
@@ -102,11 +106,17 @@ function LibraryPage() {
       .remove([material.storage_path]);
 
     setMaterials((current) => current.filter((item) => item.id !== material.id));
+    setDeleteTarget(null);
+    setDeleting(false);
     if (storageError) {
       toast.warning("Material removido da biblioteca. O arquivo temporário não pôde ser limpo.");
       return;
     }
     toast.success("Material removido.");
+  }
+
+  function requestDelete(material: Tables<"study_materials">) {
+    if (!deleting) setDeleteTarget(material);
   }
 
   const iconFor = (type: Tables<"study_materials">["source_type"]) => {
@@ -212,7 +222,7 @@ function LibraryPage() {
                       {openingId === material.id && <Loader2 className="animate-spin" size={16} />}
                       Abrir
                     </Button>
-                    <Button variant="ghost" className="w-full text-destructive hover:text-destructive sm:w-auto" onClick={() => void deleteMaterial(material)}>
+                    <Button variant="ghost" className="w-full text-destructive hover:text-destructive sm:w-auto" onClick={() => requestDelete(material)}>
                       <Trash2 size={16} />
                       Remover
                     </Button>
@@ -222,6 +232,26 @@ function LibraryPage() {
             })}
           </div>
         )}
+        <Dialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && !deleting && setDeleteTarget(null)}>
+          <DialogContent className="w-[calc(100%-1rem)] rounded-2xl sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Remover material?</DialogTitle>
+              <DialogDescription>
+                {deleteTarget ? `“${deleteTarget.title}” será removido da sua biblioteca. Esta ação não pode ser desfeita.` : ""}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button variant="outline" className="w-full sm:w-auto" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" className="w-full sm:w-auto" onClick={() => deleteTarget && void deleteMaterial(deleteTarget)} disabled={deleting}>
+                {deleting && <Loader2 className="animate-spin" size={16} />}
+                {deleting ? "Removendo..." : "Remover material"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">Pineapple Note · Desenvolvido pela Decode Analytics</footer>
       </main>
     </div>
