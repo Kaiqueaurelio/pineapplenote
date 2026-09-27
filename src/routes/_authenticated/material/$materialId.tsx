@@ -63,18 +63,7 @@ function MaterialPage() {
   }
 
   useEffect(() => {
-    let cancelled = false;
-
-    const refresh = async () => {
-      if (cancelled) return;
-      await load();
-    };
-
-    void refresh();
-
-    return () => {
-      cancelled = true;
-    };
+    void load();
   }, [materialId, user.id]);
 
   useEffect(() => {
@@ -192,7 +181,7 @@ function MaterialPage() {
             <h1 className="truncate font-extrabold">{material.title}</h1>
             <p className="text-xs text-muted-foreground">{material.status === "ready" ? "Material organizado" : material.status === "processing" ? "Organizando conteúdo..." : "Pronto para organizar"}</p>
           </div>
-          <div className="hidden items-center gap-2 sm:flex"><span className="text-xs text-muted-foreground">{progress}%</span><div className="h-2 w-28 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-primary" style={{ width: `${progress}%` }} /></div></div>
+          <div className="hidden items-center gap-2 sm:flex"><span className="text-xs text-muted-foreground">{progress}%</span><div className="h-2 w-28 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-primary transition-[width]" style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} /></div></div>
         </div>
       </header>
 
@@ -344,6 +333,16 @@ function MaterialPage() {
               </section>
             )}
           </>
+        )}
+        {output && !quiz.length && (
+          <section className="rounded-2xl border border-primary/20 bg-green-soft/50 p-5 text-center sm:p-6">
+            <CheckCircle2 className="mx-auto text-green-strong" size={24} />
+            <h2 className="mt-3 font-bold">Terminou de estudar?</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Marque o material como concluído para salvar seu progresso.</p>
+            <Button className="mt-4" onClick={() => void saveProgress(100)} disabled={progress >= 100}>
+              {progress >= 100 ? "Material concluído" : "Concluir material"}
+            </Button>
+          </section>
         )}
         <footer className="mt-10 border-t border-border py-8 text-center text-xs text-muted-foreground">Pineapple Note · Desenvolvido pela Decode Analytics</footer>
       </main>
