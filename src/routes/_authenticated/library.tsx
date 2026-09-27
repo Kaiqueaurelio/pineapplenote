@@ -51,20 +51,14 @@ function LibraryPage() {
     [materials, search],
   );
 
-  async function openMaterial(material: Tables<"study_materials">) {
+  function openMaterial(material: Tables<"study_materials">) {
     setOpeningId(material.id);
     navigate({ to: "/material/$materialId", params: { materialId: material.id } });
   }
 
   async function deleteMaterial(material: Tables<"study_materials">) {
-    const { error: storageError } = await supabase.storage
-      .from("study-materials")
-      .remove([material.storage_path]);
-
-    if (storageError) {
-      toast.error("Não foi possível remover o arquivo.");
-      return;
-    }
+    const confirmed = window.confirm("Remover \"" + material.title + "\"? Esta ação não pode ser desfeita.");
+    if (!confirmed) return;
 
     const { error: rowError } = await supabase
       .from("study_materials")
@@ -73,11 +67,19 @@ function LibraryPage() {
       .eq("user_id", user.id);
 
     if (rowError) {
-      toast.error("O arquivo foi removido, mas o registro não pôde ser atualizado.");
+      toast.error("Não foi possível remover o material.");
       return;
     }
 
+    const { error: storageError } = await supabase.storage
+      .from("study-materials")
+      .remove([material.storage_path]);
+
     setMaterials((current) => current.filter((item) => item.id !== material.id));
+    if (storageError) {
+      toast.warning("Material removido da biblioteca. O arquivo temporário não pôde ser limpo.");
+      return;
+    }
     toast.success("Material removido.");
   }
 
@@ -114,8 +116,8 @@ function LibraryPage() {
         </div>
 
         {loading ? (
-          <div className="flex min-h-48 items-center justify-center text-muted-foreground">
-            <Loader2 className="animate-spin" size={22} />
+          <div className="mt-6 grid gap-3 sm:grid-cols-2" aria-label="Carregando biblioteca">
+            {[1, 2, 3, 4].map((item) => <div key={item} className="h-44 animate-pulse rounded-2xl border border-border bg-card" />)}
           </div>
         ) : filtered.length === 0 ? (
           <div className="mt-6 rounded-2xl border border-dashed border-border px-5 py-16 text-center">
