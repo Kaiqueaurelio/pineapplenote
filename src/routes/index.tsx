@@ -4,8 +4,6 @@ import {
   BookOpen,
   FileAudio,
   FileText,
-  Headphones,
-  Languages,
   MessageCircle,
   Mic2,
   Play,
