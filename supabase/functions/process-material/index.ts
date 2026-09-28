@@ -187,7 +187,7 @@ Deno.serve(async (req) => {
 
     if (material.source_type === "url") {
       const url = material.storage_path;
-      if (!/^https?:\\/\\//i.test(url)) throw new Error("URL de origem inválida.");
+      if (!/^https?:\/\//i.test(url)) throw new Error("URL de origem inválida.");
       const pageResponse = await fetch(url, { headers: { "User-Agent": "PineappleNote/1.0" } });
       if (!pageResponse.ok) throw new Error(`Não foi possível acessar a URL (${pageResponse.status}).`);
       const contentType = pageResponse.headers.get("content-type") ?? "";
