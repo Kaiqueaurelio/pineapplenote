@@ -324,4 +324,11 @@ body,
     transition-duration: 180ms;
   }
 }
-\n@media (max-width: 767px) {\n  input,\n  textarea,\n  select {\n    font-size: 16px;\n  }\n}\n
+
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
