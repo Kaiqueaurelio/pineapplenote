@@ -159,9 +159,9 @@ function LibraryPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-32 text-foreground sm:pb-8">
-      <header className="sticky top-0 z-20 border-b border-border/70 bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-5xl items-center gap-3 px-4 sm:h-[72px] sm:px-6">
+    <div className="min-h-[100dvh] bg-[#f2f2f7] pb-32 text-black sm:pb-8">
+      <header className="sticky top-0 z-20 border-b border-[#d8d8dd] bg-[#f2f2f7]/95 backdrop-blur-2xl">
+        <div className="mx-auto flex h-[74px] max-w-3xl items-center gap-3 px-4 sm:px-6">
           <Button
             variant="ghost"
             size="icon"
@@ -177,7 +177,7 @@ function LibraryPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="ml-auto rounded-full"
+            className="ml-auto rounded-full border border-[#d8d8dd] bg-white/80"
             onClick={() => navigate({ to: "/settings" })}
             aria-label="Abrir configurações"
           >
@@ -189,8 +189,8 @@ function LibraryPage() {
       <main className="mx-auto max-w-5xl px-4 py-7 sm:px-6 sm:py-8">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-bold text-brand-violet">Sua biblioteca</p>
-            <h1 className="mt-1 text-4xl font-black tracking-tight sm:text-5xl">Minhas notas</h1>
+            <p className="text-[15px] font-semibold text-[#8e8e93]">Sua biblioteca</p>
+            <h1 className="mt-1 text-[34px] font-bold tracking-[-1.2px] sm:text-5xl">Minhas notas</h1>
           </div>
           <span className="hidden rounded-full bg-violet-soft px-3 py-1.5 text-xs font-bold text-brand-violet sm:block">
             {materials.length} {materials.length === 1 ? "nota" : "notas"}
@@ -206,7 +206,7 @@ function LibraryPage() {
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar materiais"
             aria-label="Buscar materiais"
-            className="h-11 pl-10 pr-10"
+            className="h-12 rounded-2xl border-0 bg-white pl-10 pr-10 text-[17px] shadow-none"
           />
           {search && (
             <button
@@ -239,7 +239,7 @@ function LibraryPage() {
           </button>
         )}
 
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Filtrar biblioteca">
+        <div className="mt-5 flex gap-2 overflow-x-auto pb-1" aria-label="Filtrar biblioteca">
           {[
             ["todos", "Todos"],
             ["audio", "Áudios"],
@@ -253,8 +253,8 @@ function LibraryPage() {
               onClick={() => setFilter(value as typeof filter)}
               className={`min-h-9 shrink-0 rounded-full border px-3.5 text-xs font-bold transition ${
                 filter === value
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  ? "border-black bg-black text-white"
+                  : "border-[#d8d8dd] bg-white text-[#636366] hover:bg-[#e5e5ea]"
               }`}
             >
               {label}
@@ -283,7 +283,7 @@ function LibraryPage() {
         )}
 
         {loading ? (
-          <div className="mt-6 grid gap-3 sm:grid-cols-2" aria-label="Carregando biblioteca">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2" aria-label="Carregando biblioteca">
             {[1, 2, 3, 4].map((item) => (
               <div
                 key={item}
@@ -315,10 +315,10 @@ function LibraryPage() {
               return (
                 <article
                   key={material.id}
-                  className="group rounded-3xl border border-border bg-card p-4 shadow-card transition hover:-translate-y-0.5 hover:border-primary/30 sm:p-5"
+                  className="group rounded-[28px] border-0 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 sm:p-5"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-green-soft text-green-strong">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#f2f2f7] text-black">
                       <Icon size={21} />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -356,7 +356,7 @@ function LibraryPage() {
                   </div>
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                     <Button
-                      className="w-full rounded-2xl sm:w-auto"
+                      className="w-full rounded-full bg-black text-white hover:bg-black/90 sm:w-auto"
                       onClick={() => void openMaterial(material)}
                       disabled={openingId === material.id}
                     >
@@ -365,7 +365,7 @@ function LibraryPage() {
                     </Button>
                     <Button
                       variant="ghost"
-                      className="w-full rounded-2xl text-destructive hover:text-destructive sm:w-auto"
+                      className="w-full rounded-full text-[#ff453a] hover:text-[#ff453a] sm:w-auto"
                       onClick={() => requestDelete(material)}
                     >
                       <Trash2 size={16} />
