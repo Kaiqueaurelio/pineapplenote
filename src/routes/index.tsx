@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   BookOpen,
+  NotebookPen,
   FileText,
   Mic2,
   Play,
@@ -114,7 +115,7 @@ function LandingPage() {
             <img
               src={logoAsset.url}
               alt="Pineapple Note"
-              className="h-10 w-auto object-contain sm:h-12"
+              className="h-14 w-auto object-contain mix-blend-multiply sm:h-16"
             />
           </Link>
 
@@ -142,7 +143,7 @@ function LandingPage() {
 
           <div className="mx-auto max-w-5xl text-center">
             <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3.5 py-2 text-xs font-bold text-primary">
-              <ArrowRight size={14} />
+              <NotebookPen size={15} strokeWidth={2} />
               Seu novo espaço de estudo com IA
             </div>
 
@@ -379,7 +380,7 @@ function LandingPage() {
       <footer className="border-t border-border px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 text-center text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:text-left">
           <div className="flex items-center justify-center gap-3 sm:justify-start">
-            <img src={logoAsset.url} alt="" className="h-8 w-auto" />
+            <img src={logoAsset.url} alt="" className="h-10 w-auto object-contain mix-blend-multiply sm:h-11" />
             <span>© {new Date().getFullYear()} Pineapple Note</span>
           </div>
           <span>Desenvolvido pela Decode Analytics.</span>
