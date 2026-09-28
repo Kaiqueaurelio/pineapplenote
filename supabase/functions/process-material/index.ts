@@ -22,9 +22,9 @@ function json(body: unknown, status = 200) {
 function extractJson(text: string): StudyPayload {
   const cleaned = text
     .trim()
-    .replace(/^\`\`\`json\s*/i, "")
-    .replace(/^\`\`\`\s*/i, "")
-    .replace(/\s*\`\`\`$/i, "");
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/i, "");
   const parsed = JSON.parse(cleaned) as StudyPayload;
   if (
     !parsed.summary ||
