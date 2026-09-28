@@ -324,15 +324,24 @@ function MaterialPage() {
     navigate({ to: "/library" });
   }
 
-  function shareMaterial() {
+  async function shareMaterial() {
     if (navigator.share) {
-      void navigator.share({
-        title: material?.title ?? "Pineapple Note",
-        text: "Confira esta nota no Pineapple Note.",
-      });
-    } else {
-      void navigator.clipboard?.writeText(window.location.href);
+      try {
+        await navigator.share({
+          title: material?.title ?? "Pineapple Note",
+          text: "Confira esta nota no Pineapple Note.",
+        });
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        toast.error("Não foi possível abrir o compartilhamento.");
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard?.writeText(window.location.href);
       toast.success("Link copiado.");
+    } catch {
+      toast.error("Não foi possível copiar o link.");
     }
   }
 
