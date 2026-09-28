@@ -77,6 +77,52 @@ const studySchema = {
   required: ["summary", "topics", "flashcards", "quiz", "transcript"],
 };
 
+function isPrivateOrReservedHostname(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host === "metadata.google.internal") return true;
+  if (/^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^169\.254\./.test(host)) return true;
+  const octets = host.split(".");
+  if (octets.length === 4 && octets.every((part) => /^\d+$/.test(part))) {
+    const [a, b] = octets.map(Number);
+    if (a === 0 || a === 100 && b >= 64 && b <= 127 || a === 172 && b >= 16 && b <= 31) return true;
+  }
+  return host === "::1" || host.startsWith("fc") || host.startsWith("fd") || host.startsWith("fe80:");
+}
+
+function validateImportUrl(rawUrl: string): URL {
+  const parsed = new URL(rawUrl);
+  if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("Apenas URLs HTTP e HTTPS são aceitas.");
+  if (parsed.username || parsed.password) throw new Error("URLs com credenciais embutidas não são permitidas.");
+  if (isPrivateOrReservedHostname(parsed.hostname)) throw new Error("Esta URL aponta para um endereço de rede privado ou reservado.");
+  return parsed;
+}
+
+async function readLimitedText(response: Response, maxBytes: number): Promise<string> {
+  const length = Number(response.headers.get("content-length") ?? "0");
+  if (length > maxBytes) throw new Error("A página é grande demais para ser importada.");
+  if (!response.body) return (await response.text()).slice(0, maxBytes);
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      throw new Error("A página é grande demais para ser importada.");
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
+}
+
 async function uploadToGemini(apiKey: string, bytes: Uint8Array, mimeType: string, displayName: string) {
   const start = await fetch("https://generativelanguage.googleapis.com/upload/v1beta/files", {
     method: "POST",
@@ -185,15 +231,25 @@ Deno.serve(async (req) => {
     let contents: unknown[];
 
     if (material.source_type === "url") {
-      const url = material.storage_path;
-      if (!/^https?:\/\//i.test(url)) throw new Error("URL de origem inválida.");
-      const pageResponse = await fetch(url, { headers: { "User-Agent": "PineappleNote/1.0" } });
-      if (!pageResponse.ok) throw new Error(`Não foi possível acessar a URL (${pageResponse.status}).`);
+      let pageUrl = validateImportUrl(material.storage_path);
+      let pageResponse: Response | null = null;
+      for (let redirectCount = 0; redirectCount <= 3; redirectCount++) {
+        pageResponse = await fetch(pageUrl, {
+          redirect: "manual",
+          headers: { "User-Agent": "PineappleNote/1.0" },
+        });
+        if (![301, 302, 303, 307, 308].includes(pageResponse.status)) break;
+        const location = pageResponse.headers.get("location");
+        if (!location) throw new Error("A página redirecionou sem informar um destino.");
+        pageUrl = validateImportUrl(new URL(location, pageUrl).toString());
+      }
+      if (!pageResponse) throw new Error("Não foi possível acessar a URL.");
+      if (![200, 204].includes(pageResponse.status)) throw new Error(`Não foi possível acessar a URL (${pageResponse.status}).`);
       const contentType = pageResponse.headers.get("content-type") ?? "";
       if (!contentType.includes("text/html") && !contentType.includes("text/plain")) {
         throw new Error("Esta URL não retornou uma página de texto compatível.");
       }
-      const raw = await pageResponse.text();
+      const raw = await readLimitedText(pageResponse, 2_000_000);
       const textContent = raw
         .replace(/<script[\s\S]*?<\/script>/gi, " ")
         .replace(/<style[\s\S]*?<\/style>/gi, " ")
