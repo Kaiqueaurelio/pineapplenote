@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { z } from "zod";
 import { ArrowLeft, CheckCircle2, Loader2, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +9,7 @@ type Question = { question: string; options: string[]; answer: string; explanati
 type Exam = { title: string; instructions: string; questions: Question[] };
 
 export const Route = createFileRoute("/_authenticated/exam")({
+  validateSearch: z.object({ materialId: z.string().min(1).catch("") }),
   head: () => ({ meta: [{ title: "Prova prática — Pineapple Note" }] }),
   component: ExamPage,
 });
@@ -15,21 +17,19 @@ export const Route = createFileRoute("/_authenticated/exam")({
 function ExamPage() {
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
-  const [materialId, setMaterialId] = useState("");
+  const { materialId } = Route.useSearch();
   const [exam, setExam] = useState<Exam | null>(null);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const id = new URLSearchParams(window.location.search).get("materialId") ?? "";
-    setMaterialId(id);
-    if (!id) {
+    if (!materialId) {
       toast.error("Material não informado.");
       navigate({ to: "/library" });
       return;
     }
-    supabase.functions.invoke("ai-tools", { body: { action: "exam", materialId: id, count: 15 } })
+    supabase.functions.invoke("ai-tools", { body: { action: "exam", materialId, count: 15 } })
       .then(({ data, error }) => {
         if (error || data?.error) {
           toast.error(data?.error ?? "Não foi possível criar a prova.");
