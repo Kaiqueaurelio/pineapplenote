@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, FileText, HelpCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, FileText, Gamepad2, HelpCircle, Loader2, Mic2, Presentation, Share2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -213,6 +213,42 @@ function MaterialPage() {
             ))}
           </nav>
         )}
+        {output && (
+          <section aria-label="Ferramentas de estudo" className="-mx-1 overflow-hidden">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[
+                { label: "Podcast", icon: Mic2, to: "/podcast/$materialId" as const },
+                { label: "Criar slides", icon: Presentation, to: "/slides/$materialId" as const },
+                { label: "Jogos de estudo", icon: Gamepad2, to: "/games/$materialId" as const },
+                { label: "Compartilhar", icon: Share2, to: null },
+              ].map(({ label, icon: Icon, to }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => {
+                    if (to) {
+                      navigate({ to, params: { materialId } });
+                    } else {
+                      if (navigator.share) {
+                        void navigator.share({ title: material.title, text: "Confira este material no Pineapple Note." });
+                      } else {
+                        void navigator.clipboard?.writeText(window.location.href);
+                        toast.success("Link copiado.");
+                      }
+                    }
+                  }}
+                  className="group flex min-h-[76px] items-center gap-3 rounded-2xl border border-border bg-card px-4 text-left shadow-card transition hover:-translate-y-0.5 hover:border-brand-violet/35 hover:shadow-soft"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-soft text-brand-violet transition group-hover:scale-105">
+                    <Icon size={20} />
+                  </span>
+                  <span className="text-sm font-extrabold">{label}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         {sourceUrl && (
           <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5">
             <div className="mb-3 flex items-center justify-between gap-3">
