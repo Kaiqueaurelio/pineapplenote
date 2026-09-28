@@ -201,12 +201,12 @@ function MaterialPage() {
       <main className="mx-auto max-w-6xl space-y-5 px-4 pb-10 pt-4 sm:px-6 sm:py-8">
         {output && (
           <nav className="sticky top-[4.25rem] z-10 -mx-1 flex gap-1 overflow-x-auto rounded-xl border border-border bg-card/95 p-1 shadow-soft backdrop-blur-xl sm:top-[4.75rem]" aria-label="Seções do material">
-            {[
+            {([
               ["resumo", "Resumo"],
               ...(output.transcript ? [["transcricao", "Transcrição"]] : []),
               ...(flashcards.length ? [["flashcards", "Flashcards"]] : []),
               ...(quiz.length ? [["quiz", "Quiz"]] : []),
-            ].map(([id, label]) => (
+            ] as [string, string][]).map(([id, label]) => (
               <button key={id} type="button" onClick={() => { setActiveSection(id); document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className={`min-w-max rounded-lg px-3 py-2 text-xs font-bold transition ${activeSection === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
                 {label}
               </button>
