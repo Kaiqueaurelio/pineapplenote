@@ -475,6 +475,7 @@ function AdminPage() {
                   <span className={`hidden rounded-full px-3 py-1 text-xs font-black sm:inline-flex ${material.status === "failed" ? "bg-destructive/10 text-destructive" : material.status === "ready" ? "bg-green-soft text-green-strong" : "bg-yellow-soft text-yellow-strong"}`}>{material.status}</span>
                   <button type="button" onClick={(event) => { event.stopPropagation(); setConfirmDelete(material); }} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" aria-label="Excluir material"><Trash2 size={17} /><ArrowUpRight size={17} className="shrink-0 text-muted-foreground" />
                 </button>
+                </div>
               ))}</div>
               {!filteredMaterials.length && <p className="p-10 text-center text-sm text-muted-foreground">Nenhum material encontrado.</p>}
             </section>
