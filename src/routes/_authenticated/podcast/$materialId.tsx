@@ -29,6 +29,8 @@ function PodcastPage() {
   const [generating, setGenerating] = useState(false);
   const [generatedScript, setGeneratedScript] = useState("");
   const [twoVoices, setTwoVoices] = useState(true);
+  const [audioUrl, setAudioUrl] = useState("");
+  const [audioGenerating, setAudioGenerating] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -73,6 +75,22 @@ function PodcastPage() {
     }
     setGeneratedScript(String(data.script ?? ""));
     toast.success("Roteiro do podcast gerado.");
+  }
+
+  async function generateAudio() {
+    if (audioGenerating || !output) return;
+    setAudioGenerating(true);
+    const { data, error } = await supabase.functions.invoke("ai-tools", {
+      body: { action: "podcast-audio", materialId, style: twoVoices ? "conversa de estudo natural" : voice.tone },
+    });
+    setAudioGenerating(false);
+    if (error || data?.error || !data?.audio) {
+      toast.error(data?.error ?? "Não foi possível gerar o áudio.");
+      return;
+    }
+    setGeneratedScript(String(data.script ?? ""));
+    setAudioUrl(`data:audio/mpeg;base64,${data.audio}`);
+    toast.success("Podcast em áudio pronto.");
   }
 
   function speak() {
@@ -226,6 +244,14 @@ function PodcastPage() {
             </button>
             <button
               type="button"
+              onClick={() => void generateAudio()}
+              disabled={audioGenerating}
+              className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-foreground px-5 font-extrabold text-background"
+            >
+              <Volume2 size={18} /> {audioGenerating ? "Gerando áudio…" : "Gerar áudio com IA"}
+            </button>
+            <button
+              type="button"
               onClick={
                 speaking
                   ? () => {
@@ -248,6 +274,12 @@ function PodcastPage() {
               <RotateCcw size={17} /> Parar
             </button>
           </div>
+          {audioUrl && (
+            <div className="mt-6 rounded-2xl border border-border bg-secondary p-4">
+              <p className="mb-3 text-sm font-black">Podcast gerado</p>
+              <audio controls className="w-full" src={audioUrl}>Seu navegador não suporta áudio.</audio>
+            </div>
+          )}
         </section>
       </main>
     </div>
