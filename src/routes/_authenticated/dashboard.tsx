@@ -1083,7 +1083,7 @@ function Index() {
         <button
           type="button"
           className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground"
-          onClick={() => setProfileOpen(true)}
+          onClick={() => navigate({ to: "/settings" })}
         >
           <Settings size={20} />
           Perfil
