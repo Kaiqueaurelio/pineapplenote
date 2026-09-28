@@ -407,9 +407,9 @@ function MaterialPage() {
   if (!material) return null;
 
   return (
-    <div className="min-h-[100dvh] bg-background text-foreground">
-      <header className="sticky top-0 z-20 border-b border-border/70 bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:h-[72px] sm:px-6">
+    <div className="min-h-[100dvh] bg-[#f2f2f7] text-black">
+      <header className="sticky top-0 z-20 border-b border-[#d8d8dd] bg-[#f2f2f7]/95 backdrop-blur-2xl">
+        <div className="mx-auto flex h-[74px] max-w-6xl items-center gap-3 px-4 sm:px-6">
           <Button
             variant="ghost"
             size="icon"
@@ -443,7 +443,7 @@ function MaterialPage() {
       <main className="mx-auto max-w-6xl space-y-5 px-4 pb-28 pt-4 sm:px-6 sm:py-8">
         {output && (
           <nav
-            className="sticky top-[4.25rem] z-10 -mx-1 flex gap-1 overflow-x-auto rounded-xl border border-border bg-card/95 p-1 shadow-soft backdrop-blur-xl sm:top-[4.75rem]"
+            className="sticky top-[4.6rem] z-10 -mx-1 flex gap-1 overflow-x-auto rounded-2xl border border-[#d8d8dd] bg-white/95 p-1 shadow-sm backdrop-blur-xl sm:top-[4.75rem]"
             aria-label="Seções do material"
           >
             {(
@@ -463,7 +463,7 @@ function MaterialPage() {
                     .getElementById(id)
                     ?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
-                className={`min-w-max rounded-lg px-3 py-2 text-xs font-bold transition ${activeSection === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+                className={`min-w-max rounded-lg px-3 py-2 text-xs font-bold transition ${activeSection === id ? "bg-black text-white" : "text-[#636366] hover:bg-[#f2f2f7]"}`}
               >
                 {label}
               </button>
@@ -502,9 +502,9 @@ function MaterialPage() {
                       }
                     }
                   }}
-                  className="group flex min-h-[76px] items-center gap-3 rounded-2xl border border-border bg-card px-4 text-left shadow-card transition hover:-translate-y-0.5 hover:border-brand-violet/35 hover:shadow-soft"
+                  className="group flex min-h-[76px] items-center gap-3 rounded-[24px] border-0 bg-white px-4 text-left shadow-sm transition hover:-translate-y-0.5"
                 >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-soft text-brand-violet transition group-hover:scale-105">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f2f2f7] text-black transition group-hover:scale-105">
                     <Icon size={20} />
                   </span>
                   <span className="text-sm font-extrabold">{label}</span>
@@ -515,7 +515,7 @@ function MaterialPage() {
         )}
 
         {sourceUrl && (
-          <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5">
+          <section className="rounded-[28px] border-0 bg-white p-5 shadow-sm sm:p-6">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <p className="font-bold">Conteúdo original</p>
@@ -617,7 +617,7 @@ function MaterialPage() {
             {output?.transcript && (
               <section
                 id="transcricao"
-                className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7"
+                className="scroll-mt-24 rounded-[28px] border-0 bg-white p-5 shadow-sm sm:p-7"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
@@ -664,7 +664,7 @@ function MaterialPage() {
                     </Button>
                   </div>
                 </div>
-                <div className="mt-5 max-h-[55dvh] overflow-y-auto whitespace-pre-wrap rounded-xl bg-secondary p-5 text-sm leading-7 text-muted-foreground">
+                <div className="mt-5 max-h-[55dvh] overflow-y-auto whitespace-pre-wrap rounded-2xl bg-[#f2f2f7] p-5 text-sm leading-7 text-[#636366]">
                   {output.transcript}
                 </div>
               </section>
@@ -682,7 +682,7 @@ function MaterialPage() {
               </p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {topics.map((topic, index) => (
-                  <article key={index} className="rounded-xl bg-secondary p-4">
+                  <article key={index} className="rounded-2xl bg-[#f2f2f7] p-4">
                     <h3 className="font-bold">{topic.title}</h3>
                     <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                       {topic.explanation}
@@ -711,7 +711,7 @@ function MaterialPage() {
                   aria-label={
                     showAnswer ? "Mostrar pergunta do flashcard" : "Mostrar resposta do flashcard"
                   }
-                  className="mt-5 min-h-48 w-full rounded-2xl border border-primary/20 bg-green-soft/50 p-6 text-left transition hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  className="mt-5 min-h-48 w-full rounded-[28px] border-0 bg-[#f2f2f7] p-6 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
                 >
                   <p className="text-xs font-bold uppercase tracking-wide text-green-strong">
                     {showAnswer ? "Resposta" : "Pergunta"}
@@ -773,7 +773,7 @@ function MaterialPage() {
                     const selected = quizAnswers[index];
                     const correct = selected === item["answer"];
                     return (
-                      <article key={index} className="rounded-xl border border-border p-4">
+                      <article key={index} className="rounded-2xl bg-[#f2f2f7] p-4">
                         <p className="font-bold">
                           {index + 1}. {item["question"]}
                         </p>
