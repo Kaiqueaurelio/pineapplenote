@@ -134,9 +134,11 @@ function LibraryPage() {
       return;
     }
 
-    const { error: storageError } = await supabase.storage
-      .from("study-materials")
-      .remove([material.storage_path]);
+    let storageError: { message: string } | null = null;
+    if (material.source_type !== "url") {
+      const result = await supabase.storage.from("study-materials").remove([material.storage_path]);
+      storageError = result.error;
+    }
 
     setMaterials((current) => current.filter((item) => item.id !== material.id));
     setDeleteTarget(null);
