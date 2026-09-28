@@ -1169,15 +1169,15 @@ function Index() {
                   { label: "PDF, arquivo ou texto", icon: FileUp, action: () => setNoteFlow("document") },
                   { label: "Link da web", icon: Link2, action: () => setNoteFlow("link") },
                 ].map((item) => (
-                  <button key={item.label} type="button" onClick={item.action} className="flex min-h-[112px] w-full items-center gap-5 rounded-[24px] bg-white px-6 text-left shadow-sm active:scale-[0.99]">
+                  <button key={item.label} type="button" onClick={item.action} className="flex min-h-[112px] w-full min-w-0 items-center gap-4 rounded-[24px] bg-white px-4 text-left shadow-sm active:scale-[0.99] sm:gap-5 sm:px-6">
                     <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f1f1f6] text-black"><item.icon size={25} strokeWidth={1.8} /></span>
-                    <span className="text-[22px] font-semibold tracking-[-0.4px]">{item.label}</span>
+                    <span className="min-w-0 text-[18px] font-semibold tracking-[-0.4px] sm:text-[22px]">{item.label}</span>
                   </button>
                 ))}
               </div>
             )}
             {noteFlow === "record" && (
-              <div className="flex min-h-[690px] flex-col items-center justify-between px-8 pb-8 pt-24 text-center">
+              <div className="flex min-h-[min(690px,calc(100dvh-8rem))] flex-col items-center justify-between overflow-y-auto px-5 pb-8 pt-20 text-center sm:min-h-[690px] sm:px-8 sm:pt-24">
                 <div className="flex flex-1 flex-col items-center justify-center">
                   <div className="mb-8 text-[#8e8e93]"><AudioLines size={76} strokeWidth={1.25} /></div>
                   <h3 className="text-[22px] font-bold">Comece a gravar para criar uma nota</h3>
