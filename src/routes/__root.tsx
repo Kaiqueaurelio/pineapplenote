@@ -190,12 +190,12 @@ function RootComponent() {
 
       if (event === "SIGNED_OUT") {
         queryClient.clear();
-        if (
-          window.location.pathname.startsWith("/dashboard") ||
-          window.location.pathname.startsWith("/library") ||
-          window.location.pathname.startsWith("/material/")
-        ) {
-          void router.navigate({ to: "/auth" });
+        const publicPath =
+          window.location.pathname === "/" ||
+          window.location.pathname === "/auth" ||
+          window.location.pathname === "/reset-password";
+        if (!publicPath) {
+          void router.navigate({ to: "/auth", search: { mode: "login" }, replace: true });
         }
         return;
       }
