@@ -3,7 +3,14 @@ import { ArrowLeft, FileText, Headphones, Loader2, Search, Trash2, Video, X } fr
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -27,7 +34,9 @@ function LibraryPage() {
   const [loading, setLoading] = useState(true);
   const [openingId, setOpeningId] = useState<string | null>(null);
   const [progressByMaterial, setProgressByMaterial] = useState<Record<string, number>>({});
-  const [filter, setFilter] = useState<"todos" | "audio" | "video" | "documento" | "pendentes">("todos");
+  const [filter, setFilter] = useState<"todos" | "audio" | "video" | "documento" | "pendentes">(
+    "todos",
+  );
   const [deleteTarget, setDeleteTarget] = useState<Tables<"study_materials"> | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [sort, setSort] = useState<"recent" | "name">("recent");
@@ -51,7 +60,10 @@ function LibraryPage() {
         .from("study_progress")
         .select("material_id, progress")
         .eq("user_id", user.id)
-        .in("material_id", data.map((item) => item.id));
+        .in(
+          "material_id",
+          data.map((item) => item.id),
+        );
 
       setProgressByMaterial(
         Object.fromEntries((progressRows ?? []).map((row) => [row.material_id, row.progress])),
@@ -75,7 +87,8 @@ function LibraryPage() {
         (filter === "audio" && item.source_type === "audio") ||
         (filter === "video" && item.source_type === "video") ||
         (filter === "documento" && item.source_type === "document") ||
-        (filter === "pendentes" && (item.status === "processing" || item.status === "failed" || item.status === "uploaded"));
+        (filter === "pendentes" &&
+          (item.status === "processing" || item.status === "failed" || item.status === "uploaded"));
 
       return matchesSearch && matchesFilter;
     });
@@ -136,7 +149,12 @@ function LibraryPage() {
     <div className="min-h-[100dvh] bg-background text-foreground">
       <header className="sticky top-0 z-20 border-b border-border/70 bg-background/95 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-5xl items-center gap-3 px-4 sm:h-[72px] sm:px-6">
-          <Button variant="ghost" size="icon" aria-label="Voltar" onClick={() => navigate({ to: "/dashboard" })}>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Voltar"
+            onClick={() => navigate({ to: "/dashboard" })}
+          >
             <ArrowLeft size={20} />
           </Button>
           <div className="min-w-0">
@@ -148,7 +166,10 @@ function LibraryPage() {
 
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-3 text-muted-foreground" size={18} />
+          <Search
+            className="pointer-events-none absolute left-3 top-3 text-muted-foreground"
+            size={18}
+          />
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -156,7 +177,16 @@ function LibraryPage() {
             aria-label="Buscar materiais"
             className="h-11 pl-10 pr-10"
           />
-          {search && <button type="button" aria-label="Limpar busca" onClick={() => setSearch("")} className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={16} /></button>}
+          {search && (
+            <button
+              type="button"
+              aria-label="Limpar busca"
+              onClick={() => setSearch("")}
+              className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground"
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
 
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Filtrar biblioteca">
@@ -184,10 +214,17 @@ function LibraryPage() {
 
         {!loading && filtered.length > 0 && (
           <div className="mt-4 flex items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground">{sortedMaterials.length} {sortedMaterials.length === 1 ? "material encontrado" : "materiais encontrados"}</p>
+            <p className="text-xs text-muted-foreground">
+              {sortedMaterials.length}{" "}
+              {sortedMaterials.length === 1 ? "material encontrado" : "materiais encontrados"}
+            </p>
             <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
               <span className="sr-only">Ordenar biblioteca</span>
-              <select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)} className="h-9 rounded-lg border border-border bg-card px-2 text-xs font-semibold text-foreground outline-none focus:border-primary/50">
+              <select
+                value={sort}
+                onChange={(event) => setSort(event.target.value as typeof sort)}
+                className="h-9 rounded-lg border border-border bg-card px-2 text-xs font-semibold text-foreground outline-none focus:border-primary/50"
+              >
                 <option value="recent">Mais recentes</option>
                 <option value="name">Nome A–Z</option>
               </select>
@@ -197,14 +234,23 @@ function LibraryPage() {
 
         {loading ? (
           <div className="mt-6 grid gap-3 sm:grid-cols-2" aria-label="Carregando biblioteca">
-            {[1, 2, 3, 4].map((item) => <div key={item} className="h-44 animate-pulse rounded-2xl border border-border bg-card" />)}
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className="h-44 animate-pulse rounded-2xl border border-border bg-card"
+              />
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="mt-6 rounded-2xl border border-dashed border-border px-5 py-16 text-center">
             <FileText className="mx-auto text-muted-foreground" size={28} />
-            <h2 className="mt-4 font-bold">{materials.length ? "Nenhum material encontrado" : "Sua biblioteca está vazia"}</h2>
+            <h2 className="mt-4 font-bold">
+              {materials.length ? "Nenhum material encontrado" : "Sua biblioteca está vazia"}
+            </h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-              {materials.length ? "Tente buscar por outro nome." : "Salve um áudio, vídeo ou documento na página inicial para encontrá-lo aqui."}
+              {materials.length
+                ? "Tente buscar por outro nome."
+                : "Salve um áudio, vídeo ou documento na página inicial para encontrá-lo aqui."}
             </p>
             {!materials.length && (
               <Button className="mt-5" onClick={() => navigate({ to: "/dashboard" })}>
@@ -217,7 +263,10 @@ function LibraryPage() {
             {sortedMaterials.map((material) => {
               const Icon = iconFor(material.source_type);
               return (
-                <article key={material.id} className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5">
+                <article
+                  key={material.id}
+                  className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5"
+                >
                   <div className="flex items-start gap-3">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-green-soft text-green-strong">
                       <Icon size={21} />
@@ -225,7 +274,19 @@ function LibraryPage() {
                     <div className="min-w-0 flex-1">
                       <h2 className="truncate font-bold">{material.title}</h2>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {material.source_type === "audio" ? "Áudio" : material.source_type === "video" ? "Vídeo" : "Documento"} · {material.status === "ready" ? "Pronto para estudar" : material.status === "processing" ? "Organizando conteúdo..." : material.status === "failed" ? "Não foi possível organizar" : "Pronto para organizar"}
+                        {material.source_type === "audio"
+                          ? "Áudio"
+                          : material.source_type === "video"
+                            ? "Vídeo"
+                            : "Documento"}{" "}
+                        ·{" "}
+                        {material.status === "ready"
+                          ? "Pronto para estudar"
+                          : material.status === "processing"
+                            ? "Organizando conteúdo..."
+                            : material.status === "failed"
+                              ? "Não foi possível organizar"
+                              : "Pronto para organizar"}
                       </p>
                       <div className="mt-3">
                         <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
@@ -233,17 +294,30 @@ function LibraryPage() {
                           <span>{progressByMaterial[material.id] ?? 0}%</span>
                         </div>
                         <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
-                          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.min(100, Math.max(0, progressByMaterial[material.id] ?? 0))}%` }} />
+                          <div
+                            className="h-full rounded-full bg-primary transition-all"
+                            style={{
+                              width: `${Math.min(100, Math.max(0, progressByMaterial[material.id] ?? 0))}%`,
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
                   </div>
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                    <Button className="w-full sm:w-auto" onClick={() => void openMaterial(material)} disabled={openingId === material.id}>
+                    <Button
+                      className="w-full sm:w-auto"
+                      onClick={() => void openMaterial(material)}
+                      disabled={openingId === material.id}
+                    >
                       {openingId === material.id && <Loader2 className="animate-spin" size={16} />}
                       Abrir
                     </Button>
-                    <Button variant="ghost" className="w-full text-destructive hover:text-destructive sm:w-auto" onClick={() => requestDelete(material)}>
+                    <Button
+                      variant="ghost"
+                      className="w-full text-destructive hover:text-destructive sm:w-auto"
+                      onClick={() => requestDelete(material)}
+                    >
                       <Trash2 size={16} />
                       Remover
                     </Button>
@@ -253,19 +327,34 @@ function LibraryPage() {
             })}
           </div>
         )}
-        <Dialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && !deleting && setDeleteTarget(null)}>
+        <Dialog
+          open={Boolean(deleteTarget)}
+          onOpenChange={(open) => !open && !deleting && setDeleteTarget(null)}
+        >
           <DialogContent className="w-[calc(100%-1rem)] rounded-2xl sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Remover material?</DialogTitle>
               <DialogDescription>
-                {deleteTarget ? `“${deleteTarget.title}” será removido da sua biblioteca. Esta ação não pode ser desfeita.` : ""}
+                {deleteTarget
+                  ? `“${deleteTarget.title}” será removido da sua biblioteca. Esta ação não pode ser desfeita.`
+                  : ""}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="gap-2 sm:gap-2">
-              <Button variant="outline" className="w-full sm:w-auto" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+              >
                 Cancelar
               </Button>
-              <Button variant="destructive" className="w-full sm:w-auto" onClick={() => deleteTarget && void deleteMaterial(deleteTarget)} disabled={deleting}>
+              <Button
+                variant="destructive"
+                className="w-full sm:w-auto"
+                onClick={() => deleteTarget && void deleteMaterial(deleteTarget)}
+                disabled={deleting}
+              >
                 {deleting && <Loader2 className="animate-spin" size={16} />}
                 {deleting ? "Removendo..." : "Remover material"}
               </Button>
@@ -273,7 +362,9 @@ function LibraryPage() {
           </DialogContent>
         </Dialog>
 
-        <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">Pineapple Note · Desenvolvido pela Decode Analytics</footer>
+        <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
+          Pineapple Note · Desenvolvido pela Decode Analytics
+        </footer>
       </main>
     </div>
   );

@@ -41,7 +41,8 @@ export class AppErrorBoundary extends Component<Props, State> {
             Algo não saiu como esperado
           </h1>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Esta parte da tela encontrou um problema. Tente novamente sem perder o restante da sua sessão.
+            Esta parte da tela encontrou um problema. Tente novamente sem perder o restante da sua
+            sessão.
           </p>
           <button
             type="button"

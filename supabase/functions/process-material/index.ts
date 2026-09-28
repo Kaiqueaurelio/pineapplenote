@@ -20,9 +20,18 @@ function json(body: unknown, status = 200) {
 }
 
 function extractJson(text: string): StudyPayload {
-  const cleaned = text.trim().replace(/^\`\`\`json\s*/i, "").replace(/^\`\`\`\s*/i, "").replace(/\s*\`\`\`$/i, "");
+  const cleaned = text
+    .trim()
+    .replace(/^\`\`\`json\s*/i, "")
+    .replace(/^\`\`\`\s*/i, "")
+    .replace(/\s*\`\`\`$/i, "");
   const parsed = JSON.parse(cleaned) as StudyPayload;
-  if (!parsed.summary || !Array.isArray(parsed.topics) || !Array.isArray(parsed.flashcards) || !Array.isArray(parsed.quiz)) {
+  if (
+    !parsed.summary ||
+    !Array.isArray(parsed.topics) ||
+    !Array.isArray(parsed.flashcards) ||
+    !Array.isArray(parsed.quiz)
+  ) {
     throw new Error("Formato de resposta da IA inválido.");
   }
   return parsed;
@@ -45,9 +54,38 @@ async function openAiResponses(apiKey: string, input: unknown) {
             additionalProperties: false,
             properties: {
               summary: { type: "string" },
-              topics: { type: "array", items: { type: "object", additionalProperties: false, properties: { title: { type: "string" }, explanation: { type: "string" } }, required: ["title", "explanation"] } },
-              flashcards: { type: "array", items: { type: "object", additionalProperties: false, properties: { question: { type: "string" }, answer: { type: "string" } }, required: ["question", "answer"] } },
-              quiz: { type: "array", items: { type: "object", additionalProperties: false, properties: { question: { type: "string" }, options: { type: "array", items: { type: "string" } }, answer: { type: "string" }, explanation: { type: "string" } }, required: ["question", "options", "answer", "explanation"] } },
+              topics: {
+                type: "array",
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: { title: { type: "string" }, explanation: { type: "string" } },
+                  required: ["title", "explanation"],
+                },
+              },
+              flashcards: {
+                type: "array",
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: { question: { type: "string" }, answer: { type: "string" } },
+                  required: ["question", "answer"],
+                },
+              },
+              quiz: {
+                type: "array",
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    question: { type: "string" },
+                    options: { type: "array", items: { type: "string" } },
+                    answer: { type: "string" },
+                    explanation: { type: "string" },
+                  },
+                  required: ["question", "options", "answer", "explanation"],
+                },
+              },
             },
             required: ["summary", "topics", "flashcards", "quiz"],
           },
@@ -93,11 +131,15 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}").default,
+    Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ??
+      JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}").default,
     { global: { headers: { Authorization: authHeader } } },
   );
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
   if (userError || !user) return json({ error: "Sessão inválida." }, 401);
 
   const apiKey = Deno.env.get("OPENAI_API_KEY");
@@ -118,7 +160,11 @@ Deno.serve(async (req) => {
 
     if (materialError || !material) return json({ error: "Material não encontrado." }, 404);
 
-    await supabase.from("study_materials").update({ status: "processing" }).eq("id", material.id).eq("user_id", user.id);
+    await supabase
+      .from("study_materials")
+      .update({ status: "processing" })
+      .eq("id", material.id)
+      .eq("user_id", user.id);
 
     const { data: signed, error: signedError } = await supabase.storage
       .from("study-materials")
@@ -132,50 +178,85 @@ Deno.serve(async (req) => {
     if (material.source_type === "audio" || material.source_type === "video") {
       const fileResponse = await fetch(signed.signedUrl);
       if (!fileResponse.ok) throw new Error("Não foi possível baixar o arquivo para transcrição.");
-      transcript = await transcribe(apiKey, await fileResponse.arrayBuffer(), material.title, material.mime_type);
+      transcript = await transcribe(
+        apiKey,
+        await fileResponse.arrayBuffer(),
+        material.title,
+        material.mime_type,
+      );
       if (!transcript.trim()) throw new Error("Não foi possível encontrar fala no arquivo.");
-      input = [{
-        role: "user",
-        content: [{
-          type: "input_text",
-          text: `Transforme esta transcrição em material de estudo. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. Preserve fatos e não invente informações. Transcrição:\n\n${transcript}`,
-        }],
-      }];
+      input = [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: `Transforme esta transcrição em material de estudo. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. Preserve fatos e não invente informações. Transcrição:\n\n${transcript}`,
+            },
+          ],
+        },
+      ];
     } else if (material.mime_type === "text/plain") {
       const fileResponse = await fetch(signed.signedUrl);
       if (!fileResponse.ok) throw new Error("Não foi possível ler o documento.");
       const text = await fileResponse.text();
-      input = [{ role: "user", content: [{ type: "input_text", text: `Transforme o conteúdo abaixo em material de estudo. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões. Não invente fatos.\n\n${text}` }] }];
+      input = [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: `Transforme o conteúdo abaixo em material de estudo. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões. Não invente fatos.\n\n${text}`,
+            },
+          ],
+        },
+      ];
     } else {
-      input = [{
-        role: "user",
-        content: [
-          { type: "input_file", file_url: signed.signedUrl },
-          { type: "input_text", text: "Analise este documento como material acadêmico. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. Preserve os fatos do documento e não invente informações." },
-        ],
-      }];
+      input = [
+        {
+          role: "user",
+          content: [
+            { type: "input_file", file_url: signed.signedUrl },
+            {
+              type: "input_text",
+              text: "Analise este documento como material acadêmico. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. Preserve os fatos do documento e não invente informações.",
+            },
+          ],
+        },
+      ];
     }
 
     const aiData = await openAiResponses(apiKey, input);
     const output = extractJson(responseText(aiData));
 
-    const { error: outputError } = await supabase.from("material_outputs").upsert({
-      material_id: material.id,
-      user_id: user.id,
-      summary: output.summary,
-      topics: output.topics,
-      flashcards: output.flashcards,
-      quiz: output.quiz,
-      transcript,
-    }, { onConflict: "material_id" });
+    const { error: outputError } = await supabase.from("material_outputs").upsert(
+      {
+        material_id: material.id,
+        user_id: user.id,
+        summary: output.summary,
+        topics: output.topics,
+        flashcards: output.flashcards,
+        quiz: output.quiz,
+        transcript,
+      },
+      { onConflict: "material_id" },
+    );
 
     if (outputError) throw new Error("Não foi possível salvar o material processado.");
 
-    await supabase.from("study_materials").update({ status: "ready" }).eq("id", material.id).eq("user_id", user.id);
+    await supabase
+      .from("study_materials")
+      .update({ status: "ready" })
+      .eq("id", material.id)
+      .eq("user_id", user.id);
     return json({ ok: true, output });
   } catch (error) {
     if (processingMaterialId) {
-      await supabase.from("study_materials").update({ status: "failed" }).eq("id", processingMaterialId).eq("user_id", user.id);
+      await supabase
+        .from("study_materials")
+        .update({ status: "failed" })
+        .eq("id", processingMaterialId)
+        .eq("user_id", user.id);
     }
     return json({ error: error instanceof Error ? error.message : "Falha no processamento." }, 500);
   }

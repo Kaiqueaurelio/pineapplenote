@@ -100,7 +100,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap",
+      },
       { rel: "icon", href: "/pineapple-note-app-icon.png", type: "image/png" },
       { rel: "apple-touch-icon", href: "/pineapple-note-app-icon.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
@@ -187,9 +190,11 @@ function RootComponent() {
 
       if (event === "SIGNED_OUT") {
         queryClient.clear();
-        if (window.location.pathname.startsWith("/dashboard") ||
-            window.location.pathname.startsWith("/library") ||
-            window.location.pathname.startsWith("/material/")) {
+        if (
+          window.location.pathname.startsWith("/dashboard") ||
+          window.location.pathname.startsWith("/library") ||
+          window.location.pathname.startsWith("/material/")
+        ) {
           void router.navigate({ to: "/auth" });
         }
         return;

@@ -1,5 +1,27 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, FileText, Gamepad2, HelpCircle, Languages, Loader2, Mic2, Network, PenLine, Presentation, Share2, ThumbsDown, ThumbsUp, Trash2, Flag } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Download,
+  FileText,
+  Gamepad2,
+  HelpCircle,
+  Languages,
+  Loader2,
+  Mic2,
+  Network,
+  PenLine,
+  Presentation,
+  Share2,
+  ThumbsDown,
+  ThumbsUp,
+  Trash2,
+  Flag,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,13 +34,45 @@ type Flashcard = { question: string; answer: string };
 type Quiz = { question: string; options: string[]; answer: string; explanation: string };
 
 function asTopics(value: Json): Topic[] {
-  return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ title: String(item["title"] ?? ""), explanation: String(item["explanation"] ?? "") })) : [];
+  return Array.isArray(value)
+    ? value
+        .filter(
+          (item): item is { [key: string]: Json | undefined } =>
+            typeof item === "object" && item !== null,
+        )
+        .map((item) => ({
+          title: String(item["title"] ?? ""),
+          explanation: String(item["explanation"] ?? ""),
+        }))
+    : [];
 }
 function asFlashcards(value: Json): Flashcard[] {
-  return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ question: String(item["question"] ?? ""), answer: String(item["answer"] ?? "") })) : [];
+  return Array.isArray(value)
+    ? value
+        .filter(
+          (item): item is { [key: string]: Json | undefined } =>
+            typeof item === "object" && item !== null,
+        )
+        .map((item) => ({
+          question: String(item["question"] ?? ""),
+          answer: String(item["answer"] ?? ""),
+        }))
+    : [];
 }
 function asQuiz(value: Json): Quiz[] {
-  return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ question: String(item["question"] ?? ""), options: Array.isArray(item["options"]) ? item["options"].map(String) : [], answer: String(item["answer"] ?? ""), explanation: String(item["explanation"] ?? "") })) : [];
+  return Array.isArray(value)
+    ? value
+        .filter(
+          (item): item is { [key: string]: Json | undefined } =>
+            typeof item === "object" && item !== null,
+        )
+        .map((item) => ({
+          question: String(item["question"] ?? ""),
+          options: Array.isArray(item["options"]) ? item["options"].map(String) : [],
+          answer: String(item["answer"] ?? ""),
+          explanation: String(item["explanation"] ?? ""),
+        }))
+    : [];
 }
 
 export const Route = createFileRoute("/_authenticated/material/$materialId")({
@@ -47,10 +101,29 @@ function MaterialPage() {
 
   async function load() {
     setLoading(true);
-    const [{ data: materialData, error: materialError }, { data: outputData }, { data: progressData }] = await Promise.all([
-      supabase.from("study_materials").select("*").eq("id", materialId).eq("user_id", user.id).maybeSingle(),
-      supabase.from("material_outputs").select("*").eq("material_id", materialId).eq("user_id", user.id).maybeSingle(),
-      supabase.from("study_progress").select("*").eq("material_id", materialId).eq("user_id", user.id).maybeSingle(),
+    const [
+      { data: materialData, error: materialError },
+      { data: outputData },
+      { data: progressData },
+    ] = await Promise.all([
+      supabase
+        .from("study_materials")
+        .select("*")
+        .eq("id", materialId)
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("material_outputs")
+        .select("*")
+        .eq("material_id", materialId)
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("study_progress")
+        .select("*")
+        .eq("material_id", materialId)
+        .eq("user_id", user.id)
+        .maybeSingle(),
     ]);
     setLoading(false);
     if (materialError || !materialData) {
@@ -59,17 +132,22 @@ function MaterialPage() {
       return;
     }
     setMaterial(materialData);
-    const { data: signedSource } = await supabase.storage.from("study-materials").createSignedUrl(materialData.storage_path, 60 * 60);
+    const { data: signedSource } = await supabase.storage
+      .from("study-materials")
+      .createSignedUrl(materialData.storage_path, 60 * 60);
     setSourceUrl(signedSource?.signedUrl ?? null);
     setOutput(outputData);
     const savedProgress = Math.max(0, Math.min(100, progressData?.progress ?? 0));
     setProgress(savedProgress);
-    void supabase.from("study_progress").upsert({
-      user_id: user.id,
-      material_id: materialId,
-      progress: savedProgress,
-      last_opened_at: new Date().toISOString(),
-    }, { onConflict: "user_id,material_id" });
+    void supabase.from("study_progress").upsert(
+      {
+        user_id: user.id,
+        material_id: materialId,
+        progress: savedProgress,
+        last_opened_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,material_id" },
+    );
   }
 
   useEffect(() => {
@@ -127,7 +205,11 @@ function MaterialPage() {
 
     const timeout = new Promise<{ data: null; error: Error }>((resolve) =>
       window.setTimeout(
-        () => resolve({ data: null, error: new Error("O processamento está demorando mais que o esperado.") }),
+        () =>
+          resolve({
+            data: null,
+            error: new Error("O processamento está demorando mais que o esperado."),
+          }),
         90_000,
       ),
     );
@@ -159,14 +241,22 @@ function MaterialPage() {
 
   async function deleteMaterial() {
     if (!material) return;
-    const confirmed = window.confirm("Excluir esta nota? O arquivo e os dados deste material serão removidos.");
+    const confirmed = window.confirm(
+      "Excluir esta nota? O arquivo e os dados deste material serão removidos.",
+    );
     if (!confirmed) return;
-    const { error: storageError } = await supabase.storage.from("study-materials").remove([material.storage_path]);
+    const { error: storageError } = await supabase.storage
+      .from("study-materials")
+      .remove([material.storage_path]);
     if (storageError) {
       toast.error("Não foi possível remover o arquivo original.");
       return;
     }
-    const { error } = await supabase.from("study_materials").delete().eq("id", materialId).eq("user_id", user.id);
+    const { error } = await supabase
+      .from("study_materials")
+      .delete()
+      .eq("id", materialId)
+      .eq("user_id", user.id);
     if (error) {
       toast.error("Não foi possível excluir a nota.");
       return;
@@ -177,7 +267,10 @@ function MaterialPage() {
 
   function shareMaterial() {
     if (navigator.share) {
-      void navigator.share({ title: material?.title ?? "Pineapple Note", text: "Confira esta nota no Pineapple Note." });
+      void navigator.share({
+        title: material?.title ?? "Pineapple Note",
+        text: "Confira esta nota no Pineapple Note.",
+      });
     } else {
       void navigator.clipboard?.writeText(window.location.href);
       toast.success("Link copiado.");
@@ -187,17 +280,20 @@ function MaterialPage() {
   async function saveProgress(value: number) {
     const next = Math.max(0, Math.min(100, value));
     setProgress(next);
-    await supabase.from("study_progress").upsert({
-      user_id: user.id,
-      material_id: materialId,
-      progress: next,
-      last_opened_at: new Date().toISOString(),
-    }, { onConflict: "user_id,material_id" });
+    await supabase.from("study_progress").upsert(
+      {
+        user_id: user.id,
+        material_id: materialId,
+        progress: next,
+        last_opened_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,material_id" },
+    );
   }
 
-  const topics = useMemo(() => output ? asTopics(output.topics) : [], [output]);
-  const flashcards = useMemo(() => output ? asFlashcards(output.flashcards) : [], [output]);
-  const quiz = useMemo(() => output ? asQuiz(output.quiz) : [], [output]);
+  const topics = useMemo(() => (output ? asTopics(output.topics) : []), [output]);
+  const flashcards = useMemo(() => (output ? asFlashcards(output.flashcards) : []), [output]);
+  const quiz = useMemo(() => (output ? asQuiz(output.quiz) : []), [output]);
   const currentFlashcard = flashcards[flashcardIndex];
   const answeredQuizCount = Object.keys(quizAnswers).length;
   const correctQuizCount = quiz.reduce(
@@ -211,32 +307,74 @@ function MaterialPage() {
     setQuizSubmitted(false);
   }
 
-  if (loading) return <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 px-6 text-center"><Loader2 className="animate-spin text-primary" size={26} /><p className="text-sm font-medium text-muted-foreground">Carregando seu material...</p></div>;
+  if (loading)
+    return (
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 px-6 text-center">
+        <Loader2 className="animate-spin text-primary" size={26} />
+        <p className="text-sm font-medium text-muted-foreground">Carregando seu material...</p>
+      </div>
+    );
   if (!material) return null;
 
   return (
     <div className="min-h-[100dvh] bg-background text-foreground">
       <header className="sticky top-0 z-20 border-b border-border/70 bg-background/95 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:h-[72px] sm:px-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/library" })} aria-label="Voltar"><ArrowLeft size={20} /></Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate({ to: "/library" })}
+            aria-label="Voltar"
+          >
+            <ArrowLeft size={20} />
+          </Button>
           <div className="min-w-0 flex-1">
             <h1 className="truncate font-extrabold">{material.title}</h1>
-            <p className="text-xs text-muted-foreground">{material.status === "ready" ? "Material organizado" : material.status === "processing" ? "Organizando conteúdo..." : "Pronto para organizar"}</p>
+            <p className="text-xs text-muted-foreground">
+              {material.status === "ready"
+                ? "Material organizado"
+                : material.status === "processing"
+                  ? "Organizando conteúdo..."
+                  : "Pronto para organizar"}
+            </p>
           </div>
-          <div className="hidden items-center gap-2 sm:flex"><span className="text-xs text-muted-foreground">{progress}%</span><div className="h-2 w-28 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-primary transition-[width]" style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} /></div></div>
+          <div className="hidden items-center gap-2 sm:flex">
+            <span className="text-xs text-muted-foreground">{progress}%</span>
+            <div className="h-2 w-28 overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full bg-primary transition-[width]"
+                style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+              />
+            </div>
+          </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-6xl space-y-5 px-4 pb-10 pt-4 sm:px-6 sm:py-8">
         {output && (
-          <nav className="sticky top-[4.25rem] z-10 -mx-1 flex gap-1 overflow-x-auto rounded-xl border border-border bg-card/95 p-1 shadow-soft backdrop-blur-xl sm:top-[4.75rem]" aria-label="Seções do material">
-            {([
-              ["resumo", "Resumo"],
-              ...(output.transcript ? [["transcricao", "Transcrição"]] : []),
-              ...(flashcards.length ? [["flashcards", "Flashcards"]] : []),
-              ...(quiz.length ? [["quiz", "Quiz"]] : []),
-            ] as [string, string][]).map(([id, label]) => (
-              <button key={id} type="button" onClick={() => { setActiveSection(id); document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className={`min-w-max rounded-lg px-3 py-2 text-xs font-bold transition ${activeSection === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
+          <nav
+            className="sticky top-[4.25rem] z-10 -mx-1 flex gap-1 overflow-x-auto rounded-xl border border-border bg-card/95 p-1 shadow-soft backdrop-blur-xl sm:top-[4.75rem]"
+            aria-label="Seções do material"
+          >
+            {(
+              [
+                ["resumo", "Resumo"],
+                ...(output.transcript ? [["transcricao", "Transcrição"]] : []),
+                ...(flashcards.length ? [["flashcards", "Flashcards"]] : []),
+                ...(quiz.length ? [["quiz", "Quiz"]] : []),
+              ] as [string, string][]
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => {
+                  setActiveSection(id);
+                  document
+                    .getElementById(id)
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className={`min-w-max rounded-lg px-3 py-2 text-xs font-bold transition ${activeSection === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+              >
                 {label}
               </button>
             ))}
@@ -259,7 +397,10 @@ function MaterialPage() {
                       navigate({ to, params: { materialId } });
                     } else {
                       if (navigator.share) {
-                        void navigator.share({ title: material.title, text: "Confira este material no Pineapple Note." });
+                        void navigator.share({
+                          title: material.title,
+                          text: "Confira este material no Pineapple Note.",
+                        });
                       } else {
                         void navigator.clipboard?.writeText(window.location.href);
                         toast.success("Link copiado.");
@@ -281,11 +422,27 @@ function MaterialPage() {
         {sourceUrl && (
           <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <div><p className="font-bold">Conteúdo original</p><p className="text-xs text-muted-foreground">Acesso privado e temporário</p></div>
-              <Button variant="outline" onClick={() => window.open(sourceUrl, "_blank", "noopener,noreferrer")}>Abrir arquivo</Button>
+              <div>
+                <p className="font-bold">Conteúdo original</p>
+                <p className="text-xs text-muted-foreground">Acesso privado e temporário</p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => window.open(sourceUrl, "_blank", "noopener,noreferrer")}
+              >
+                Abrir arquivo
+              </Button>
             </div>
-            {material.source_type === "audio" && <audio className="w-full" controls src={sourceUrl} />}
-            {material.source_type === "video" && <video className="max-h-[60dvh] w-full rounded-xl bg-black" controls src={sourceUrl} />}
+            {material.source_type === "audio" && (
+              <audio className="w-full" controls src={sourceUrl} />
+            )}
+            {material.source_type === "video" && (
+              <video
+                className="max-h-[60dvh] w-full rounded-xl bg-black"
+                controls
+                src={sourceUrl}
+              />
+            )}
           </section>
         )}
         {!output && material.status === "failed" && (
@@ -297,7 +454,8 @@ function MaterialPage() {
               <div className="min-w-0">
                 <h2 className="text-xl font-extrabold">Não conseguimos organizar este material</h2>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                  O arquivo continua salvo. Você pode tentar o processamento novamente sem precisar enviá-lo de novo.
+                  O arquivo continua salvo. Você pode tentar o processamento novamente sem precisar
+                  enviá-lo de novo.
                 </p>
                 <Button className="mt-5" onClick={() => void retryProcessing()} disabled={retrying}>
                   {retrying && <Loader2 className="animate-spin" size={17} />}
@@ -311,17 +469,30 @@ function MaterialPage() {
         {!output && material.status !== "failed" && (
           <section className="rounded-2xl border border-violet-border bg-violet-soft p-6 sm:p-8">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-violet text-brand-violet-foreground"><BookOpen size={22} /></div>
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-violet text-brand-violet-foreground">
+                <BookOpen size={22} />
+              </div>
               <div className="min-w-0">
                 <h2 className="text-xl font-extrabold">Transforme este conteúdo em estudo</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">A organização inteligente transforma o arquivo em resumo, tópicos, flashcards e quiz. Para áudio e vídeo, primeiro fazemos a transcrição.</p>
-                <Button className="mt-5" onClick={() => void processMaterial()} disabled={processing || material.status === "processing"}>
-                  {(processing || material.status === "processing") && <Loader2 className="animate-spin" size={17} />}
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                  A organização inteligente transforma o arquivo em resumo, tópicos, flashcards e
+                  quiz. Para áudio e vídeo, primeiro fazemos a transcrição.
+                </p>
+                <Button
+                  className="mt-5"
+                  onClick={() => void processMaterial()}
+                  disabled={processing || material.status === "processing"}
+                >
+                  {(processing || material.status === "processing") && (
+                    <Loader2 className="animate-spin" size={17} />
+                  )}
                   {material.status === "processing"
                     ? "Processamento em andamento..."
                     : processing
                       ? "Transcrevendo e organizando..."
-                      : (material.source_type === "audio" || material.source_type === "video" ? "Transcrever e organizar com IA" : "Organizar com IA")}
+                      : material.source_type === "audio" || material.source_type === "video"
+                        ? "Transcrever e organizar com IA"
+                        : "Organizar com IA"}
                 </Button>
               </div>
             </div>
@@ -329,12 +500,18 @@ function MaterialPage() {
         )}
 
         {material.status === "processing" && !output && (
-          <section aria-live="polite" className="rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6">
+          <section
+            aria-live="polite"
+            className="rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6"
+          >
             <div className="flex items-center gap-3">
               <Loader2 className="shrink-0 animate-spin text-primary" size={20} />
               <div>
                 <p className="font-bold">Organizando seu material...</p>
-                <p className="mt-1 text-xs text-muted-foreground">Você pode permanecer nesta página. Se sair, o processamento continua e retomamos quando voltar.</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Você pode permanecer nesta página. Se sair, o processamento continua e retomamos
+                  quando voltar.
+                </p>
               </div>
             </div>
           </section>
@@ -343,78 +520,218 @@ function MaterialPage() {
         {output && (
           <>
             {output?.transcript && (
-              <section id="transcricao" className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
+              <section
+                id="transcricao"
+                className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <div className="flex items-center gap-2 font-bold"><FileText size={18} /> Transcrição</div>
-                    <p className="mt-1 text-xs text-muted-foreground">Texto extraído do áudio ou vídeo para você revisar e estudar.</p>
+                    <div className="flex items-center gap-2 font-bold">
+                      <FileText size={18} /> Transcrição
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Texto extraído do áudio ou vídeo para você revisar e estudar.
+                    </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => { if (!navigator.clipboard) { toast.error("Seu navegador não permite copiar automaticamente."); return; } void navigator.clipboard.writeText(output.transcript); toast.success("Transcrição copiada."); }}><Copy size={15} />Copiar</Button>
-                    <Button variant="outline" size="sm" onClick={() => {
-                      const blob = new Blob([output.transcript], { type: "text/plain;charset=utf-8" });
-                      const url = URL.createObjectURL(blob);
-                      const anchor = document.createElement("a");
-                      anchor.href = url;
-                      anchor.download = `${material.title.replace(/[^a-z0-9-_]+/gi, "-")}-transcricao.txt`;
-                      anchor.click();
-                      URL.revokeObjectURL(url);
-                    }}><Download size={15} />TXT</Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (!navigator.clipboard) {
+                          toast.error("Seu navegador não permite copiar automaticamente.");
+                          return;
+                        }
+                        void navigator.clipboard.writeText(output.transcript);
+                        toast.success("Transcrição copiada.");
+                      }}
+                    >
+                      <Copy size={15} />
+                      Copiar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const blob = new Blob([output.transcript], {
+                          type: "text/plain;charset=utf-8",
+                        });
+                        const url = URL.createObjectURL(blob);
+                        const anchor = document.createElement("a");
+                        anchor.href = url;
+                        anchor.download = `${material.title.replace(/[^a-z0-9-_]+/gi, "-")}-transcricao.txt`;
+                        anchor.click();
+                        URL.revokeObjectURL(url);
+                      }}
+                    >
+                      <Download size={15} />
+                      TXT
+                    </Button>
                   </div>
                 </div>
-                <div className="mt-5 max-h-[55dvh] overflow-y-auto whitespace-pre-wrap rounded-xl bg-secondary p-5 text-sm leading-7 text-muted-foreground">{output.transcript}</div>
+                <div className="mt-5 max-h-[55dvh] overflow-y-auto whitespace-pre-wrap rounded-xl bg-secondary p-5 text-sm leading-7 text-muted-foreground">
+                  {output.transcript}
+                </div>
               </section>
             )}
 
-            <section id="resumo" className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
-              <div className="flex items-center gap-2 text-sm font-bold text-brand-violet"><BookOpen size={18} /> Resumo</div>
-              <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground sm:text-base">{output.summary}</p>
+            <section
+              id="resumo"
+              className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7"
+            >
+              <div className="flex items-center gap-2 text-sm font-bold text-brand-violet">
+                <BookOpen size={18} /> Resumo
+              </div>
+              <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground sm:text-base">
+                {output.summary}
+              </p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {topics.map((topic, index) => <article key={index} className="rounded-xl bg-secondary p-4"><h3 className="font-bold">{topic.title}</h3><p className="mt-1 text-sm leading-relaxed text-muted-foreground">{topic.explanation}</p></article>)}
+                {topics.map((topic, index) => (
+                  <article key={index} className="rounded-xl bg-secondary p-4">
+                    <h3 className="font-bold">{topic.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                      {topic.explanation}
+                    </p>
+                  </article>
+                ))}
               </div>
             </section>
 
             {flashcards.length > 0 && (
-              <section id="flashcards" className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
-                <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 font-bold"><BookOpen size={18} /> Flashcards</div><span className="text-xs text-muted-foreground">{flashcardIndex + 1} / {flashcards.length}</span></div>
-                <button type="button" onClick={() => setShowAnswer((value) => !value)} aria-label={showAnswer ? "Mostrar pergunta do flashcard" : "Mostrar resposta do flashcard"}
-                  className="mt-5 min-h-48 w-full rounded-2xl border border-primary/20 bg-green-soft/50 p-6 text-left transition hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
-                  <p className="text-xs font-bold uppercase tracking-wide text-green-strong">{showAnswer ? "Resposta" : "Pergunta"}</p>
-                  <p className="mt-3 text-lg font-bold leading-relaxed">{showAnswer ? currentFlashcard?.answer : currentFlashcard?.question}</p>
+              <section
+                id="flashcards"
+                className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 font-bold">
+                    <BookOpen size={18} /> Flashcards
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {flashcardIndex + 1} / {flashcards.length}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAnswer((value) => !value)}
+                  aria-label={
+                    showAnswer ? "Mostrar pergunta do flashcard" : "Mostrar resposta do flashcard"
+                  }
+                  className="mt-5 min-h-48 w-full rounded-2xl border border-primary/20 bg-green-soft/50 p-6 text-left transition hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                >
+                  <p className="text-xs font-bold uppercase tracking-wide text-green-strong">
+                    {showAnswer ? "Resposta" : "Pergunta"}
+                  </p>
+                  <p className="mt-3 text-lg font-bold leading-relaxed">
+                    {showAnswer ? currentFlashcard?.answer : currentFlashcard?.question}
+                  </p>
                 </button>
                 <div className="mt-4 flex justify-between gap-3">
-                  <Button variant="outline" disabled={flashcardIndex === 0} onClick={() => { setFlashcardIndex((i) => i - 1); setShowAnswer(false); }}><ChevronLeft size={17} />Anterior</Button>
-                  <Button onClick={() => { const next = Math.min(flashcards.length - 1, flashcardIndex + 1); setFlashcardIndex(next); setShowAnswer(false); void saveProgress(Math.max(progress, Math.round(((next + 1) / flashcards.length) * 70))); }} disabled={flashcardIndex === flashcards.length - 1}>Próximo<ChevronRight size={17} /></Button>
+                  <Button
+                    variant="outline"
+                    disabled={flashcardIndex === 0}
+                    onClick={() => {
+                      setFlashcardIndex((i) => i - 1);
+                      setShowAnswer(false);
+                    }}
+                  >
+                    <ChevronLeft size={17} />
+                    Anterior
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const next = Math.min(flashcards.length - 1, flashcardIndex + 1);
+                      setFlashcardIndex(next);
+                      setShowAnswer(false);
+                      void saveProgress(
+                        Math.max(progress, Math.round(((next + 1) / flashcards.length) * 70)),
+                      );
+                    }}
+                    disabled={flashcardIndex === flashcards.length - 1}
+                  >
+                    Próximo
+                    <ChevronRight size={17} />
+                  </Button>
                 </div>
               </section>
             )}
 
             {quiz.length > 0 && (
-              <section id="quiz" className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7">
-                <div className="flex items-center gap-2 font-bold"><HelpCircle size={18} /> Quiz</div>
+              <section
+                id="quiz"
+                className="scroll-mt-24 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7"
+              >
+                <div className="flex items-center gap-2 font-bold">
+                  <HelpCircle size={18} /> Quiz
+                </div>
                 <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-secondary p-3 text-sm">
-                  <span className="font-semibold">{answeredQuizCount} de {quiz.length} respondidas</span>
-                  {quizSubmitted && quizCompleted && <span className="font-extrabold text-green-strong">Resultado: {correctQuizCount}/{quiz.length}</span>}
+                  <span className="font-semibold">
+                    {answeredQuizCount} de {quiz.length} respondidas
+                  </span>
+                  {quizSubmitted && quizCompleted && (
+                    <span className="font-extrabold text-green-strong">
+                      Resultado: {correctQuizCount}/{quiz.length}
+                    </span>
+                  )}
                 </div>
                 <div className="mt-5 space-y-6">
                   {quiz.map((item, index) => {
                     const selected = quizAnswers[index];
                     const correct = selected === item["answer"];
-                    return <article key={index} className="rounded-xl border border-border p-4">
-                      <p className="font-bold">{index + 1}. {item["question"]}</p>
-                      <div className="mt-3 grid gap-2">
-                        {item.options.map((option) => <button type="button" key={option} onClick={() => { setQuizAnswers((current) => ({ ...current, [index]: option })); setQuizSubmitted(false); }} aria-pressed={selected === option}
-                          className={`min-h-11 rounded-lg border px-3 py-3 text-left text-sm transition ${selected === option ? (quizSubmitted ? (correct ? "border-primary bg-green-soft" : "border-destructive bg-destructive/10") : "border-primary bg-primary/5") : "border-border hover:bg-secondary"}`}>{option}</button>)}
-                      </div>
-                      {selected && quizSubmitted && <div className="mt-3 rounded-lg bg-secondary p-3 text-sm"><strong>{correct ? "Correto!" : `Resposta: ${item["answer"]}`}</strong><p className="mt-1 text-muted-foreground">{item["explanation"]}</p></div>}
-                    </article>;
+                    return (
+                      <article key={index} className="rounded-xl border border-border p-4">
+                        <p className="font-bold">
+                          {index + 1}. {item["question"]}
+                        </p>
+                        <div className="mt-3 grid gap-2">
+                          {item.options.map((option) => (
+                            <button
+                              type="button"
+                              key={option}
+                              onClick={() => {
+                                setQuizAnswers((current) => ({ ...current, [index]: option }));
+                                setQuizSubmitted(false);
+                              }}
+                              aria-pressed={selected === option}
+                              className={`min-h-11 rounded-lg border px-3 py-3 text-left text-sm transition ${selected === option ? (quizSubmitted ? (correct ? "border-primary bg-green-soft" : "border-destructive bg-destructive/10") : "border-primary bg-primary/5") : "border-border hover:bg-secondary"}`}
+                            >
+                              {option}
+                            </button>
+                          ))}
+                        </div>
+                        {selected && quizSubmitted && (
+                          <div className="mt-3 rounded-lg bg-secondary p-3 text-sm">
+                            <strong>{correct ? "Correto!" : `Resposta: ${item["answer"]}`}</strong>
+                            <p className="mt-1 text-muted-foreground">{item["explanation"]}</p>
+                          </div>
+                        )}
+                      </article>
+                    );
                   })}
                 </div>
                 <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-                  <Button variant="outline" className="w-full sm:w-auto" onClick={resetQuiz} disabled={answeredQuizCount === 0}>Refazer quiz</Button>
-                  <Button className="w-full sm:w-auto" variant="secondary" onClick={() => { setQuizSubmitted(true); if (quizCompleted) void saveProgress(100); }} disabled={!quizCompleted}>
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                    onClick={resetQuiz}
+                    disabled={answeredQuizCount === 0}
+                  >
+                    Refazer quiz
+                  </Button>
+                  <Button
+                    className="w-full sm:w-auto"
+                    variant="secondary"
+                    onClick={() => {
+                      setQuizSubmitted(true);
+                      if (quizCompleted) void saveProgress(100);
+                    }}
+                    disabled={!quizCompleted}
+                  >
                     <CheckCircle2 size={17} />
-                    {quizCompleted ? (quizSubmitted ? "Resultado atualizado" : "Ver resultado") : "Responda todas as questões"}
+                    {quizCompleted
+                      ? quizSubmitted
+                        ? "Resultado atualizado"
+                        : "Ver resultado"
+                      : "Responda todas as questões"}
                   </Button>
                 </div>
               </section>
@@ -425,8 +742,14 @@ function MaterialPage() {
           <section className="rounded-2xl border border-primary/20 bg-green-soft/50 p-5 text-center sm:p-6">
             <CheckCircle2 className="mx-auto text-green-strong" size={24} />
             <h2 className="mt-3 font-bold">Terminou de estudar?</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Marque o material como concluído para salvar seu progresso.</p>
-            <Button className="mt-4" onClick={() => void saveProgress(100)} disabled={progress >= 100}>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Marque o material como concluído para salvar seu progresso.
+            </p>
+            <Button
+              className="mt-4"
+              onClick={() => void saveProgress(100)}
+              disabled={progress >= 100}
+            >
               {progress >= 100 ? "Material concluído" : "Concluir material"}
             </Button>
           </section>
@@ -437,21 +760,71 @@ function MaterialPage() {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xl font-black">Está satisfeito com esta nota?</p>
                 <div className="flex gap-3">
-                  <button type="button" aria-label="Não gostei" onClick={() => { setFeedback("down"); toast.success("Obrigado pelo feedback."); }} className={`flex h-14 w-14 items-center justify-center rounded-full transition ${feedback === "down" ? "bg-destructive/15 text-destructive" : "bg-destructive/10 text-destructive"}`}><ThumbsDown size={23} /></button>
-                  <button type="button" aria-label="Gostei" onClick={() => { setFeedback("up"); toast.success("Obrigado pelo feedback."); }} className={`flex h-14 w-14 items-center justify-center rounded-full transition ${feedback === "up" ? "bg-primary/20 text-primary" : "bg-green-soft text-green-strong"}`}><ThumbsUp size={23} /></button>
+                  <button
+                    type="button"
+                    aria-label="Não gostei"
+                    onClick={() => {
+                      setFeedback("down");
+                      toast.success("Obrigado pelo feedback.");
+                    }}
+                    className={`flex h-14 w-14 items-center justify-center rounded-full transition ${feedback === "down" ? "bg-destructive/15 text-destructive" : "bg-destructive/10 text-destructive"}`}
+                  >
+                    <ThumbsDown size={23} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Gostei"
+                    onClick={() => {
+                      setFeedback("up");
+                      toast.success("Obrigado pelo feedback.");
+                    }}
+                    className={`flex h-14 w-14 items-center justify-center rounded-full transition ${feedback === "up" ? "bg-primary/20 text-primary" : "bg-green-soft text-green-strong"}`}
+                  >
+                    <ThumbsUp size={23} />
+                  </button>
                 </div>
               </div>
             </div>
 
             {[
               { label: "Ver mapa mental", icon: Network, action: () => setShowMindMap(true) },
-              { label: "Editar nota e transcrição", icon: PenLine, action: () => document.getElementById("transcricao")?.scrollIntoView({ behavior: "smooth", block: "start" }) },
-              { label: "Traduzir anotação", icon: Languages, action: () => toast.info("Tradução automática será conectada ao pipeline de idiomas.") },
-              { label: "Denunciar nota", icon: Flag, action: () => toast.success("Sua denúncia foi registrada para análise.") },
-              { label: "Excluir nota", icon: Trash2, action: () => void deleteMaterial(), danger: true },
+              {
+                label: "Editar nota e transcrição",
+                icon: PenLine,
+                action: () =>
+                  document
+                    .getElementById("transcricao")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+              },
+              {
+                label: "Traduzir anotação",
+                icon: Languages,
+                action: () =>
+                  toast.info("Tradução automática será conectada ao pipeline de idiomas."),
+              },
+              {
+                label: "Denunciar nota",
+                icon: Flag,
+                action: () => toast.success("Sua denúncia foi registrada para análise."),
+              },
+              {
+                label: "Excluir nota",
+                icon: Trash2,
+                action: () => void deleteMaterial(),
+                danger: true,
+              },
             ].map(({ label, icon: Icon, action, danger }) => (
-              <button key={label} type="button" onClick={action} className={`flex min-h-[78px] w-full items-center gap-4 rounded-3xl border border-border bg-card px-5 text-left shadow-card transition hover:-translate-y-0.5 hover:shadow-soft ${danger ? "text-destructive" : "text-foreground"}`}>
-                <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border ${danger ? "bg-destructive/10" : "bg-secondary"}`}><Icon size={22} /></span>
+              <button
+                key={label}
+                type="button"
+                onClick={action}
+                className={`flex min-h-[78px] w-full items-center gap-4 rounded-3xl border border-border bg-card px-5 text-left shadow-card transition hover:-translate-y-0.5 hover:shadow-soft ${danger ? "text-destructive" : "text-foreground"}`}
+              >
+                <span
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border ${danger ? "bg-destructive/10" : "bg-secondary"}`}
+                >
+                  <Icon size={22} />
+                </span>
                 <span className="flex-1 text-lg font-semibold">{label}</span>
                 <ChevronRight className="text-muted-foreground" size={23} />
               </button>
@@ -463,20 +836,46 @@ function MaterialPage() {
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 p-3 backdrop-blur-sm sm:items-center">
             <div className="max-h-[85dvh] w-full max-w-2xl overflow-y-auto rounded-[2rem] border border-border bg-background p-6 shadow-soft sm:p-8">
               <div className="flex items-center justify-between gap-4">
-                <div><p className="text-sm font-black text-brand-violet">Pineapple Note</p><h2 className="text-2xl font-black">Mapa mental</h2></div>
-                <button type="button" onClick={() => setShowMindMap(false)} className="flex h-10 w-10 items-center justify-center rounded-full border border-border">×</button>
+                <div>
+                  <p className="text-sm font-black text-brand-violet">Pineapple Note</p>
+                  <h2 className="text-2xl font-black">Mapa mental</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowMindMap(false)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-border"
+                >
+                  ×
+                </button>
               </div>
               <div className="mt-7 rounded-3xl bg-secondary p-5 text-center">
-                <div className="mx-auto max-w-xs rounded-2xl bg-card p-5 shadow-card"><p className="text-xs font-black uppercase tracking-wider text-muted-foreground">Tema central</p><p className="mt-2 text-xl font-black">{material.title}</p></div>
+                <div className="mx-auto max-w-xs rounded-2xl bg-card p-5 shadow-card">
+                  <p className="text-xs font-black uppercase tracking-wider text-muted-foreground">
+                    Tema central
+                  </p>
+                  <p className="mt-2 text-xl font-black">{material.title}</p>
+                </div>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {topics.map((topic) => <div key={topic.title} className="rounded-2xl border border-border bg-card p-4 text-left"><p className="font-black text-brand-violet">{topic.title}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{topic.explanation}</p></div>)}
+                  {topics.map((topic) => (
+                    <div
+                      key={topic.title}
+                      className="rounded-2xl border border-border bg-card p-4 text-left"
+                    >
+                      <p className="font-black text-brand-violet">{topic.title}</p>
+                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                        {topic.explanation}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        <footer className="mt-10 border-t border-border py-8 text-center text-xs text-muted-foreground">Pineapple Note · Desenvolvido pela Decode Analytics</footer>
+        <footer className="mt-10 border-t border-border py-8 text-center text-xs text-muted-foreground">
+          Pineapple Note · Desenvolvido pela Decode Analytics
+        </footer>
       </main>
     </div>
   );

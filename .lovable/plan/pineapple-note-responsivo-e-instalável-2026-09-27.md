@@ -1,6 +1,7 @@
 # Pineapple Note responsivo e instalável
 
 ## Implementação
+
 - Ajustar o cabeçalho para permanecer estável em telas estreitas.
 - Criar ícones próprios em tamanhos adequados a partir do logo oficial.
 - Adicionar os dados necessários para instalar o Pineapple Note na tela inicial de celulares e computadores.
