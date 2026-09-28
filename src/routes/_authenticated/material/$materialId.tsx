@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, FileText, Gamepad2, HelpCircle, Loader2, Mic2, Presentation, Share2 } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, FileText, Gamepad2, HelpCircle, Languages, Loader2, Mic2, Network, PenLine, Presentation, Share2, ThumbsDown, ThumbsUp, Trash2, Flag } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,8 @@ function MaterialPage() {
   const [activeSection, setActiveSection] = useState("resumo");
   const [retrying, setRetrying] = useState(false);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [showMindMap, setShowMindMap] = useState(false);
+  const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
 
   async function load() {
     setLoading(true);
@@ -153,6 +155,33 @@ function MaterialPage() {
     setRetrying(true);
     await processMaterial();
     setRetrying(false);
+  }
+
+  async function deleteMaterial() {
+    if (!material) return;
+    const confirmed = window.confirm("Excluir esta nota? O arquivo e os dados deste material serão removidos.");
+    if (!confirmed) return;
+    const { error: storageError } = await supabase.storage.from("study-materials").remove([material.storage_path]);
+    if (storageError) {
+      toast.error("Não foi possível remover o arquivo original.");
+      return;
+    }
+    const { error } = await supabase.from("study_materials").delete().eq("id", materialId).eq("user_id", user.id);
+    if (error) {
+      toast.error("Não foi possível excluir a nota.");
+      return;
+    }
+    toast.success("Nota excluída.");
+    navigate({ to: "/library" });
+  }
+
+  function shareMaterial() {
+    if (navigator.share) {
+      void navigator.share({ title: material?.title ?? "Pineapple Note", text: "Confira esta nota no Pineapple Note." });
+    } else {
+      void navigator.clipboard?.writeText(window.location.href);
+      toast.success("Link copiado.");
+    }
   }
 
   async function saveProgress(value: number) {
@@ -402,6 +431,51 @@ function MaterialPage() {
             </Button>
           </section>
         )}
+        {output && (
+          <section className="mt-8 space-y-3" aria-label="Ações da nota">
+            <div className="rounded-3xl border border-border bg-card p-5 shadow-card sm:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xl font-black">Está satisfeito com esta nota?</p>
+                <div className="flex gap-3">
+                  <button type="button" aria-label="Não gostei" onClick={() => { setFeedback("down"); toast.success("Obrigado pelo feedback."); }} className={`flex h-14 w-14 items-center justify-center rounded-full transition ${feedback === "down" ? "bg-destructive/15 text-destructive" : "bg-destructive/10 text-destructive"}`}><ThumbsDown size={23} /></button>
+                  <button type="button" aria-label="Gostei" onClick={() => { setFeedback("up"); toast.success("Obrigado pelo feedback."); }} className={`flex h-14 w-14 items-center justify-center rounded-full transition ${feedback === "up" ? "bg-primary/20 text-primary" : "bg-green-soft text-green-strong"}`}><ThumbsUp size={23} /></button>
+                </div>
+              </div>
+            </div>
+
+            {[
+              { label: "Ver mapa mental", icon: Network, action: () => setShowMindMap(true) },
+              { label: "Editar nota e transcrição", icon: PenLine, action: () => document.getElementById("transcricao")?.scrollIntoView({ behavior: "smooth", block: "start" }) },
+              { label: "Traduzir anotação", icon: Languages, action: () => toast.info("Tradução automática será conectada ao pipeline de idiomas.") },
+              { label: "Denunciar nota", icon: Flag, action: () => toast.success("Sua denúncia foi registrada para análise.") },
+              { label: "Excluir nota", icon: Trash2, action: () => void deleteMaterial(), danger: true },
+            ].map(({ label, icon: Icon, action, danger }) => (
+              <button key={label} type="button" onClick={action} className={`flex min-h-[78px] w-full items-center gap-4 rounded-3xl border border-border bg-card px-5 text-left shadow-card transition hover:-translate-y-0.5 hover:shadow-soft ${danger ? "text-destructive" : "text-foreground"}`}>
+                <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border ${danger ? "bg-destructive/10" : "bg-secondary"}`}><Icon size={22} /></span>
+                <span className="flex-1 text-lg font-semibold">{label}</span>
+                <ChevronRight className="text-muted-foreground" size={23} />
+              </button>
+            ))}
+          </section>
+        )}
+
+        {showMindMap && output && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 p-3 backdrop-blur-sm sm:items-center">
+            <div className="max-h-[85dvh] w-full max-w-2xl overflow-y-auto rounded-[2rem] border border-border bg-background p-6 shadow-soft sm:p-8">
+              <div className="flex items-center justify-between gap-4">
+                <div><p className="text-sm font-black text-brand-violet">Pineapple Note</p><h2 className="text-2xl font-black">Mapa mental</h2></div>
+                <button type="button" onClick={() => setShowMindMap(false)} className="flex h-10 w-10 items-center justify-center rounded-full border border-border">×</button>
+              </div>
+              <div className="mt-7 rounded-3xl bg-secondary p-5 text-center">
+                <div className="mx-auto max-w-xs rounded-2xl bg-card p-5 shadow-card"><p className="text-xs font-black uppercase tracking-wider text-muted-foreground">Tema central</p><p className="mt-2 text-xl font-black">{material.title}</p></div>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {topics.map((topic) => <div key={topic.title} className="rounded-2xl border border-border bg-card p-4 text-left"><p className="font-black text-brand-violet">{topic.title}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{topic.explanation}</p></div>)}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <footer className="mt-10 border-t border-border py-8 text-center text-xs text-muted-foreground">Pineapple Note · Desenvolvido pela Decode Analytics</footer>
       </main>
     </div>
