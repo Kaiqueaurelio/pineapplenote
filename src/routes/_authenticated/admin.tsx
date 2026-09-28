@@ -113,9 +113,11 @@ function AdminPage() {
   }, [autoRefresh]);
 
   async function deleteMaterial(material: Tables<"study_materials">) {
-    const { error } = await supabase.from("study_materials").delete().eq("id", material.id);
-    if (error) {
-      toast.error("Não foi possível excluir o material. Verifique as políticas do banco.");
+    const { data, error } = await supabase.functions.invoke("admin-actions", {
+      body: { action: "delete_materials", materialIds: [material.id] },
+    });
+    if (error || data?.error) {
+      toast.error(data?.error ?? "Não foi possível excluir o material.");
       return;
     }
     setConfirmDelete(null);
@@ -147,8 +149,10 @@ function AdminPage() {
   async function toggleRole(profile: Tables<"profiles">) {
     const nextRole = profile.role === "admin" ? "user" : "admin";
     if (!window.confirm(`Alterar ${profile.display_name || "este perfil"} para ${nextRole === "admin" ? "Administrador" : "Estudante"}?`)) return;
-    const { error } = await supabase.from("profiles").update({ role: nextRole }).eq("user_id", profile.user_id);
-    if (error) return toast.error("A permissão não pôde ser alterada. Verifique a política de acesso do Supabase.");
+    const { data, error } = await supabase.functions.invoke("admin-actions", {
+      body: { action: "set_role", userId: profile.user_id, role: nextRole },
+    });
+    if (error || data?.error) return toast.error(data?.error ?? "A permissão não pôde ser alterada.");
     toast.success(`Permissão alterada para ${nextRole === "admin" ? "Administrador" : "Estudante"}.`);
     await load();
   }
@@ -266,9 +270,11 @@ function AdminPage() {
   async function deleteSelectedMaterials() {
     if (!selectedMaterials.length) return;
     if (!window.confirm(`Excluir ${selectedMaterials.length} material(is) selecionado(s)?`)) return;
-    const { error } = await supabase.from("study_materials").delete().in("id", selectedMaterials);
-    if (error) {
-      toast.error("Não foi possível excluir os materiais selecionados.");
+    const { data, error } = await supabase.functions.invoke("admin-actions", {
+      body: { action: "delete_materials", materialIds: selectedMaterials },
+    });
+    if (error || data?.error) {
+      toast.error(data?.error ?? "Não foi possível excluir os materiais selecionados.");
       return;
     }
     setSelectedMaterials([]);
