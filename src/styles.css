@@ -160,6 +160,20 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
+  /* Keep the document in the normal horizontal writing direction on every browser/device. */
+  writing-mode: horizontal-tb !important;
+  direction: ltr !important;
+  text-orientation: mixed !important;
+  transform: none !important;
+}
+
+body {
+  writing-mode: horizontal-tb !important;
+  direction: ltr !important;
+  text-orientation: mixed !important;
+  transform: none !important;
+  width: 100%;
+  min-height: 100dvh;
 }
 
 @media (prefers-reduced-motion: reduce) {
