@@ -73,10 +73,6 @@ function SettingsPage() {
     navigate({ to: "/auth", replace: true });
   }
 
-  function unsupported(label: string) {
-    toast.info(`${label} estará disponível em uma próxima versão.`);
-  }
-
   return (
     <div className="min-h-[100dvh] bg-[#f2f2f7] text-black">
       <header className="sticky top-0 z-30 border-b border-[#d8d8dd] bg-[#f2f2f7]/95 backdrop-blur-2xl">
@@ -98,12 +94,11 @@ function SettingsPage() {
         <p className="mb-8 text-[17px]">{user.email}</p>
 
         <section className="overflow-hidden rounded-[28px] bg-white">
-          <Row icon={Volume2} label="Gravações salvas" onClick={() => navigate({ to: "/library" })} />
-          <Row icon={Users} label="Plano Familiar" onClick={() => unsupported("Plano Familiar")} />
-          <Row icon={RotateCcw} label="Restaurar compras" onClick={() => toast.success("Não há compras pendentes para restaurar nesta versão.")} />
+          <Row icon={Volume2} label="Gravações e materiais" onClick={() => navigate({ to: "/library" })} />
+          <Row icon={Bell} label={"Notificações: " + (notifications ? "ativadas" : "desativadas")} onClick={() => setNotifications((value) => !value)} />
+          <Row icon={RotateCcw} label="Restaurar compras" onClick={() => toast.info("Não há compras associadas a esta conta para restaurar.")} />
           <Row icon={Monitor} label="Termos de serviço" onClick={() => setDialog("terms")} />
           <Row icon={Shield} label="Política de Privacidade" onClick={() => setDialog("privacy")} />
-          <Row icon={Heart} label="Trabalhe no Pineapple Note" onClick={() => unsupported("Página de carreiras")} />
           <Row icon={LogOut} label="Sair" danger onClick={() => void signOut()} />
           <Row icon={Trash2} label="Excluir conta" danger onClick={() => setDialog("delete")} />
         </section>
@@ -120,8 +115,8 @@ function SettingsPage() {
             </div>
             <p className="mt-4 text-[15px] leading-7 text-[#636366]">
               {dialog === "help" && "Adicione um áudio, vídeo, documento ou link. O Pineapple Note organiza o conteúdo e prepara resumo, transcrição, flashcards, quiz, podcast, slides e jogos."}
-              {dialog === "terms" && "Os termos oficiais da Decode Analytics devem ser publicados antes do lançamento público."}
-              {dialog === "privacy" && "A política de privacidade oficial da Decode Analytics deve ser publicada antes do lançamento público."}
+              {dialog === "terms" && "O uso do Pineapple Note exige respeito às leis aplicáveis, aos direitos autorais e às regras de uso da plataforma. Este texto é informativo e não substitui os termos oficiais."}
+              {dialog === "privacy" && "O Pineapple Note processa dados de conta e conteúdos enviados para oferecer os recursos da plataforma. Consulte a política oficial da Decode Analytics quando publicada para conhecer detalhes de retenção, segurança e direitos do usuário."}
               {dialog === "delete" && "A exclusão permanente precisa ser executada por uma rotina segura no backend. Nenhum dado será removido de forma incompleta."}
               {dialog !== "help" && dialog !== "terms" && dialog !== "privacy" && dialog !== "delete" && "Esta seção está preparada para receber o conteúdo oficial."}
             </p>
