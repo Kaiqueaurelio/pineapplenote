@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Pause, Play, RotateCcw, Sparkles, Volume2 } from "lucide-react";
+import { ArrowLeft, Pause, Play, RotateCcw, Users, Volume2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -26,6 +26,9 @@ function PodcastPage() {
   const [voice, setVoice] = useState(voices[0]);
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generatedScript, setGeneratedScript] = useState("");
+  const [twoVoices, setTwoVoices] = useState(true);
 
   useEffect(() => {
     void (async () => {
@@ -49,11 +52,28 @@ function PodcastPage() {
     return () => window.speechSynthesis.cancel();
   }, [materialId, user.id]);
 
-  const script = useMemo(() => {
+  const baseScript = useMemo(() => {
     if (!output) return "";
     const summary = output.summary?.trim() ?? "";
     return summary ? `Olá! Vamos revisar ${material?.title ?? "este material"}. ${summary}` : "";
   }, [material?.title, output]);
+
+  const script = generatedScript || baseScript;
+
+  async function generatePodcast() {
+    if (generating || !output) return;
+    setGenerating(true);
+    const { data, error } = await supabase.functions.invoke("ai-tools", {
+      body: { action: "podcast", materialId, style: twoVoices ? "duas vozes, conversa natural e didática" : voice.tone },
+    });
+    setGenerating(false);
+    if (error || data?.error) {
+      toast.error(data?.error ?? "Não foi possível gerar o podcast.");
+      return;
+    }
+    setGeneratedScript(String(data.script ?? ""));
+    toast.success("Roteiro do podcast gerado.");
+  }
 
   function speak() {
     if (!("speechSynthesis" in window) || !script) {
@@ -159,10 +179,10 @@ function PodcastPage() {
         <section className="mt-10 rounded-3xl border border-border bg-card p-5 shadow-card sm:p-7">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-soft text-brand-violet">
-              <Sparkles size={21} />
+              <Users size={21} />
             </div>
             <div>
-              <p className="font-black">Duas vozes</p>
+              <p className="font-black">Duas vozes {twoVoices ? "· ativado" : ""}</p>
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
                 Modo de conversa para transformar a revisão em um diálogo entre dois apresentadores.
               </p>
@@ -170,11 +190,7 @@ function PodcastPage() {
           </div>
           <button
             type="button"
-            onClick={() =>
-              toast.info(
-                "O modo Duas vozes está preparado para a próxima etapa de áudio generativo.",
-              )
-            }
+            onClick={() => { setTwoVoices((value) => !value); void generatePodcast(); }}
             className="mt-5 w-full rounded-2xl border border-border bg-secondary p-5 text-left transition hover:border-brand-violet/30"
           >
             <div className="flex items-center gap-4">
@@ -200,6 +216,14 @@ function PodcastPage() {
             {script || "Processe o material para gerar o roteiro do podcast."}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => void generatePodcast()}
+              disabled={generating}
+              className="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-brand-violet/30 bg-violet-soft px-5 font-extrabold text-brand-violet"
+            >
+              <Users size={18} /> {generating ? "Gerando roteiro…" : "Gerar roteiro"}
+            </button>
             <button
               type="button"
               onClick={
