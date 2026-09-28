@@ -147,10 +147,14 @@ function MaterialPage() {
       return;
     }
     setMaterial(materialData);
-    const { data: signedSource } = await supabase.storage
-      .from("study-materials")
-      .createSignedUrl(materialData.storage_path, 60 * 60);
-    setSourceUrl(signedSource?.signedUrl ?? null);
+    if (materialData.source_type === "url") {
+      setSourceUrl(materialData.storage_path);
+    } else {
+      const { data: signedSource } = await supabase.storage
+        .from("study-materials")
+        .createSignedUrl(materialData.storage_path, 60 * 60);
+      setSourceUrl(signedSource?.signedUrl ?? null);
+    }
     setOutput(outputData);
     const savedProgress = Math.max(0, Math.min(100, progressData?.progress ?? 0));
     setProgress(savedProgress);
