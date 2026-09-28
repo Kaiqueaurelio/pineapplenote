@@ -25,7 +25,7 @@ import {
   Trash2,
   Flag,
 } from "lucide-react";
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -114,7 +114,7 @@ function MaterialPage() {
   } | null>(null);
   const [mindMapLoading, setMindMapLoading] = useState(false);
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     const [
       { data: materialData, error: materialError },
@@ -163,11 +163,11 @@ function MaterialPage() {
       },
       { onConflict: "user_id,material_id" },
     );
-  }
+  }, [materialId, user.id, navigate]);
 
   useEffect(() => {
     void load();
-  }, [materialId, user.id]);
+  }, [load]);
 
   useEffect(() => {
     void supabase
@@ -220,7 +220,7 @@ function MaterialPage() {
     }, 3000);
 
     return () => window.clearInterval(interval);
-  }, [material?.status, output, materialId, user.id]);
+  }, [material?.status, output, materialId, user.id, load]);
 
   async function processMaterial() {
     if (!material || processing || material.status === "processing") return;
