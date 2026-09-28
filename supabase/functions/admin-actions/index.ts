@@ -24,7 +24,8 @@ Deno.serve(async (req) => {
   const publishableKey =
     Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ??
     JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}").default;
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const secretKeys = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? secretKeys.default;
 
   if (!url || !publishableKey || !serviceRoleKey) {
     return json({ error: "Configuração segura do servidor incompleta." }, 503);
