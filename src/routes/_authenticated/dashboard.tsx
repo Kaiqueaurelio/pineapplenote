@@ -4,10 +4,13 @@ import {
   ArrowRight,
   AudioLines,
   BookOpen,
+  CalendarClock,
+  CheckCircle2,
   CircleStop,
   CircleHelp,
   FileText,
   Home,
+  Download,
   Library,
   Loader2,
   Menu,
@@ -29,7 +32,13 @@ import { z } from "zod";
 
 import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,6 +71,11 @@ const navItems = [
   { label: "Biblioteca", icon: Library },
 ];
 
+type InstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+};
+
 function Index() {
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
@@ -82,6 +96,7 @@ function Index() {
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const [dashboardMaterials, setDashboardMaterials] = useState<Tables<"study_materials">[]>([]);
   const [dashboardProgress, setDashboardProgress] = useState<Record<string, number>>({});
+  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordingChunksRef = useRef<Blob[]>([]);
@@ -107,43 +122,89 @@ function Index() {
   }, [mobileMenuOpen]);
 
   useEffect(() => {
-    supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(async ({ data, error }) => {
-      if (error) {
-        toast.error("Não foi possível carregar seu perfil.");
-        return;
-      }
-      if (data) return setProfile(data);
-      const metadata = user.user_metadata;
-      const initial = {
-        user_id: user.id,
-        display_name: typeof metadata['full_name'] === "string" ? metadata['full_name'].slice(0, 80) : "",
-        institution: typeof metadata['institution'] === "string" ? metadata['institution'].slice(0, 120) : "",
-        course: typeof metadata['course'] === "string" ? metadata['course'].slice(0, 120) : "",
-      };
-      const { data: created, error: createError } = await supabase.from("profiles").upsert(initial).select().single();
-      if (createError) {
-        toast.error("Não foi possível criar seu perfil.");
-        return;
-      }
-      if (created) setProfile(created);
-    });
+    const captureInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as InstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", captureInstallPrompt);
+    return () => window.removeEventListener("beforeinstallprompt", captureInstallPrompt);
+  }, []);
+
+  useEffect(() => {
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(async ({ data, error }) => {
+        if (error) {
+          toast.error("Não foi possível carregar seu perfil.");
+          return;
+        }
+        if (data) return setProfile(data);
+        const metadata = user.user_metadata;
+        const initial = {
+          user_id: user.id,
+          display_name:
+            typeof metadata["full_name"] === "string" ? metadata["full_name"].slice(0, 80) : "",
+          institution:
+            typeof metadata["institution"] === "string"
+              ? metadata["institution"].slice(0, 120)
+              : "",
+          course: typeof metadata["course"] === "string" ? metadata["course"].slice(0, 120) : "",
+        };
+        const { data: created, error: createError } = await supabase
+          .from("profiles")
+          .upsert(initial)
+          .select()
+          .single();
+        if (createError) {
+          toast.error("Não foi possível criar seu perfil.");
+          return;
+        }
+        if (created) setProfile(created);
+      });
   }, [user]);
 
   useEffect(() => {
-    supabase.from("study_materials").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(async ({ data, error }) => {
-      if (error) {
-        toast.error("Não foi possível carregar seus materiais.");
-        return;
-      }
-      setDashboardMaterials(data ?? []);
-      if (!data?.length) return;
-      const { data: progressRows } = await supabase.from("study_progress").select("material_id, progress").eq("user_id", user.id).in("material_id", data.map((item) => item.id));
-      setDashboardProgress(Object.fromEntries((progressRows ?? []).map((row) => [row.material_id, row.progress])));
-    });
+    supabase
+      .from("study_materials")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .then(async ({ data, error }) => {
+        if (error) {
+          toast.error("Não foi possível carregar seus materiais.");
+          return;
+        }
+        setDashboardMaterials(data ?? []);
+        if (!data?.length) return;
+        const { data: progressRows } = await supabase
+          .from("study_progress")
+          .select("material_id, progress")
+          .eq("user_id", user.id)
+          .in(
+            "material_id",
+            data.map((item) => item.id),
+          );
+        setDashboardProgress(
+          Object.fromEntries((progressRows ?? []).map((row) => [row.material_id, row.progress])),
+        );
+      });
   }, [user.id]);
 
-  const displayName = profile?.display_name || (typeof user.user_metadata['full_name'] === "string" ? user.user_metadata['full_name'] : "Estudante");
-  const initials = displayName.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "PN";
+  const displayName =
+    profile?.display_name ||
+    (typeof user.user_metadata["full_name"] === "string"
+      ? user.user_metadata["full_name"]
+      : "Estudante");
+  const initials =
+    displayName
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "PN";
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -155,17 +216,27 @@ function Index() {
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const result = z.object({
-      display_name: z.string().trim().min(2, "Informe seu nome.").max(80),
-      institution: z.string().trim().max(120),
-      course: z.string().trim().max(120),
-    }).safeParse({ display_name: String(form.get("display_name") ?? ""), institution: String(form.get("institution") ?? ""), course: String(form.get("course") ?? "") });
+    const result = z
+      .object({
+        display_name: z.string().trim().min(2, "Informe seu nome.").max(80),
+        institution: z.string().trim().max(120),
+        course: z.string().trim().max(120),
+      })
+      .safeParse({
+        display_name: String(form.get("display_name") ?? ""),
+        institution: String(form.get("institution") ?? ""),
+        course: String(form.get("course") ?? ""),
+      });
     if (!result.success) {
       toast.error(result.error.issues[0]?.message ?? "Revise seus dados.");
       return;
     }
     setSavingProfile(true);
-    const { data, error } = await supabase.from("profiles").upsert({ user_id: user.id, ...result.data }).select().single();
+    const { data, error } = await supabase
+      .from("profiles")
+      .upsert({ user_id: user.id, ...result.data })
+      .select()
+      .single();
     setSavingProfile(false);
     if (error || !data) {
       toast.error("Não foi possível salvar seu perfil.");
@@ -179,15 +250,20 @@ function Index() {
   async function changePassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const result = z.object({
-      current_password: z.string().min(1, "Informe sua senha atual."),
-      new_password: z.string().min(8, "A nova senha precisa ter pelo menos 8 caracteres.").max(72),
-      confirmation: z.string().min(1, "Confirme a nova senha."),
-    }).safeParse({
-      current_password: String(form.get("current_password") ?? ""),
-      new_password: String(form.get("new_password") ?? ""),
-      confirmation: String(form.get("confirmation") ?? ""),
-    });
+    const result = z
+      .object({
+        current_password: z.string().min(1, "Informe sua senha atual."),
+        new_password: z
+          .string()
+          .min(8, "A nova senha precisa ter pelo menos 8 caracteres.")
+          .max(72),
+        confirmation: z.string().min(1, "Confirme a nova senha."),
+      })
+      .safeParse({
+        current_password: String(form.get("current_password") ?? ""),
+        new_password: String(form.get("new_password") ?? ""),
+        confirmation: String(form.get("confirmation") ?? ""),
+      });
     if (!result.success) {
       toast.error(result.error.issues[0]?.message ?? "Revise os dados.");
       return;
@@ -210,7 +286,9 @@ function Index() {
       toast.error("A senha atual está incorreta.");
       return;
     }
-    const { error: updateError } = await supabase.auth.updateUser({ password: result.data.new_password });
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: result.data.new_password,
+    });
     setSavingPassword(false);
     if (updateError) {
       toast.error("Não foi possível alterar a senha. Tente novamente.");
@@ -255,7 +333,9 @@ function Index() {
       if (fileRef.current) fileRef.current.value = "";
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mimeType = getRecordingMimeType();
-      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
       recordingChunksRef.current = [];
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) recordingChunksRef.current.push(event.data);
@@ -267,7 +347,13 @@ function Index() {
         if (blob.size === 0) {
           toast.error("A gravação ficou vazia. Tente novamente.");
         } else {
-          setSelectedFile(new File([blob], `gravacao-${new Date().toISOString().replace(/[:.]/g, "-")}.${extension}`, { type }));
+          setSelectedFile(
+            new File(
+              [blob],
+              `gravacao-${new Date().toISOString().replace(/[:.]/g, "-")}.${extension}`,
+              { type },
+            ),
+          );
           toast.success("Gravação pronta para salvar.");
         }
         stream?.getTracks().forEach((track) => track.stop());
@@ -293,7 +379,10 @@ function Index() {
       setSelectedType("Gravar áudio");
       setRecordingSeconds(0);
       setRecording(true);
-      recordingTimerRef.current = window.setInterval(() => setRecordingSeconds((seconds) => seconds + 1), 1000);
+      recordingTimerRef.current = window.setInterval(
+        () => setRecordingSeconds((seconds) => seconds + 1),
+        1000,
+      );
     } catch {
       stream?.getTracks().forEach((track) => track.stop());
       mediaRecorderRef.current = null;
@@ -324,7 +413,9 @@ function Index() {
   };
 
   function formatRecordingTime(totalSeconds: number) {
-    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+    const minutes = Math.floor(totalSeconds / 60)
+      .toString()
+      .padStart(2, "0");
     const seconds = (totalSeconds % 60).toString().padStart(2, "0");
     return `${minutes}:${seconds}`;
   }
@@ -344,11 +435,19 @@ function Index() {
     setUploadingMaterial(true);
     const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(-120);
     const path = `${user.id}/${crypto.randomUUID()}-${safeName}`;
-    const sourceType = selectedType === "Gravar áudio" ? "audio" : selectedType === "Enviar vídeo" ? "video" : "document";
+    const sourceType =
+      selectedType === "Gravar áudio"
+        ? "audio"
+        : selectedType === "Enviar vídeo"
+          ? "video"
+          : "document";
 
     const { error: uploadError } = await supabase.storage
       .from("study-materials")
-      .upload(path, selectedFile, { contentType: selectedFile.type || "application/octet-stream", upsert: false });
+      .upload(path, selectedFile, {
+        contentType: selectedFile.type || "application/octet-stream",
+        upsert: false,
+      });
 
     if (uploadError) {
       setUploadingMaterial(false);
@@ -356,14 +455,18 @@ function Index() {
       return;
     }
 
-    const { data: savedMaterial, error: rowError } = await supabase.from("study_materials").insert({
-      user_id: user.id,
-      title: selectedFile.name,
-      source_type: sourceType,
-      mime_type: selectedFile.type || "application/octet-stream",
-      storage_path: path,
-      status: "uploaded",
-    }).select("id").single();
+    const { data: savedMaterial, error: rowError } = await supabase
+      .from("study_materials")
+      .insert({
+        user_id: user.id,
+        title: selectedFile.name,
+        source_type: sourceType,
+        mime_type: selectedFile.type || "application/octet-stream",
+        storage_path: path,
+        status: "uploaded",
+      })
+      .select("id")
+      .single();
 
     if (rowError || !savedMaterial) {
       await supabase.storage.from("study-materials").remove([path]);
@@ -380,6 +483,38 @@ function Index() {
   }
 
   const isAdmin = profile?.role === "admin";
+  const profileComplete = Boolean(profile?.display_name && profile?.institution && profile?.course);
+  const readyMaterials = dashboardMaterials.filter((material) => material.status === "ready");
+  const onboardingSteps = [
+    {
+      label: "Complete seu perfil acadêmico",
+      complete: profileComplete,
+      action: () => setProfileOpen(true),
+    },
+    {
+      label: "Adicione seu primeiro conteúdo",
+      complete: dashboardMaterials.length > 0,
+      action: () =>
+        document.getElementById("novo-material")?.scrollIntoView({ behavior: "smooth" }),
+    },
+    {
+      label: "Abra um material pronto para estudar",
+      complete: readyMaterials.length > 0,
+      action: () =>
+        readyMaterials[0] &&
+        navigate({ to: "/material/$materialId", params: { materialId: readyMaterials[0].id } }),
+    },
+  ];
+  const completedOnboardingSteps = onboardingSteps.filter((step) => step.complete).length;
+
+  async function requestInstall() {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
+    if (choice.outcome === "accepted")
+      toast.success("Pineapple Note instalado no seu dispositivo.");
+    setInstallPrompt(null);
+  }
   const currentHour = new Date().getHours();
   const greeting = currentHour < 12 ? "Bom dia" : currentHour < 18 ? "Boa tarde" : "Boa noite";
 
@@ -397,7 +532,11 @@ function Index() {
             {mobileMenuOpen ? <X size={21} /> : <Menu size={21} />}
           </Button>
 
-          <a href="/" className="flex min-w-0 items-center sm:mr-auto" aria-label="Pineapple Note — início">
+          <a
+            href="/"
+            className="flex min-w-0 items-center sm:mr-auto"
+            aria-label="Pineapple Note — início"
+          >
             <img
               src={logoAsset.url}
               alt="Pineapple Note"
@@ -406,7 +545,10 @@ function Index() {
           </a>
 
           <div className="hidden w-full max-w-md items-center lg:flex">
-            <Search className="pointer-events-none relative left-9 z-10 text-muted-foreground" size={18} />
+            <Search
+              className="pointer-events-none relative left-9 z-10 text-muted-foreground"
+              size={18}
+            />
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -416,7 +558,15 @@ function Index() {
             />
           </div>
 
-          {isAdmin && <Button variant="outline" className="hidden sm:inline-flex" onClick={() => navigate({ to: "/admin" })}>Administração</Button>}
+          {isAdmin && (
+            <Button
+              variant="outline"
+              className="hidden sm:inline-flex"
+              onClick={() => navigate({ to: "/admin" })}
+            >
+              Administração
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -456,16 +606,23 @@ function Index() {
           </nav>
 
           <div className="mt-auto space-y-1 border-t border-border pt-5">
-            <button type="button" onClick={() => setHelpOpen(true)} className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
+            <button
+              type="button"
+              onClick={() => setHelpOpen(true)}
+              className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+            >
               <CircleHelp size={19} /> Ajuda
             </button>
-            <Button variant="ghost" className="w-full justify-start" onClick={() => setProfileOpen(true)}>
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => setProfileOpen(true)}
+            >
               <Settings size={19} /> Configurações
             </Button>
             <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
               <LogOut size={19} /> Sair
             </Button>
-
           </div>
         </aside>
 
@@ -475,19 +632,90 @@ function Index() {
               <div>
                 <p className="mb-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-green-strong">
                   <BookOpen size={16} /> {greeting}, {displayName.split(" ")[0]}
-                  {isAdmin && <span className="rounded-full bg-violet-soft px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-brand-violet">Admin</span>}
+                  {isAdmin && (
+                    <span className="rounded-full bg-violet-soft px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-brand-violet">
+                      Admin
+                    </span>
+                  )}
                 </p>
-                <h1 className="text-[1.75rem] font-extrabold leading-tight sm:text-4xl">O que vamos aprender hoje?</h1>
+                <h1 className="text-[1.75rem] font-extrabold leading-tight sm:text-4xl">
+                  O que vamos aprender hoje?
+                </h1>
                 <p className="mt-2 max-w-xl text-muted-foreground">
-                  Sua aula. Organizada pela IA. Envie um conteúdo e receba um material pronto para estudar.
+                  Sua aula. Organizada pela IA. Envie um conteúdo e receba um material pronto para
+                  estudar.
                 </p>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <BookOpen size={17} /> <strong className="text-foreground">{dashboardMaterials.length}</strong> {dashboardMaterials.length === 1 ? "material" : "materiais"} na biblioteca
+                <BookOpen size={17} />{" "}
+                <strong className="text-foreground">{dashboardMaterials.length}</strong>{" "}
+                {dashboardMaterials.length === 1 ? "material" : "materiais"} na biblioteca
               </div>
             </section>
 
-            <section id="novo-material" className="overflow-hidden rounded-xl border border-border bg-card shadow-soft">
+            {(completedOnboardingSteps < onboardingSteps.length || installPrompt) && (
+              <section className="mb-6 grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+                {completedOnboardingSteps < onboardingSteps.length && (
+                  <article className="rounded-xl border border-primary/25 bg-green-soft/45 p-5 shadow-card sm:p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-bold text-green-strong">Primeiros passos</p>
+                        <h2 className="mt-1 text-xl font-extrabold">
+                          Deixe sua central pronta para estudar
+                        </h2>
+                      </div>
+                      <span className="rounded-full bg-background px-3 py-1 text-xs font-bold text-green-strong">
+                        {completedOnboardingSteps}/{onboardingSteps.length}
+                      </span>
+                    </div>
+                    <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                      {onboardingSteps.map((step) => (
+                        <button
+                          key={step.label}
+                          type="button"
+                          onClick={step.action}
+                          className="flex min-h-16 items-center gap-3 rounded-lg border border-primary/15 bg-card px-3 text-left text-sm font-medium transition hover:border-primary/45"
+                        >
+                          {step.complete ? (
+                            <CheckCircle2 className="shrink-0 text-green-strong" size={20} />
+                          ) : (
+                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-primary/40 text-[11px] text-primary">
+                              {onboardingSteps.indexOf(step) + 1}
+                            </span>
+                          )}
+                          <span>{step.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </article>
+                )}
+                {installPrompt && (
+                  <article className="flex flex-col justify-between rounded-xl border border-violet-border bg-violet-soft p-5 shadow-card sm:p-6">
+                    <div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-violet text-brand-violet-foreground">
+                        <Download size={19} />
+                      </div>
+                      <h2 className="mt-4 text-lg font-extrabold">Leve o Pineapple com você</h2>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Instale para abrir como app e acessar mais rápido.
+                      </p>
+                    </div>
+                    <Button
+                      variant="violet"
+                      className="mt-5 w-full"
+                      onClick={() => void requestInstall()}
+                    >
+                      Instalar aplicativo
+                    </Button>
+                  </article>
+                )}
+              </section>
+            )}
+
+            <section
+              id="novo-material"
+              className="overflow-hidden rounded-xl border border-border bg-card shadow-soft"
+            >
               <div className="grid lg:grid-cols-[1.5fr_1fr]">
                 <div className="p-5 sm:p-7 lg:p-8">
                   <div className="mb-5 flex items-start gap-4">
@@ -496,7 +724,9 @@ function Index() {
                     </div>
                     <div>
                       <h2 className="text-xl font-bold">Criar novo material</h2>
-                      <p className="mt-1 text-sm text-muted-foreground">Escolha de onde vem o seu conteúdo.</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Escolha de onde vem o seu conteúdo.
+                      </p>
                     </div>
                   </div>
 
@@ -504,7 +734,13 @@ function Index() {
                     ref={fileRef}
                     type="file"
                     className="sr-only"
-                    accept={selectedType === "Gravar áudio" ? "audio/*" : selectedType === "Enviar vídeo" ? "video/*" : ".pdf,.doc,.docx,.ppt,.pptx,.txt"}
+                    accept={
+                      selectedType === "Gravar áudio"
+                        ? "audio/*"
+                        : selectedType === "Enviar vídeo"
+                          ? "video/*"
+                          : ".pdf,.doc,.docx,.ppt,.pptx,.txt"
+                    }
                     onChange={(event) => handleFileSelection(event.target.files?.[0] ?? null)}
                   />
 
@@ -527,32 +763,61 @@ function Index() {
                         {item.label === "Gravar áudio" && recording ? (
                           <div className="flex items-center gap-2 text-destructive">
                             <CircleStop size={23} />
-                            <span className="text-sm font-extrabold tabular-nums">{formatRecordingTime(recordingSeconds)}</span>
+                            <span className="text-sm font-extrabold tabular-nums">
+                              {formatRecordingTime(recordingSeconds)}
+                            </span>
                           </div>
                         ) : (
                           <item.icon className="text-green-strong" size={23} />
                         )}
                         <span>
                           <strong className="block text-sm">{item.label}</strong>
-                          <span className="mt-1 block text-xs text-muted-foreground">{item.detail}</span>
+                          <span className="mt-1 block text-xs text-muted-foreground">
+                            {item.detail}
+                          </span>
                         </span>
                       </button>
                     ))}
                   </div>
 
                   {selectedFile && (
-                    <div className="mt-4 rounded-lg border border-primary/30 bg-green-soft p-4 text-sm" aria-live="polite">
+                    <div
+                      className="mt-4 rounded-lg border border-primary/30 bg-green-soft p-4 text-sm"
+                      aria-live="polite"
+                    >
                       <div className="flex items-center justify-between gap-3">
                         <span className="min-w-0 truncate font-medium">{selectedFile.name}</span>
-                        <span className="shrink-0 font-semibold text-green-strong">{uploadingMaterial ? "Enviando..." : "Pronto"}</span>
+                        <span className="shrink-0 font-semibold text-green-strong">
+                          {uploadingMaterial ? "Enviando..." : "Pronto"}
+                        </span>
                       </div>
-                      {uploadingMaterial && <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-background/70" aria-label="Enviando material"><div className="h-full w-2/5 animate-[pulse_1.4s_ease-in-out_infinite] rounded-full bg-primary" /></div>}
+                      {uploadingMaterial && (
+                        <div
+                          className="mt-3 h-1.5 overflow-hidden rounded-full bg-background/70"
+                          aria-label="Enviando material"
+                        >
+                          <div className="h-full w-2/5 animate-[pulse_1.4s_ease-in-out_infinite] rounded-full bg-primary" />
+                        </div>
+                      )}
                       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-                        <Button type="button" className="w-full sm:w-auto" onClick={() => void saveMaterial()} disabled={uploadingMaterial}>
+                        <Button
+                          type="button"
+                          className="w-full sm:w-auto"
+                          onClick={() => void saveMaterial()}
+                          disabled={uploadingMaterial}
+                        >
                           {uploadingMaterial && <Loader2 className="animate-spin" size={17} />}
                           {uploadingMaterial ? "Salvando..." : "Salvar na biblioteca"}
                         </Button>
-                        <Button type="button" variant="ghost" className="w-full sm:w-auto" onClick={() => { setSelectedFile(null); if (fileRef.current) fileRef.current.value = ""; }}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="w-full sm:w-auto"
+                          onClick={() => {
+                            setSelectedFile(null);
+                            if (fileRef.current) fileRef.current.value = "";
+                          }}
+                        >
                           Remover
                         </Button>
                       </div>
@@ -566,12 +831,18 @@ function Index() {
                     <span className="inline-flex items-center gap-2 rounded-full border border-ink-foreground/20 px-3 py-1 text-xs font-semibold">
                       <BookOpen size={14} /> Organização inteligente
                     </span>
-                    <h2 className="mt-4 max-w-sm text-[1.35rem] font-bold leading-tight sm:mt-5 sm:text-2xl">Do conteúdo bruto ao estudo organizado.</h2>
+                    <h2 className="mt-4 max-w-sm text-[1.35rem] font-bold leading-tight sm:mt-5 sm:text-2xl">
+                      Do conteúdo bruto ao estudo organizado.
+                    </h2>
                     <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-muted">
                       Resumos, tópicos essenciais, perguntas e flashcards em poucos instantes.
                     </p>
                   </div>
-                  <Button variant="violet" className="relative mt-6 w-fit" onClick={() => chooseFile("Documento")}>
+                  <Button
+                    variant="violet"
+                    className="relative mt-6 w-fit"
+                    onClick={() => chooseFile("Documento")}
+                  >
                     <Upload size={17} /> Importar conteúdo
                   </Button>
                 </div>
@@ -582,9 +853,15 @@ function Index() {
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-bold">Continue estudando</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">{search ? `Resultados para “${search.trim()}”` : "Seus materiais mais recentes"}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {search ? `Resultados para “${search.trim()}”` : "Seus materiais mais recentes"}
+                  </p>
                 </div>
-                <Button variant="ghost" className="hidden min-h-10 sm:inline-flex" onClick={() => navigate({ to: "/library" })}>
+                <Button
+                  variant="ghost"
+                  className="hidden min-h-10 sm:inline-flex"
+                  onClick={() => navigate({ to: "/library" })}
+                >
                   Ver biblioteca <ArrowRight size={16} />
                 </Button>
               </div>
@@ -592,24 +869,64 @@ function Index() {
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {visibleMaterials.map((material) => {
                   const progress = dashboardProgress[material.id] ?? 0;
-                  const Icon = material.source_type === "audio" ? AudioLines : material.source_type === "video" ? Video : FileText;
+                  const Icon =
+                    material.source_type === "audio"
+                      ? AudioLines
+                      : material.source_type === "video"
+                        ? Video
+                        : FileText;
                   return (
-                    <article key={material.id} className="rounded-xl border border-border bg-card p-5 shadow-card">
+                    <article
+                      key={material.id}
+                      className="rounded-xl border border-border bg-card p-5 shadow-card"
+                    >
                       <div className="flex items-start justify-between gap-4">
-                        <div className="material-icon material-icon-green"><Icon size={21} /></div>
+                        <div className="material-icon material-icon-green">
+                          <Icon size={21} />
+                        </div>
                         <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
                           {progress}% concluído
                         </span>
                       </div>
-                      <p className="mt-5 text-xs font-bold uppercase text-muted-foreground">{material.source_type === "audio" ? "Áudio" : material.source_type === "video" ? "Vídeo" : "Documento"}</p>
-                      <h3 className="mt-1 min-h-12 truncate text-base font-bold leading-snug">{material.title}</h3>
-                      <p className="mt-2 text-sm text-muted-foreground">{material.status === "ready" ? "Pronto para estudar" : material.status === "processing" ? "Organizando conteúdo..." : material.status === "failed" ? "Não foi possível organizar" : "Pronto para organizar"}</p>
+                      <p className="mt-5 text-xs font-bold uppercase text-muted-foreground">
+                        {material.source_type === "audio"
+                          ? "Áudio"
+                          : material.source_type === "video"
+                            ? "Vídeo"
+                            : "Documento"}
+                      </p>
+                      <h3 className="mt-1 min-h-12 truncate text-base font-bold leading-snug">
+                        {material.title}
+                      </h3>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {material.status === "ready"
+                          ? "Pronto para estudar"
+                          : material.status === "processing"
+                            ? "Organizando conteúdo..."
+                            : material.status === "failed"
+                              ? "Não foi possível organizar"
+                              : "Pronto para organizar"}
+                      </p>
                       <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
                         <span>{new Date(material.created_at).toLocaleDateString("pt-BR")}</span>
                         <strong className="text-foreground">{progress}%</strong>
                       </div>
-                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} /></div>
-                      <Button variant="secondary" className="mt-5 w-full min-h-11" onClick={() => navigate({ to: "/material/$materialId", params: { materialId: material.id } })}>
+                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
+                        <div
+                          className="h-full rounded-full bg-primary transition-[width] duration-500"
+                          style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+                        />
+                      </div>
+                      <Button
+                        variant="secondary"
+                        className="mt-5 w-full min-h-11"
+                        onClick={() =>
+                          navigate({
+                            to: "/material/$materialId",
+                            params: { materialId: material.id },
+                          })
+                        }
+                      >
                         <Play size={16} /> Continuar
                       </Button>
                     </article>
@@ -621,10 +938,57 @@ function Index() {
                 <div className="rounded-xl border border-dashed border-border py-14 text-center">
                   <Search className="mx-auto text-muted-foreground" size={24} />
                   <p className="mt-3 font-semibold">Nenhum material encontrado</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{search ? "Nenhum material da sua biblioteca corresponde à busca." : "Adicione seu primeiro material para começar."}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {search
+                      ? "Nenhum material da sua biblioteca corresponde à busca."
+                      : "Adicione seu primeiro material para começar."}
+                  </p>
                 </div>
               )}
             </section>
+
+            {readyMaterials.length > 0 && (
+              <section className="mt-8 rounded-xl border border-border bg-card p-5 shadow-card sm:p-6">
+                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+                  <div>
+                    <p className="flex items-center gap-2 text-sm font-bold text-brand-violet">
+                      <CalendarClock size={17} /> Fila de revisão
+                    </p>
+                    <h2 className="mt-1 text-xl font-extrabold">Volte ao que já está pronto</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Uma revisão curta agora ajuda o conteúdo a fixar.
+                    </p>
+                  </div>
+                  <span className="text-sm font-semibold text-muted-foreground">
+                    {readyMaterials.length}{" "}
+                    {readyMaterials.length === 1 ? "material pronto" : "materiais prontos"}
+                  </span>
+                </div>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {readyMaterials.slice(0, 3).map((material) => (
+                    <button
+                      key={material.id}
+                      type="button"
+                      onClick={() =>
+                        navigate({
+                          to: "/material/$materialId",
+                          params: { materialId: material.id },
+                        })
+                      }
+                      className="rounded-lg border border-border bg-background p-4 text-left transition hover:border-primary/45 hover:shadow-card"
+                    >
+                      <p className="truncate font-bold">{material.title}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Pronto para resumo, flashcards e quiz
+                      </p>
+                      <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-green-strong">
+                        Revisar <ArrowRight size={15} />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <section className="mt-8 grid gap-4 sm:mt-10 lg:grid-cols-[1fr_1.4fr]">
               <div className="rounded-xl border border-border bg-card p-6 shadow-card">
@@ -642,7 +1006,11 @@ function Index() {
                     ? "Seus materiais recentes ficam aqui para você continuar de onde parou."
                     : "Adicione sua primeira aula ou documento para começar sua biblioteca."}
                 </p>
-                <Button variant="secondary" className="mt-5" onClick={() => navigate({ to: "/library" })}>
+                <Button
+                  variant="secondary"
+                  className="mt-5"
+                  onClick={() => navigate({ to: "/library" })}
+                >
                   Ver biblioteca <ArrowRight size={16} />
                 </Button>
               </div>
@@ -655,10 +1023,18 @@ function Index() {
                   <div>
                     <p className="text-sm font-bold text-brand-violet">Seu próximo passo</p>
                     <h3 className="mt-1 text-lg font-bold">Adicione um conteúdo para começar.</h3>
-                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">O Pineapple Note organiza o material e prepara a revisão.</p>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                      O Pineapple Note organiza o material e prepara a revisão.
+                    </p>
                   </div>
                 </div>
-                <Button variant="violet" className="mt-5 w-full sm:mt-0 sm:w-auto" onClick={() => document.getElementById("novo-material")?.scrollIntoView({ behavior: "smooth" })}>
+                <Button
+                  variant="violet"
+                  className="mt-5 w-full sm:mt-0 sm:w-auto"
+                  onClick={() =>
+                    document.getElementById("novo-material")?.scrollIntoView({ behavior: "smooth" })
+                  }
+                >
                   Adicionar material <Plus size={16} />
                 </Button>
               </div>
@@ -667,7 +1043,9 @@ function Index() {
         </main>
       </div>
 
-      <div className="mt-10 border-t border-border pt-6 text-center text-xs text-muted-foreground">Pineapple Note · Desenvolvido pela Decode Analytics</div>
+      <div className="mt-10 border-t border-border pt-6 text-center text-xs text-muted-foreground">
+        Pineapple Note · Desenvolvido pela Decode Analytics
+      </div>
 
       <div className="fixed inset-x-3 bottom-[max(5.25rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-20 md:hidden">
         <div className="flex min-h-12 items-center rounded-2xl border border-border bg-card/95 p-1.5 shadow-soft backdrop-blur-xl">
@@ -682,35 +1060,78 @@ function Index() {
         </div>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 flex h-[4.4rem] items-center justify-around border-t border-border bg-card/95 px-3 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_color-mix(in_oklab,var(--foreground)_6%,transparent)] backdrop-blur md:hidden" aria-label="Navegação móvel">
-        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-bold text-green-strong" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><Home size={20} />Início</button>
-        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => navigate({ to: "/library" })}><Library size={20} />Notas</button>
-        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => setProfileOpen(true)}><Settings size={20} />Perfil</button>
+      <nav
+        className="fixed inset-x-0 bottom-0 z-30 flex h-[4.4rem] items-center justify-around border-t border-border bg-card/95 px-3 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_color-mix(in_oklab,var(--foreground)_6%,transparent)] backdrop-blur md:hidden"
+        aria-label="Navegação móvel"
+      >
+        <button
+          type="button"
+          className="flex min-w-16 flex-col items-center gap-1 text-xs font-bold text-green-strong"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        >
+          <Home size={20} />
+          Início
+        </button>
+        <button
+          type="button"
+          className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground"
+          onClick={() => navigate({ to: "/library" })}
+        >
+          <Library size={20} />
+          Notas
+        </button>
+        <button
+          type="button"
+          className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground"
+          onClick={() => setProfileOpen(true)}
+        >
+          <Settings size={20} />
+          Perfil
+        </button>
       </nav>
 
       <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
         <DialogContent className="w-[calc(100%-1rem)] rounded-2xl sm:max-w-md">
           <DialogHeader>
-            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-green-soft text-green-strong"><CircleHelp size={21} /></div>
+            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-green-soft text-green-strong">
+              <CircleHelp size={21} />
+            </div>
             <DialogTitle>Ajuda do Pineapple Note</DialogTitle>
             <DialogDescription>Um resumo rápido para você começar.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 text-sm text-muted-foreground">
-            <p><strong className="text-foreground">1. Adicione um conteúdo.</strong> Grave uma aula ou envie um vídeo ou documento.</p>
-            <p><strong className="text-foreground">2. Abra o material.</strong> A partir dele você pode gerar e revisar os materiais de estudo disponíveis.</p>
-            <p><strong className="text-foreground">3. Continue estudando.</strong> Seu progresso fica associado ao material.</p>
-            <p className="rounded-lg bg-secondary p-3 text-xs">Se um processamento falhar, abra o material novamente para tentar de novo.</p>
+            <p>
+              <strong className="text-foreground">1. Adicione um conteúdo.</strong> Grave uma aula
+              ou envie um vídeo ou documento.
+            </p>
+            <p>
+              <strong className="text-foreground">2. Abra o material.</strong> A partir dele você
+              pode gerar e revisar os materiais de estudo disponíveis.
+            </p>
+            <p>
+              <strong className="text-foreground">3. Continue estudando.</strong> Seu progresso fica
+              associado ao material.
+            </p>
+            <p className="rounded-lg bg-secondary p-3 text-xs">
+              Se um processamento falhar, abra o material novamente para tentar de novo.
+            </p>
           </div>
-          <Button className="w-full" onClick={() => setHelpOpen(false)}>Entendi</Button>
+          <Button className="w-full" onClick={() => setHelpOpen(false)}>
+            Entendi
+          </Button>
         </DialogContent>
       </Dialog>
 
       <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
         <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto rounded-2xl p-5 sm:w-[calc(100%-2rem)] sm:max-w-md sm:p-6">
           <DialogHeader>
-            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-violet-soft text-brand-violet"><UserRound size={21} /></div>
+            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-violet-soft text-brand-violet">
+              <UserRound size={21} />
+            </div>
             <DialogTitle>Seu perfil acadêmico</DialogTitle>
-            <DialogDescription>Mantenha seus dados atualizados para personalizar seus estudos.</DialogDescription>
+            <DialogDescription>
+              Mantenha seus dados atualizados para personalizar seus estudos.
+            </DialogDescription>
           </DialogHeader>
           <div className="rounded-lg bg-green-soft p-3 text-sm text-green-strong">
             <div className="flex items-center justify-between gap-3">
@@ -724,30 +1145,120 @@ function Index() {
             <span className="break-all text-xs">{user.email}</span>
           </div>
           <form onSubmit={saveProfile} className="space-y-4">
-            <div className="space-y-2"><Label htmlFor="display_name">Nome completo</Label><Input id="display_name" name="display_name" defaultValue={profile?.display_name ?? displayName} maxLength={80} required className="h-11" /></div>
-            <div className="space-y-2"><Label htmlFor="institution">Instituição</Label><Input id="institution" name="institution" defaultValue={profile?.institution ?? ""} maxLength={120} placeholder="Sua faculdade ou escola" className="h-11" /></div>
-            <div className="space-y-2"><Label htmlFor="course">Curso</Label><Input id="course" name="course" defaultValue={profile?.course ?? ""} maxLength={120} placeholder="Seu curso" className="h-11" /></div>
-            <Button type="submit" className="w-full" disabled={savingProfile}><Save size={17} />{savingProfile ? "Salvando..." : "Salvar perfil"}</Button>
+            <div className="space-y-2">
+              <Label htmlFor="display_name">Nome completo</Label>
+              <Input
+                id="display_name"
+                name="display_name"
+                defaultValue={profile?.display_name ?? displayName}
+                maxLength={80}
+                required
+                className="h-11"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="institution">Instituição</Label>
+              <Input
+                id="institution"
+                name="institution"
+                defaultValue={profile?.institution ?? ""}
+                maxLength={120}
+                placeholder="Sua faculdade ou escola"
+                className="h-11"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="course">Curso</Label>
+              <Input
+                id="course"
+                name="course"
+                defaultValue={profile?.course ?? ""}
+                maxLength={120}
+                placeholder="Seu curso"
+                className="h-11"
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={savingProfile}>
+              <Save size={17} />
+              {savingProfile ? "Salvando..." : "Salvar perfil"}
+            </Button>
           </form>
-          <Button type="button" variant="outline" className="w-full" onClick={() => { setProfileOpen(false); setPasswordOpen(true); }}>
-            <KeyRound size={17} />Alterar senha
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              setProfileOpen(false);
+              setPasswordOpen(true);
+            }}
+          >
+            <KeyRound size={17} />
+            Alterar senha
           </Button>
-          <Button variant="ghost" className="w-full text-destructive hover:text-destructive" onClick={handleSignOut}><LogOut size={17} />Sair da conta</Button>
+          <Button
+            variant="ghost"
+            className="w-full text-destructive hover:text-destructive"
+            onClick={handleSignOut}
+          >
+            <LogOut size={17} />
+            Sair da conta
+          </Button>
         </DialogContent>
       </Dialog>
 
       <Dialog open={passwordOpen} onOpenChange={setPasswordOpen}>
         <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto rounded-2xl p-5 sm:w-[calc(100%-2rem)] sm:max-w-md sm:p-6">
           <DialogHeader>
-            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-violet-soft text-brand-violet"><KeyRound size={21} /></div>
+            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-violet-soft text-brand-violet">
+              <KeyRound size={21} />
+            </div>
             <DialogTitle>Alterar senha</DialogTitle>
-            <DialogDescription>Por segurança, informe sua senha atual antes de definir uma nova.</DialogDescription>
+            <DialogDescription>
+              Por segurança, informe sua senha atual antes de definir uma nova.
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={changePassword} className="space-y-4">
-            <div className="space-y-2"><Label htmlFor="current_password">Senha atual</Label><Input id="current_password" name="current_password" type="password" autoComplete="current-password" maxLength={72} required className="h-11" /></div>
-            <div className="space-y-2"><Label htmlFor="new_password">Nova senha</Label><Input id="new_password" name="new_password" type="password" autoComplete="new-password" minLength={8} maxLength={72} required className="h-11" /></div>
-            <div className="space-y-2"><Label htmlFor="confirmation">Confirmar nova senha</Label><Input id="confirmation" name="confirmation" type="password" autoComplete="new-password" minLength={8} maxLength={72} required className="h-11" /></div>
-            <Button type="submit" className="w-full" disabled={savingPassword}>{savingPassword ? "Validando..." : "Alterar senha"}</Button>
+            <div className="space-y-2">
+              <Label htmlFor="current_password">Senha atual</Label>
+              <Input
+                id="current_password"
+                name="current_password"
+                type="password"
+                autoComplete="current-password"
+                maxLength={72}
+                required
+                className="h-11"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new_password">Nova senha</Label>
+              <Input
+                id="new_password"
+                name="new_password"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                maxLength={72}
+                required
+                className="h-11"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmation">Confirmar nova senha</Label>
+              <Input
+                id="confirmation"
+                name="confirmation"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                maxLength={72}
+                required
+                className="h-11"
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={savingPassword}>
+              {savingPassword ? "Validando..." : "Alterar senha"}
+            </Button>
           </form>
         </DialogContent>
       </Dialog>
