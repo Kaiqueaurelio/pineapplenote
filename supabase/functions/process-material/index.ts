@@ -152,7 +152,8 @@ Deno.serve(async (req) => {
 
   const { data: actor } = await supabase.from("profiles").select("role").eq("user_id", user.id).maybeSingle();
   const isAdmin = actor?.role === "admin";
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const secretKeys = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? secretKeys.default;
   const db = isAdmin && serviceRoleKey
     ? createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } })
     : supabase;
