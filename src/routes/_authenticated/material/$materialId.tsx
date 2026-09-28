@@ -118,7 +118,7 @@ function MaterialPage() {
   }, [material?.status, output, materialId, user.id]);
 
   async function processMaterial() {
-    if (!material || processing) return;
+    if (!material || processing || material.status === "processing") return;
 
     setProcessing(true);
     setMaterial({ ...material, status: "processing" });
@@ -250,9 +250,13 @@ function MaterialPage() {
               <div className="min-w-0">
                 <h2 className="text-xl font-extrabold">Transforme este conteúdo em estudo</h2>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">A organização inteligente transforma o arquivo em resumo, tópicos, flashcards e quiz. Para áudio e vídeo, primeiro fazemos a transcrição.</p>
-                <Button className="mt-5" onClick={() => void processMaterial()} disabled={processing}>
-                  {processing && <Loader2 className="animate-spin" size={17} />}
-                  {processing ? "Transcrevendo e organizando..." : (material.source_type === "audio" || material.source_type === "video" ? "Transcrever e organizar com IA" : "Organizar com IA")}
+                <Button className="mt-5" onClick={() => void processMaterial()} disabled={processing || material.status === "processing"}>
+                  {(processing || material.status === "processing") && <Loader2 className="animate-spin" size={17} />}
+                  {material.status === "processing"
+                    ? "Processamento em andamento..."
+                    : processing
+                      ? "Transcrevendo e organizando..."
+                      : (material.source_type === "audio" || material.source_type === "video" ? "Transcrever e organizar com IA" : "Organizar com IA")}
                 </Button>
               </div>
             </div>
