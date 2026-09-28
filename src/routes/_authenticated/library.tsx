@@ -1,5 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, FileText, Headphones, Loader2, Search, Trash2, Video, X } from "lucide-react";
+import {
+  ArrowLeft,
+  FileText,
+  Headphones,
+  Home,
+  Library,
+  Loader2,
+  Plus,
+  Search,
+  Settings,
+  Trash2,
+  Video,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -146,7 +159,7 @@ function LibraryPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background text-foreground">
+    <div className="min-h-[100dvh] bg-background pb-32 text-foreground sm:pb-8">
       <header className="sticky top-0 z-20 border-b border-border/70 bg-background/95 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-5xl items-center gap-3 px-4 sm:h-[72px] sm:px-6">
           <Button
@@ -158,13 +171,31 @@ function LibraryPage() {
             <ArrowLeft size={20} />
           </Button>
           <div className="min-w-0">
-            <h1 className="truncate text-lg font-extrabold sm:text-xl">Biblioteca</h1>
-            <p className="text-xs text-muted-foreground">Seus materiais salvos</p>
+            <p className="text-sm font-extrabold">Pineapple Note</p>
+            <p className="text-xs text-muted-foreground">Sua central de estudos</p>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto rounded-full"
+            onClick={() => navigate({ to: "/settings" })}
+            aria-label="Abrir configurações"
+          >
+            <Settings size={20} />
+          </Button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+      <main className="mx-auto max-w-5xl px-4 py-7 sm:px-6 sm:py-8">
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-bold text-brand-violet">Sua biblioteca</p>
+            <h1 className="mt-1 text-4xl font-black tracking-tight sm:text-5xl">Minhas notas</h1>
+          </div>
+          <span className="hidden rounded-full bg-violet-soft px-3 py-1.5 text-xs font-bold text-brand-violet sm:block">
+            {materials.length} {materials.length === 1 ? "nota" : "notas"}
+          </span>
+        </div>
         <div className="relative">
           <Search
             className="pointer-events-none absolute left-3 top-3 text-muted-foreground"
@@ -188,6 +219,25 @@ function LibraryPage() {
             </button>
           )}
         </div>
+
+        {!loading && materials.length > 0 && (
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/dashboard" })}
+            className="mt-5 flex w-full items-center gap-4 rounded-3xl bg-gradient-to-br from-violet-soft via-card to-yellow-soft p-5 text-left shadow-card transition hover:-translate-y-0.5"
+          >
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-card text-2xl shadow-card">
+              🍍
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-lg font-black text-brand-violet">Pronto para uma nova aula?</span>
+              <span className="mt-0.5 block text-sm text-muted-foreground">
+                Transforme áudio, vídeo, PDF ou link em material de estudo.
+              </span>
+            </span>
+            <Plus className="shrink-0 text-brand-violet" size={22} />
+          </button>
+        )}
 
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Filtrar biblioteca">
           {[
@@ -265,14 +315,14 @@ function LibraryPage() {
               return (
                 <article
                   key={material.id}
-                  className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5"
+                  className="group rounded-3xl border border-border bg-card p-4 shadow-card transition hover:-translate-y-0.5 hover:border-primary/30 sm:p-5"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-green-soft text-green-strong">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-green-soft text-green-strong">
                       <Icon size={21} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h2 className="truncate font-bold">{material.title}</h2>
+                      <h2 className="truncate text-[17px] font-extrabold">{material.title}</h2>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {material.source_type === "audio"
                           ? "Áudio"
@@ -306,7 +356,7 @@ function LibraryPage() {
                   </div>
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                     <Button
-                      className="w-full sm:w-auto"
+                      className="w-full rounded-2xl sm:w-auto"
                       onClick={() => void openMaterial(material)}
                       disabled={openingId === material.id}
                     >
@@ -315,7 +365,7 @@ function LibraryPage() {
                     </Button>
                     <Button
                       variant="ghost"
-                      className="w-full text-destructive hover:text-destructive sm:w-auto"
+                      className="w-full rounded-2xl text-destructive hover:text-destructive sm:w-auto"
                       onClick={() => requestDelete(material)}
                     >
                       <Trash2 size={16} />
@@ -366,6 +416,30 @@ function LibraryPage() {
           Pineapple Note · Desenvolvido pela Decode Analytics
         </footer>
       </main>
+
+      <div className="fixed inset-x-4 bottom-[max(5.15rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-20 sm:hidden">
+        <Button
+          className="h-14 w-full rounded-[1.35rem] bg-[linear-gradient(135deg,var(--brand-violet),var(--primary))] text-base font-black shadow-soft"
+          onClick={() => navigate({ to: "/dashboard" })}
+        >
+          <Plus size={21} /> Nova nota
+        </Button>
+      </div>
+
+      <nav
+        className="fixed inset-x-0 bottom-0 z-30 flex h-[4.4rem] items-center justify-around border-t border-border bg-card/95 px-3 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
+        aria-label="Navegação móvel"
+      >
+        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => navigate({ to: "/dashboard" })}>
+          <Home size={20} /> Início
+        </button>
+        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-bold text-brand-violet" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          <Library size={20} /> Notas
+        </button>
+        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => navigate({ to: "/settings" })}>
+          <Settings size={20} /> Perfil
+        </button>
+      </nav>
     </div>
   );
 }
