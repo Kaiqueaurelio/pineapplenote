@@ -185,7 +185,30 @@ Deno.serve(async (req) => {
     let transcript = "";
     let input: unknown;
 
-    if (material.source_type === "audio" || material.source_type === "video") {
+    if (material.source_type === "url") {
+      const url = material.storage_path;
+      if (!/^https?:\\/\\//i.test(url)) throw new Error("URL de origem inválida.");
+      const pageResponse = await fetch(url, { headers: { "User-Agent": "PineappleNote/1.0" } });
+      if (!pageResponse.ok) throw new Error(`Não foi possível acessar a URL (${pageResponse.status}).`);
+      const contentType = pageResponse.headers.get("content-type") ?? "";
+      if (!contentType.includes("text/html") && !contentType.includes("text/plain")) {
+        throw new Error("Esta URL não retornou uma página de texto compatível.");
+      }
+      const raw = await pageResponse.text();
+      const textContent = raw
+        .replace(/<script[\\s\\S]*?<\\/script>/gi, " ")
+        .replace(/<style[\\s\\S]*?<\\/style>/gi, " ")
+        .replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, " ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;/gi, " ")
+        .replace(/&amp;/gi, "&")
+        .replace(/&quot;/gi, '"')
+        .replace(/\\s+/g, " ")
+        .trim()
+        .slice(0, 120000);
+      if (!textContent) throw new Error("Não encontramos texto suficiente nesta página.");
+      input = [{ role: "user", content: [{ type: "input_text", text: `Transforme o conteúdo desta página em material de estudo. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões. Preserve os fatos e não invente informações. URL: ${url}\\n\\nConteúdo:\\n${textContent}` }] }];
+    } else if (material.source_type === "audio" || material.source_type === "video") {
       const fileResponse = await fetch(signed.signedUrl);
       if (!fileResponse.ok) throw new Error("Não foi possível baixar o arquivo para transcrição.");
       transcript = await transcribe(
