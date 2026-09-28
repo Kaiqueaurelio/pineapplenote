@@ -14,105 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      material_outputs: {
-        Row: {
-          id: string
-          material_id: string
-          user_id: string
-          summary: string
-          topics: Json
-          flashcards: Json
-          quiz: Json
-          transcript: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          material_id: string
-          user_id: string
-          summary?: string
-          topics?: Json
-          flashcards?: Json
-          quiz?: Json
-          transcript?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          material_id?: string
-          user_id?: string
-          summary?: string
-          topics?: Json
-          flashcards?: Json
-          quiz?: Json
-          transcript?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      study_progress: {
-        Row: {
-          id: string
-          user_id: string
-          material_id: string
-          progress: number
-          last_opened_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          material_id: string
-          progress?: number
-          last_opened_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          material_id?: string
-          progress?: number
-          last_opened_at?: string
-        }
-        Relationships: []
-      }
-      study_materials: {
-        Row: {
-          created_at: string
-          id: string
-          mime_type: string
-          source_type: "audio" | "video" | "document"
-          status: "uploaded" | "processing" | "ready" | "failed"
-          storage_path: string
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          mime_type: string
-          source_type: "audio" | "video" | "document"
-          status?: "uploaded" | "processing" | "ready" | "failed"
-          storage_path: string
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          mime_type?: string
-          source_type?: "audio" | "video" | "document"
-          status?: "uploaded" | "processing" | "ready" | "failed"
-          storage_path?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -120,7 +21,6 @@ export type Database = {
           created_at: string
           display_name: string
           institution: string
-          role: "user" | "admin"
           updated_at: string
           user_id: string
         }
@@ -130,7 +30,6 @@ export type Database = {
           created_at?: string
           display_name?: string
           institution?: string
-          role?: "user" | "admin"
           updated_at?: string
           user_id: string
         }
@@ -140,7 +39,6 @@ export type Database = {
           created_at?: string
           display_name?: string
           institution?: string
-          role?: "user" | "admin"
           updated_at?: string
           user_id?: string
         }
