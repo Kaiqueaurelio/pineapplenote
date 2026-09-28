@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -107,15 +108,34 @@ const faqs = [
 ];
 
 function LandingPage() {
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const updateScrollProgress = () => {
+      const root = document.documentElement;
+      const scrollable = root.scrollHeight - root.clientHeight;
+      setScrollProgress(scrollable > 0 ? Math.min(window.scrollY / scrollable, 1) : 0);
+    };
+
+    updateScrollProgress();
+    window.addEventListener("scroll", updateScrollProgress, { passive: true });
+    window.addEventListener("resize", updateScrollProgress);
+
+    return () => {
+      window.removeEventListener("scroll", updateScrollProgress);
+      window.removeEventListener("resize", updateScrollProgress);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground scroll-smooth">\n      <div\n        aria-hidden="true"\n        className="fixed inset-x-0 top-0 z-[60] h-0.5 origin-left bg-primary transition-transform duration-100"\n        style={{ transform: `scaleX(${scrollProgress})` }}\n      />
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-xl">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-[72px] sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center" aria-label="Pineapple Note — início">
             <img
               src={logoAsset.url}
               alt="Pineapple Note"
-              className="h-14 w-auto object-contain mix-blend-multiply sm:h-16"
+              className="h-14 w-auto origin-left scale-[1.12] object-contain mix-blend-multiply sm:h-16 sm:scale-[1.1]"
             />
           </Link>
 
@@ -137,12 +157,12 @@ function LandingPage() {
       </header>
 
       <main>
-        <section className="relative isolate overflow-hidden px-4 pb-20 pt-14 sm:px-6 sm:pb-28 sm:pt-24 lg:px-8 lg:pt-28">
+        <section className="relative isolate scroll-mt-24 overflow-hidden px-4 pb-20 pt-14 sm:px-6 sm:pb-28 sm:pt-24 lg:px-8 lg:pt-28">
           <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[720px] bg-[radial-gradient(circle_at_50%_-10%,hsl(var(--primary)/0.20),transparent_58%)]" />
           <div className="pointer-events-none absolute left-1/2 top-40 -z-10 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
 
           <div className="mx-auto max-w-5xl text-center">
-            <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3.5 py-2 text-xs font-bold text-primary">
+            <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3.5 py-2 text-xs font-bold text-primary shadow-sm">
               <NotebookPen size={15} strokeWidth={2} />
               Seu novo espaço de estudo com IA
             </div>
@@ -277,7 +297,7 @@ function LandingPage() {
               <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Como funciona</span>
               <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">O processo é simples.</h2>
               <p className="mt-4 text-base leading-7 text-muted-foreground">
-                A referência do Coconote é direta: capturar, organizar e estudar. O Pineapple Note segue essa mesma lógica, com identidade própria.
+                A experiência foi pensada para acompanhar o caminho natural do estudo: capturar o conteúdo, organizar o que importa e voltar para revisar.
               </p>
             </div>
 
