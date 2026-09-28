@@ -11,6 +11,16 @@ import {
   GraduationCap,
   ChevronDown,
   CheckCircle2,
+  MessageCircle,
+  Languages,
+  Gamepad2,
+  Podcast,
+  Smartphone,
+  Monitor,
+  Link2,
+  Headphones,
+  Share2,
+  FileStack,
 } from "lucide-react";
 
 import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
@@ -43,26 +53,55 @@ const features = [
     icon: Mic2,
     title: "Grave aulas e reuniões",
     description: "Capture o áudio direto pelo navegador e continue focado no que está sendo explicado.",
+    status: "Disponível",
   },
   {
     icon: Upload,
-    title: "Envie qualquer material",
-    description: "Áudios, vídeos e documentos ficam no mesmo espaço para você estudar sem espalhar seus materiais.",
+    title: "Envie seus materiais",
+    description: "Áudios, vídeos e documentos ficam no mesmo espaço para você estudar sem espalhar seus arquivos.",
+    status: "Disponível",
   },
   {
     icon: FileText,
-    title: "Receba notas organizadas",
-    description: "Transcrições, resumos, tópicos e pontos importantes ficam estruturados para revisão.",
+    title: "Notas e transcrições",
+    description: "Transforme conteúdo bruto em transcrições, resumos, tópicos e pontos importantes.",
+    status: "Disponível",
   },
   {
     icon: BookOpen,
-    title: "Crie materiais de estudo",
-    description: "Transforme o conteúdo em flashcards, quizzes e outros formatos de revisão.",
+    title: "Quizzes e flashcards",
+    description: "Crie materiais de revisão a partir do conteúdo processado e acompanhe sua evolução.",
+    status: "Disponível",
   },
   {
-    icon: GraduationCap,
-    title: "Tudo no seu espaço",
-    description: "Biblioteca, materiais e progresso reunidos em uma experiência simples.",
+    icon: MessageCircle,
+    title: "Converse com seu material",
+    description: "Faça perguntas diretamente sobre suas notas e receba explicações baseadas no conteúdo.",
+    status: "Em breve",
+  },
+  {
+    icon: Languages,
+    title: "Mais idiomas",
+    description: "Amplie o estudo para conteúdos em diferentes idiomas, com suporte de processamento e tradução.",
+    status: "Em breve",
+  },
+  {
+    icon: Gamepad2,
+    title: "Jogos de estudo",
+    description: "Transforme a revisão em pequenas experiências interativas para praticar conceitos.",
+    status: "Em breve",
+  },
+  {
+    icon: Podcast,
+    title: "Podcasts de estudo",
+    description: "Converta seus materiais em uma experiência de áudio para revisar enquanto continua sua rotina.",
+    status: "Em breve",
+  },
+  {
+    icon: Share2,
+    title: "Compartilhe o que aprendeu",
+    description: "Organize materiais de estudo em um espaço que pode evoluir para colaboração e compartilhamento.",
+    status: "Em breve",
   },
 ];
 
@@ -84,6 +123,14 @@ const steps = [
   },
 ];
 
+const inputTypes = [
+  { icon: Mic2, title: "Áudio", description: "Aulas, reuniões e gravações." },
+  { icon: FileText, title: "Documentos", description: "Materiais para leitura e revisão." },
+  { icon: Headphones, title: "Vídeo", description: "Conteúdo falado transformado em estudo." },
+  { icon: Link2, title: "Links", description: "Importação de conteúdos por link em evolução." },
+  { icon: FileStack, title: "Biblioteca", description: "Tudo organizado em um só lugar." },
+];
+
 const faqs = [
   {
     question: "O que é o Pineapple Note?",
@@ -95,7 +142,15 @@ const faqs = [
   },
   {
     question: "Que tipos de conteúdo posso enviar?",
-    answer: "Hoje o fluxo trabalha com gravações de áudio, vídeos e documentos compatíveis. Outros formatos podem ser adicionados futuramente.",
+    answer: "O fluxo atual trabalha com gravações de áudio, vídeos e documentos compatíveis. Importação por links e outras fontes faz parte da evolução da plataforma.",
+  },
+  {
+    question: "O Pineapple Note terá chat com os materiais?",
+    answer: "Essa experiência está no roadmap do produto. A landing page já apresenta a direção do recurso, mas ele só será marcado como disponível quando estiver implementado e validado.",
+  },
+  {
+    question: "O Pineapple Note terá jogos, podcasts e mais idiomas?",
+    answer: "Esses recursos fazem parte da evolução planejada da plataforma. O site diferencia claramente o que já está disponível do que está em desenvolvimento.",
   },
   {
     question: "O Pineapple Note é um projeto da Decode Analytics?",
@@ -282,11 +337,14 @@ function LandingPage() {
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Feito para acompanhar sua rotina
             </p>
-            <div className="mt-6 grid grid-cols-2 gap-3 text-sm font-semibold text-muted-foreground sm:grid-cols-4">
-              <div className="rounded-xl border border-border bg-card px-4 py-4">Estudantes</div>
-              <div className="rounded-xl border border-border bg-card px-4 py-4">Profissionais</div>
-              <div className="rounded-xl border border-border bg-card px-4 py-4">Professores</div>
-              <div className="rounded-xl border border-border bg-card px-4 py-4">Pesquisadores</div>
+            <div className="mt-6 grid grid-cols-2 gap-3 text-sm font-semibold text-muted-foreground sm:grid-cols-5">
+              {inputTypes.map(({ icon: Icon, title, description }) => (
+                <div key={title} className="rounded-xl border border-border bg-card px-4 py-4 text-left">
+                  <Icon size={18} className="text-primary" />
+                  <div className="mt-3 text-foreground">{title}</div>
+                  <div className="mt-1 text-xs font-normal leading-5">{description}</div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -316,26 +374,135 @@ function LandingPage() {
         <section id="recursos" className="border-y border-border bg-secondary/30 px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
           <div className="mx-auto max-w-6xl">
             <div className="mx-auto max-w-2xl text-center">
-              <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Recursos</span>
-              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Capture. Organize. Aprenda.</h2>
+              <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Tudo em um só lugar</span>
+              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Do conteúdo bruto ao estudo.</h2>
               <p className="mt-4 text-muted-foreground">
-                Capture o conteúdo, deixe a organização acontecer e volte para estudar quando quiser.
+                A experiência reúne captura, organização e revisão em uma única jornada. O que já está disponível aparece pronto para usar; o restante entra no roadmap do produto.
               </p>
             </div>
 
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {features.map((feature) => {
                 const Icon = feature.icon;
+                const available = feature.status === "Disponível";
                 return (
                   <article key={feature.title} className="group rounded-3xl border border-border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Icon size={21} />
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Icon size={21} />
+                      </div>
+                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${available ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                        {feature.status}
+                      </span>
                     </div>
                     <h3 className="mt-5 font-extrabold">{feature.title}</h3>
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">{feature.description}</p>
                   </article>
                 );
               })}
+            </div>
+          </div>
+        </section>
+
+        <section className="px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <div className="grid items-center gap-8 lg:grid-cols-[.85fr_1.15fr]">
+              <div>
+                <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Experiência de estudo</span>
+                <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Um material. Várias formas de aprender.</h2>
+                <p className="mt-5 leading-7 text-muted-foreground">
+                  O conteúdo não precisa terminar na transcrição. A ideia do Pineapple Note é levar você da captura até a revisão, com notas, flashcards, quizzes e progresso no mesmo fluxo.
+                </p>
+                <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                  {[
+                    ["01", "Capturar", "Grave ou envie o conteúdo."],
+                    ["02", "Organizar", "Receba notas e transcrição."],
+                    ["03", "Praticar", "Use quiz e flashcards."],
+                    ["04", "Revisar", "Acompanhe seu progresso."],
+                  ].map(([number, title, description]) => (
+                    <div key={number} className="rounded-2xl border border-border bg-card p-4">
+                      <span className="text-xs font-black text-primary">{number}</span>
+                      <h3 className="mt-2 font-extrabold">{title}</h3>
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[30px] border border-border bg-card p-4 shadow-[0_30px_90px_-35px_hsl(var(--foreground)/0.28)] sm:p-6">
+                <div className="rounded-2xl border border-border bg-background p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <FileText size={19} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-extrabold">Aula de Ciência da Computação</p>
+                      <p className="text-xs text-muted-foreground">Material pronto para revisão</p>
+                    </div>
+                  </div>
+                  <div className="mt-5 rounded-xl bg-secondary/60 p-4">
+                    <div className="h-2.5 w-11/12 rounded bg-foreground/10" />
+                    <div className="mt-2.5 h-2.5 w-full rounded bg-muted" />
+                    <div className="mt-2.5 h-2.5 w-4/5 rounded bg-muted" />
+                  </div>
+                  <div className="mt-4 grid grid-cols-3 gap-3">
+                    {[
+                      { icon: FileText, label: "Notas" },
+                      { icon: BookOpen, label: "Flashcards" },
+                      { icon: CheckCircle2, label: "Quiz" },
+                    ].map(({ icon: Icon, label }) => (
+                      <div key={label} className="rounded-xl border border-border p-3 text-center">
+                        <Icon size={18} className="mx-auto text-primary" />
+                        <p className="mt-2 text-xs font-bold">{label}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 rounded-xl border border-primary/15 bg-primary/5 p-4">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span>Progresso de revisão</span>
+                      <span className="text-primary">78%</span>
+                    </div>
+                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-primary/10">
+                      <div className="h-full w-[78%] rounded-full bg-primary" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-y border-border bg-secondary/30 px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="rounded-3xl border border-border bg-card p-7 sm:p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Smartphone size={22} />
+                </div>
+                <h2 className="mt-5 text-2xl font-black">Estude no celular.</h2>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                  O Pineapple Note já foi construído com interface responsiva para funcionar bem no celular, tablet e desktop pelo navegador.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {["Celular", "Tablet", "Web"].map((item) => (
+                    <span key={item} className="rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-bold">{item}</span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-border bg-card p-7 sm:p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Monitor size={22} />
+                </div>
+                <h2 className="mt-5 text-2xl font-black">Uma experiência que cresce com você.</h2>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                  O acesso web é o centro da experiência hoje. Aplicativos nativos e recursos avançados entram como evolução do produto.
+                </p>
+                <div className="mt-6 flex items-center gap-2 text-xs font-bold text-muted-foreground">
+                  <CheckCircle2 size={15} className="text-primary" />
+                  Web responsivo disponível
+                </div>
+              </div>
             </div>
           </div>
         </section>
