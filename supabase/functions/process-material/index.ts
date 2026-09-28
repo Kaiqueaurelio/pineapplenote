@@ -235,9 +235,9 @@ ${textContent}`,
         role: "user",
         parts: [
           {
-            fileData: {
-              mimeType: material.mime_type || "application/octet-stream",
-              fileUri,
+            file_data: {
+              mime_type: material.mime_type || "application/octet-stream",
+              file_uri: fileUri,
             },
           },
           {
