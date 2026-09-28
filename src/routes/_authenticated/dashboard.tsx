@@ -4,6 +4,7 @@ import {
   ArrowRight,
   AudioLines,
   ChevronDown,
+  ChevronRight,
   Link2,
   FileUp,
   BookOpen,
