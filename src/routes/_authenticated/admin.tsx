@@ -70,7 +70,6 @@ function AdminPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Tables<"study_materials"> | null>(null);
-  const [profileSearch, setProfileSearch] = useState("");
   const [courseFilter, setCourseFilter] = useState("all");
   const [institutionFilter, setInstitutionFilter] = useState("all");
   const [materialSourceFilter, setMaterialSourceFilter] = useState("all");
@@ -180,10 +179,9 @@ function AdminPage() {
           profile.institution.toLowerCase().includes(query) ||
           profile.course.toLowerCase().includes(query) ||
           profile.user_id.toLowerCase().includes(query);
-        const matchesExtra = !profileSearch.trim() || profileSearch.trim().toLowerCase() === profile.user_id.toLowerCase();
-        return matchesRole && matchesCourse && matchesInstitution && matchesQuery && matchesExtra;
+        return matchesRole && matchesCourse && matchesInstitution && matchesQuery;
       }),
-    [profiles, roleFilter, userSearch, profileSearch, courseFilter, institutionFilter],
+    [profiles, roleFilter, userSearch, courseFilter, institutionFilter],
   );
 
   const institutions = useMemo(() => Array.from(new Set(profiles.map((p) => p.institution).filter(Boolean))).sort(), [profiles]);
@@ -316,7 +314,7 @@ function AdminPage() {
         <aside className="border-b border-border bg-background lg:sticky lg:top-[72px] lg:h-[calc(100dvh-72px)] lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r">
           <nav className="flex gap-1 overflow-x-auto p-3 lg:block lg:space-y-1 lg:p-5" aria-label="Administração">
             {tabs.map(({ id, label, icon: Icon }) => (
-              <button key={id} type="button" onClick={() => setTab(id)} className={`flex h-11 shrink-0 items-center gap-3 rounded-xl px-4 text-sm font-bold transition lg:w-full ${tab === id ? "bg-violet-soft text-brand-violet" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
+              <button key={id} type="button" onClick={() => setTab(id)} className={`flex h-11 w-full items-center gap-3 rounded-xl px-4 text-sm font-bold transition ${tab === id ? "bg-violet-soft text-brand-violet" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
                 <Icon size={19} /> {label}
               </button>
             ))}
