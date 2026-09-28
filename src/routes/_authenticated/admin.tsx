@@ -57,6 +57,8 @@ function AdminPage() {
   const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
   const [materials, setMaterials] = useState<Tables<"study_materials">[]>([]);
   const [domains, setDomains] = useState<string[]>([]);
+  const [progressCount, setProgressCount] = useState(0);
+  const [outputCount, setOutputCount] = useState(0);
   const [adminName, setAdminName] = useState("Administrador");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -78,11 +80,13 @@ function AdminPage() {
 
   async function load() {
     setLoading(true);
-    const [{ data: auth }, profileResult, materialResult, domainResult] = await Promise.all([
+    const [{ data: auth }, profileResult, materialResult, domainResult, progressResult, outputResult] = await Promise.all([
       supabase.auth.getUser(),
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("study_materials").select("*").order("created_at", { ascending: false }),
       supabase.from("signup_email_domains").select("domain").order("domain"),
+      supabase.from("study_progress").select("id", { count: "exact", head: true }),
+      supabase.from("material_outputs").select("id", { count: "exact", head: true }),
     ]);
     setLoading(false);
     if (auth.user?.user_metadata.full_name) setAdminName(String(auth.user.user_metadata.full_name));
@@ -93,6 +97,8 @@ function AdminPage() {
     setProfiles(profileResult.data ?? []);
     setMaterials(materialResult.data ?? []);
     setDomains((domainResult.data ?? []).map((item) => item.domain));
+    setProgressCount(progressResult.count ?? 0);
+    setOutputCount(outputResult.count ?? 0);
     setLastUpdated(new Date());
   }
 
