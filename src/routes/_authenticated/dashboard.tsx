@@ -500,8 +500,19 @@ function Index() {
       toast.error(parsed.error.issues[0]?.message ?? "URL inválida.");
       return;
     }
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(parsed.data);
+    } catch {
+      toast.error("URL inválida.");
+      return;
+    }
+    if (!["http:", "https:"].includes(parsedUrl.protocol) || parsedUrl.username || parsedUrl.password) {
+      toast.error("Use uma URL HTTP ou HTTPS sem credenciais.");
+      return;
+    }
     setUploadingMaterial(true);
-    const url = parsed.data;
+    const url = parsedUrl.toString();
     const title = (() => {
       try {
         return new URL(url).hostname.replace(/^www\\./, "");
