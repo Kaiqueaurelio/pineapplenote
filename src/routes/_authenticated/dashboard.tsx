@@ -249,10 +249,11 @@ function Index() {
       return;
     }
 
+    let stream: MediaStream | null = null;
     try {
       setSelectedFile(null);
       if (fileRef.current) fileRef.current.value = "";
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mimeType = getRecordingMimeType();
       const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
       recordingChunksRef.current = [];
@@ -269,7 +270,7 @@ function Index() {
           setSelectedFile(new File([blob], `gravacao-${new Date().toISOString().replace(/[:.]/g, "-")}.${extension}`, { type }));
           toast.success("Gravação pronta para salvar.");
         }
-        stream.getTracks().forEach((track) => track.stop());
+        stream?.getTracks().forEach((track) => track.stop());
         mediaRecorderRef.current = null;
         setRecording(false);
         if (recordingTimerRef.current !== null) {
@@ -278,7 +279,7 @@ function Index() {
         }
       };
       recorder.onerror = () => {
-        stream.getTracks().forEach((track) => track.stop());
+        stream?.getTracks().forEach((track) => track.stop());
         mediaRecorderRef.current = null;
         setRecording(false);
         if (recordingTimerRef.current !== null) {
@@ -294,6 +295,13 @@ function Index() {
       setRecording(true);
       recordingTimerRef.current = window.setInterval(() => setRecordingSeconds((seconds) => seconds + 1), 1000);
     } catch {
+      stream?.getTracks().forEach((track) => track.stop());
+      mediaRecorderRef.current = null;
+      if (recordingTimerRef.current !== null) {
+        window.clearInterval(recordingTimerRef.current);
+        recordingTimerRef.current = null;
+      }
+      setRecording(false);
       toast.error("Permita o acesso ao microfone para gravar sua aula.");
     }
   }
