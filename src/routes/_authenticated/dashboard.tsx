@@ -401,7 +401,7 @@ function Index() {
             <img
               src={logoAsset.url}
               alt="Pineapple Note"
-              className="h-10 max-w-[150px] w-auto object-contain object-left sm:h-12 sm:max-w-[190px] lg:h-14 lg:max-w-[230px]"
+              className="h-12 max-w-[180px] w-auto object-contain object-left mix-blend-multiply sm:h-14 sm:max-w-[210px] lg:h-16 lg:max-w-[240px]"
             />
           </a>
 
