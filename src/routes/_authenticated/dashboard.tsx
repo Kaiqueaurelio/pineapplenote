@@ -1144,6 +1144,21 @@ function Index() {
             </div>
             <span className="break-all text-xs">{user.email}</span>
           </div>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/admin" })}
+              className="flex w-full items-center justify-between rounded-xl border border-violet-border bg-violet-soft p-4 text-left transition hover:bg-violet-soft/70"
+            >
+              <span>
+                <strong className="block text-brand-violet">Central de administração</strong>
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  Acessos, domínios institucionais e saúde da plataforma.
+                </span>
+              </span>
+              <ArrowRight className="shrink-0 text-brand-violet" size={19} />
+            </button>
+          )}
           <form onSubmit={saveProfile} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="display_name">Nome completo</Label>
