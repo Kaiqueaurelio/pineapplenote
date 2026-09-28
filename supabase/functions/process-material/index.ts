@@ -139,14 +139,23 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) return json({ error: "Não autenticado." }, 401);
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const publishableKey =
     Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ??
-      JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}").default,
-    { global: { headers: { Authorization: authHeader } } },
-  );
+    JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}").default;
+  const supabase = createClient(supabaseUrl, publishableKey, {
+    global: { headers: { Authorization: authHeader } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) return json({ error: "Sessão inválida." }, 401);
+
+  const { data: actor } = await supabase.from("profiles").select("role").eq("user_id", user.id).maybeSingle();
+  const isAdmin = actor?.role === "admin";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const db = isAdmin && serviceRoleKey
+    ? createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } })
+    : supabase;
 
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) return json({ error: "GEMINI_API_KEY não configurada no servidor." }, 503);
@@ -158,20 +167,18 @@ Deno.serve(async (req) => {
     processingMaterialId = materialId;
     if (typeof materialId !== "string") return json({ error: "materialId é obrigatório." }, 400);
 
-    const { data: material, error: materialError } = await supabase
-      .from("study_materials")
-      .select("*")
-      .eq("id", materialId)
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const materialQuery = db.from("study_materials").select("*").eq("id", materialId);
+    if (!isAdmin) materialQuery.eq("user_id", user.id);
+    const { data: material, error: materialError } = await materialQuery.maybeSingle();
 
     if (materialError || !material) return json({ error: "Material não encontrado." }, 404);
+    const materialOwnerId = material.user_id;
 
-    await supabase
+    await db
       .from("study_materials")
       .update({ status: "processing" })
       .eq("id", material.id)
-      .eq("user_id", user.id);
+      .eq("user_id", materialOwnerId);
 
     let contents: unknown[];
 
@@ -209,7 +216,7 @@ ${textContent}`,
         }],
       }];
     } else {
-      const { data: signed, error: signedError } = await supabase.storage
+      const { data: signed, error: signedError } = await db.storage
         .from("study-materials")
         .createSignedUrl(material.storage_path, 60 * 60);
       if (signedError || !signed?.signedUrl) throw new Error("Não foi possível acessar o arquivo.");
@@ -249,10 +256,10 @@ ${textContent}`,
 
     const output = await generateStudy(apiKey, contents);
 
-    const { error: outputError } = await supabase.from("material_outputs").upsert(
+    const { error: outputError } = await db.from("material_outputs").upsert(
       {
         material_id: material.id,
-        user_id: user.id,
+        user_id: materialOwnerId,
         summary: output.summary,
         topics: output.topics,
         flashcards: output.flashcards,
@@ -264,20 +271,20 @@ ${textContent}`,
 
     if (outputError) throw new Error("Não foi possível salvar o material processado.");
 
-    await supabase
+    await db
       .from("study_materials")
       .update({ status: "ready" })
       .eq("id", material.id)
-      .eq("user_id", user.id);
+      .eq("user_id", materialOwnerId);
 
     return json({ ok: true, output });
   } catch (error) {
     if (processingMaterialId) {
-      await supabase
+      await db
         .from("study_materials")
         .update({ status: "failed" })
         .eq("id", processingMaterialId)
-        .eq("user_id", user.id);
+        .eq("user_id", materialOwnerId ?? user.id);
     }
     return json({ error: error instanceof Error ? error.message : "Falha no processamento." }, 500);
   }
