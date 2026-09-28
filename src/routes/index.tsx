@@ -24,19 +24,6 @@ import {
 import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 
-const features = [
-  { icon: FileAudio, title: "Do conteúdo ao conhecimento", text: "Envie áudios, vídeos, PDFs, documentos ou grave uma aula diretamente no app." },
-  { icon: BrainCircuit, title: "Estudo organizado por IA", text: "Receba resumo, tópicos essenciais, transcrição, flashcards e quiz em um só lugar." },
-  { icon: MessageCircleMore, title: "Seu material, sempre acessível", text: "Revise na biblioteca, acompanhe o progresso e retome seus estudos de onde parou." },
-  { icon: Languages, title: "Feito para aprender melhor", text: "Uma experiência clara, responsiva e preparada para ferramentas de estudo inteligente." },
-];
-
-const steps = [
-  ["01", "Envie ou grave", "Escolha um arquivo, documento ou uma nova gravação."],
-  ["02", "Deixe a IA organizar", "A Pineapple transforma conteúdo bruto em um material de estudo estruturado."],
-  ["03", "Revise e avance", "Use resumos, flashcards e quiz para estudar com mais constância."],
-];
-
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
