@@ -14,6 +14,7 @@ import {
   Plus,
   RotateCcw,
   Shield,
+  Smartphone,
   Star,
   Trash2,
   Users,
@@ -103,8 +104,8 @@ function SettingsPage() {
         <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-card">
           <Row icon={Star} label="Dê 5 estrelas para o Pineapple Note" onClick={() => setDialog("rating")} />
           <Row icon={Plus} label="Convidar um amigo" onClick={() => unsupported("Convites")} />
-          <Row icon={Bell} label="Notificações" onClick={() => setNotifications((value) => !value)} />
-          <Row icon={Shield} label={`Notificações: ${notifications ? "ativadas" : "desativadas"}`} onClick={() => setNotifications((value) => !value)} />
+          <Row icon={Bell} label={`Notificações · ${notifications ? "ativadas" : "desativadas"}`} onClick={() => setNotifications((value) => !value)} />
+          <Row icon={Smartphone} label="Bloqueio de aplicativos" onClick={() => unsupported("Bloqueio de aplicativos")} />
         </section>
 
         <h3 className="mb-3 mt-9 px-1 text-2xl font-black">Suporte e feedback</h3>
