@@ -947,18 +947,19 @@ function MaterialPage() {
               <label className="mt-6 block text-sm font-bold" htmlFor="translation-language">
                 Idioma
               </label>
-              <select
+              <input
                 id="translation-language"
                 value={language}
                 onChange={(event) => setLanguage(event.target.value)}
-                className="mt-2 h-12 w-full rounded-2xl border border-border bg-card px-4"
-              >
-                {["English", "Español", "Français", "Deutsch", "Italiano", "日本語", "한국어"].map(
-                  (item) => (
-                    <option key={item}>{item}</option>
-                  ),
+                placeholder="Ex.: English, Español, 日本語, العربية..."
+                className="mt-2 h-12 w-full rounded-2xl border border-border bg-card px-4 outline-none focus:border-brand-violet"
+                list="pineapple-language-suggestions"
+              />
+              <datalist id="pineapple-language-suggestions">
+                {["English", "Español", "Français", "Deutsch", "Italiano", "日本語", "한국어", "中文", "العربية", "Português"].map(
+                  (item) => <option key={item} value={item} />,
                 )}
-              </select>
+              </datalist>
               <Button className="mt-4 w-full" onClick={() => void translateNote()}>
                 Traduzir com IA
               </Button>
