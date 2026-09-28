@@ -157,23 +157,35 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+html,
+body,
+#root {
+  /* The app is always a normal horizontal web layout. Never inherit device/editor
+     writing modes or transforms that can rotate the entire application. */
+  writing-mode: horizontal-tb !important;
+  direction: ltr !important;
+  text-orientation: mixed !important;
+  transform: none !important;
+  rotate: none !important;
+}
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
-  /* Keep the document in the normal horizontal writing direction on every browser/device. */
-  writing-mode: horizontal-tb !important;
-  direction: ltr !important;
-  text-orientation: mixed !important;
-  transform: none !important;
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
 }
 
-body {
-  writing-mode: horizontal-tb !important;
-  direction: ltr !important;
-  text-orientation: mixed !important;
-  transform: none !important;
+body,
+#root {
   width: 100%;
+  min-width: 320px;
   min-height: 100dvh;
+}
+
+#root {
+  isolation: isolate;
 }
 
 @media (prefers-reduced-motion: reduce) {
