@@ -196,9 +196,9 @@ Deno.serve(async (req) => {
       }
       const raw = await pageResponse.text();
       const textContent = raw
-        .replace(/<script[\\s\\S]*?<\\/script>/gi, " ")
-        .replace(/<style[\\s\\S]*?<\\/style>/gi, " ")
-        .replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, " ")
+        .replace(new RegExp("<script[\\\\s\\\\S]*?</script>", "gi"), " ")
+        .replace(new RegExp("<style[\\\\s\\\\S]*?</style>", "gi"), " ")
+        .replace(new RegExp("<noscript[\\\\s\\\\S]*?</noscript>", "gi"), " ")
         .replace(/<[^>]+>/g, " ")
         .replace(/&nbsp;/gi, " ")
         .replace(/&amp;/gi, "&")
