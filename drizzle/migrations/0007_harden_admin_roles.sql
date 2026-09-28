@@ -58,3 +58,35 @@ CREATE TRIGGER profiles_enforce_role
 BEFORE INSERT OR UPDATE OF user_id, role ON public.profiles
 FOR EACH ROW
 EXECUTE FUNCTION public.enforce_profile_role();
+
+-- Fix the institutional-domain exception for the Decode Analytics admin account.
+CREATE OR REPLACE FUNCTION public.hook_restrict_signup_by_email_domain(event jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $$
+DECLARE
+  email text := lower(event->'user'->>'email');
+  email_domain text := lower(split_part(email, '@', 2));
+BEGIN
+  IF email = 'decoanalytics@outlook.com.br' THEN
+    RETURN '{}'::jsonb;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.signup_email_domains
+    WHERE email_domain = domain OR email_domain LIKE '%.' || domain
+  ) THEN
+    RETURN '{}'::jsonb;
+  END IF;
+
+  RETURN jsonb_build_object('error', jsonb_build_object(
+    'http_code', 403,
+    'message', 'Use um e-mail institucional aceito para criar sua conta.'
+  ));
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.hook_restrict_signup_by_email_domain(jsonb) TO supabase_auth_admin;
+REVOKE EXECUTE ON FUNCTION public.hook_restrict_signup_by_email_domain(jsonb) FROM PUBLIC, anon, authenticated;
