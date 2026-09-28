@@ -84,6 +84,8 @@ function Index() {
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState("Documento");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [urlOpen, setUrlOpen] = useState(false);
+  const [sourceUrl, setSourceUrl] = useState("");
   const MAX_FILE_SIZE = 500 * 1024 * 1024;
   const [recording, setRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
@@ -482,6 +484,44 @@ function Index() {
     navigate({ to: "/material/$materialId", params: { materialId: savedMaterial.id } });
   }
 
+  async function saveUrlMaterial() {
+    const parsed = z.string().url("Cole uma URL válida.").safeParse(sourceUrl.trim());
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "URL inválida.");
+      return;
+    }
+    setUploadingMaterial(true);
+    const url = parsed.data;
+    const title = (() => {
+      try {
+        return new URL(url).hostname.replace(/^www\\./, "");
+      } catch {
+        return "Material da web";
+      }
+    })();
+    const { data: savedMaterial, error } = await supabase
+      .from("study_materials")
+      .insert({
+        user_id: user.id,
+        title: `Conteúdo de ${title}`,
+        source_type: "url",
+        mime_type: "text/html",
+        storage_path: url,
+        status: "uploaded",
+      })
+      .select("id")
+      .single();
+    setUploadingMaterial(false);
+    if (error || !savedMaterial) {
+      toast.error("Não foi possível salvar o link.");
+      return;
+    }
+    setUrlOpen(false);
+    setSourceUrl("");
+    toast.success("Link adicionado. Vamos organizar o conteúdo.");
+    navigate({ to: "/material/$materialId", params: { materialId: savedMaterial.id } });
+  }
+
   const isAdmin = profile?.role === "admin";
   const profileComplete = Boolean(profile?.display_name && profile?.institution && profile?.course);
   const readyMaterials = dashboardMaterials.filter((material) => material.status === "ready");
@@ -749,11 +789,12 @@ function Index() {
                       { label: "Gravar áudio", detail: "Aula ou explicação", icon: Mic2 },
                       { label: "Enviar vídeo", detail: "Arquivo de vídeo", icon: Video },
                       { label: "Documento", detail: "PDF, DOC ou slides", icon: FileText },
+                      { label: "Colar um link", detail: "Site, artigo ou página", icon: Download },
                     ].map((item) => (
                       <button
                         key={item.label}
                         type="button"
-                        onClick={() => chooseFile(item.label)}
+                        onClick={() => item.label === "Colar um link" ? setUrlOpen(true) : chooseFile(item.label)}
                         className={`group flex min-h-32 flex-col items-start justify-between rounded-lg border p-4 text-left transition ${
                           selectedType === item.label
                             ? "border-primary bg-green-soft/70"
@@ -772,9 +813,7 @@ function Index() {
                         )}
                         <span>
                           <strong className="block text-sm">{item.label}</strong>
-                          <span className="mt-1 block text-xs text-muted-foreground">
-                            {item.detail}
-                          </span>
+                          <span className="mt-1 block text-xs text-muted-foreground">{item.detail}</span>
                         </span>
                       </button>
                     ))}
@@ -1089,6 +1128,24 @@ function Index() {
           Perfil
         </button>
       </nav>
+
+      <Dialog open={urlOpen} onOpenChange={setUrlOpen}>
+        <DialogContent className="w-[calc(100%-1rem)] rounded-2xl sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Adicionar conteúdo por link</DialogTitle>
+            <DialogDescription>Cole uma página, artigo ou endereço de vídeo que você quer transformar em material de estudo.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Label htmlFor="source-url">URL</Label>
+            <Input id="source-url" value={sourceUrl} onChange={(event) => setSourceUrl(event.target.value)} placeholder="https://..." inputMode="url" autoComplete="url" />
+            <p className="text-xs leading-5 text-muted-foreground">O Pineapple extrai o texto acessível da página e cria resumo, tópicos, flashcards e quiz.</p>
+            <Button className="w-full" onClick={() => void saveUrlMaterial()} disabled={uploadingMaterial || !sourceUrl.trim()}>
+              {uploadingMaterial ? <Loader2 className="animate-spin" size={17} /> : <Download size={17} />}
+              {uploadingMaterial ? "Adicionando..." : "Adicionar link"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
         <DialogContent className="w-[calc(100%-1rem)] rounded-2xl sm:max-w-md">
