@@ -187,7 +187,7 @@ Deno.serve(async (req) => {
 
     if (material.source_type === "url") {
       const url = material.storage_path;
-      if (!/^https?:\\/\\//i.test(url)) throw new Error("URL de origem inválida.");
+      if (!/^https?:\/\//i.test(url)) throw new Error("URL de origem inválida.");
       const pageResponse = await fetch(url, { headers: { "User-Agent": "PineappleNote/1.0" } });
       if (!pageResponse.ok) throw new Error(`Não foi possível acessar a URL (${pageResponse.status}).`);
       const contentType = pageResponse.headers.get("content-type") ?? "";
@@ -196,9 +196,9 @@ Deno.serve(async (req) => {
       }
       const raw = await pageResponse.text();
       const textContent = raw
-        .replace(/<script[\\s\\S]*?<\\/script>/gi, " ")
-        .replace(/<style[\\s\\S]*?<\\/style>/gi, " ")
-        .replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, " ")
+        .replace(new RegExp("<script[\\\\s\\\\S]*?</script>", "gi"), " ")
+        .replace(new RegExp("<style[\\\\s\\\\S]*?</style>", "gi"), " ")
+        .replace(new RegExp("<noscript[\\\\s\\\\S]*?</noscript>", "gi"), " ")
         .replace(/<[^>]+>/g, " ")
         .replace(/&nbsp;/gi, " ")
         .replace(/&amp;/gi, "&")

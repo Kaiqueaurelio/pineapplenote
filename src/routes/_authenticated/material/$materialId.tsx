@@ -297,12 +297,14 @@ function MaterialPage() {
       "Excluir esta nota? O arquivo e os dados deste material serão removidos.",
     );
     if (!confirmed) return;
-    const { error: storageError } = await supabase.storage
-      .from("study-materials")
-      .remove([material.storage_path]);
-    if (storageError) {
-      toast.error("Não foi possível remover o arquivo original.");
-      return;
+    if (material.source_type !== "url") {
+      const { error: storageError } = await supabase.storage
+        .from("study-materials")
+        .remove([material.storage_path]);
+      if (storageError) {
+        toast.error("Não foi possível remover o arquivo original.");
+        return;
+      }
     }
     const { error } = await supabase
       .from("study_materials")

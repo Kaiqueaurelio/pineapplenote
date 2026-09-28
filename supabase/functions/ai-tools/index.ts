@@ -13,84 +13,144 @@ function json(body: unknown, status = 200) {
   });
 }
 
-async function callOpenAI(apiKey: string, input: unknown, schema?: unknown) {
-  const body: Record<string, unknown> = { model: "gpt-5", input };
-  if (schema) {
-    body.text = {
-      format: {
-        type: "json_schema",
-        name: "pineapple_tool",
-        strict: true,
-        schema,
-      },
-    };
+function textFromGemini(data: unknown) {
+  const candidates = (data as { candidates?: unknown[] })?.candidates;
+  for (const candidate of Array.isArray(candidates) ? candidates : []) {
+    const parts = (candidate as { content?: { parts?: unknown[] } })?.content?.parts;
+    for (const part of Array.isArray(parts) ? parts : []) {
+      const text = (part as { text?: unknown })?.text;
+      if (typeof text === "string" && text.trim()) return text;
+    }
   }
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  throw new Error("O Gemini não retornou texto.");
+}
+
+async function callGemini(apiKey: string, contents: unknown[], schema?: unknown) {
+  const generationConfig: Record<string, unknown> = {
+    thinkingConfig: { thinkingLevel: "low" },
+  };
+  if (schema) {
+    generationConfig.responseMimeType = "application/json";
+    generationConfig.responseSchema = schema;
+  }
+  const response = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+    {
+      method: "POST",
+      headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({ contents, generationConfig }),
+    },
+  );
   const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message ?? "Falha na IA.");
+  if (!response.ok) throw new Error(data?.error?.message ?? "Falha no Gemini.");
   return data;
 }
 
-function outputText(data: unknown) {
-  if (!data || typeof data !== "object") throw new Error("Resposta vazia da IA.");
-  const record = data as Record<string, unknown>;
-  if (typeof record.output_text === "string") return record.output_text;
-  for (const item of Array.isArray(record.output) ? record.output : []) {
-    if (!item || typeof item !== "object") continue;
-    for (const part of Array.isArray((item as Record<string, unknown>).content)
-      ? (item as Record<string, unknown>).content as unknown[]
-      : []) {
-      if (part && typeof part === "object" && typeof (part as Record<string, unknown>).text === "string") {
-        return (part as Record<string, unknown>).text as string;
-      }
-    }
-  }
-  throw new Error("A IA não retornou conteúdo.");
+async function callGeminiTts(apiKey: string, turns: Array<{ text: string; speaker?: string; style?: string }>) {
+  const multi = turns.some((turn) => turn.speaker);
+  const input = [{
+    type: "user_input",
+    content: turns.map((turn) => ({
+      type: "text",
+      text: turn.text,
+      annotations: [{
+        type: "speech_metadata",
+        ...(turn.speaker ? { speaker: turn.speaker } : {}),
+        style: turn.style ?? "natural, didático e amigável em português brasileiro",
+      }],
+    })),
+  }];
+
+  const body: Record<string, unknown> = {
+    model: "gemini-3.8-flash-tts",
+    input,
+    response_format: { type: "audio" },
+    generation_config: {
+      speech_config: multi
+        ? {
+            mode: "conversational",
+            speakers: [
+              { speaker: "Kai", voice: "Puck" },
+              { speaker: "Lia", voice: "Kore" },
+            ],
+          }
+        : [{ voice: "Kore" }],
+    },
+  };
+
+  const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
+    method: "POST",
+    headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data?.error?.message ?? "Falha ao gerar o áudio.");
+  const audio = data?.output_audio?.data ??
+    data?.steps?.flatMap((step: { content?: unknown[] }) => Array.isArray(step.content) ? step.content : [])
+      .reverse().find((part: { type?: string; data?: string }) => part?.type === "audio")?.data;
+  if (!audio) throw new Error("O Gemini não retornou o áudio.");
+  return audio;
 }
 
 const chatSchema = {
   type: "object",
-  additionalProperties: false,
-  properties: { answer: { type: "string" }, citations: { type: "array", items: { type: "string" } } },
+  properties: {
+    answer: { type: "string" },
+    citations: { type: "array", items: { type: "string" } },
+  },
   required: ["answer", "citations"],
 };
+
 const podcastSchema = {
   type: "object",
-  additionalProperties: false,
-  properties: { title: { type: "string" }, script: { type: "string" }, duration: { type: "string" } },
-  required: ["title", "script", "duration"],
+  properties: {
+    title: { type: "string" },
+    turns: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          speaker: { type: "string" },
+          text: { type: "string" },
+        },
+        required: ["speaker", "text"],
+      },
+    },
+  },
+  required: ["title", "turns"],
 };
+
 const slidesSchema = {
   type: "object",
-  additionalProperties: false,
   properties: {
     slides: {
       type: "array",
       items: {
         type: "object",
-        additionalProperties: false,
-        properties: { title: { type: "string" }, body: { type: "string" }, takeaway: { type: "string" } },
+        properties: {
+          title: { type: "string" },
+          body: { type: "string" },
+          takeaway: { type: "string" },
+        },
         required: ["title", "body", "takeaway"],
       },
     },
   },
   required: ["slides"],
 };
+
 const mindmapSchema = {
   type: "object",
-  additionalProperties: false,
   properties: {
     center: { type: "string" },
     branches: {
       type: "array",
       items: {
         type: "object",
-        additionalProperties: false,
-        properties: { title: { type: "string" }, children: { type: "array", items: { type: "string" } } },
+        properties: {
+          title: { type: "string" },
+          children: { type: "array", items: { type: "string" } },
+        },
         required: ["title", "children"],
       },
     },
@@ -98,9 +158,48 @@ const mindmapSchema = {
   required: ["center", "branches"],
 };
 
+const examSchema = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    instructions: { type: "string" },
+    questions: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          question: { type: "string" },
+          options: { type: "array", items: { type: "string" } },
+          answer: { type: "string" },
+          explanation: { type: "string" },
+        },
+        required: ["question", "options", "answer", "explanation"],
+      },
+    },
+  },
+  required: ["title", "instructions", "questions"],
+};
+
+const translateSchema = {
+  type: "object",
+  properties: {
+    summary: { type: "string" },
+    topics: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: { title: { type: "string" }, explanation: { type: "string" } },
+        required: ["title", "explanation"],
+      },
+    },
+  },
+  required: ["summary", "topics"],
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
+
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) return json({ error: "Não autenticado." }, 401);
 
@@ -113,8 +212,8 @@ Deno.serve(async (req) => {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return json({ error: "Sessão inválida." }, 401);
 
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!apiKey) return json({ error: "Processamento IA não configurado no servidor." }, 503);
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey) return json({ error: "GEMINI_API_KEY não configurada no servidor." }, 503);
 
   try {
     const body = await req.json();
@@ -150,47 +249,87 @@ Deno.serve(async (req) => {
     if (action === "chat") {
       const question = String(body.question ?? "").trim();
       if (!question) return json({ error: "Digite uma pergunta." }, 400);
-      const data = await callOpenAI(apiKey, [
-        { role: "system", content: [{ type: "input_text", text: "Você é o tutor do Pineapple Note. Responda em português brasileiro, usando somente o contexto fornecido. Se algo não estiver no material, diga claramente que não consta nele. Seja didático e objetivo." }] },
-        { role: "user", content: [{ type: "input_text", text: `CONTEXTO:\n${context}\n\nPERGUNTA:\n${question}` }] },
-      ], chatSchema);
-      return json(JSON.parse(outputText(data)));
+      const data = await callGemini(apiKey, [{
+        role: "user",
+        parts: [{ text: `Você é o tutor do Pineapple Note. Responda em português brasileiro, usando somente o material abaixo. Se a resposta não estiver no material, diga isso claramente. Seja didático, objetivo e não invente fatos.
+
+MATERIAL:
+${context}
+
+PERGUNTA:
+${question}` }],
+      }], chatSchema);
+      return json(JSON.parse(textFromGemini(data)));
     }
 
     if (action === "translate") {
       const language = String(body.language ?? "English");
-      const data = await callOpenAI(apiKey, [
-        { role: "user", content: [{ type: "input_text", text: `Traduza o resumo e tópicos deste material para ${language}. Preserve termos técnicos e estrutura. Retorne apenas JSON com summary e topics. Contexto:\n${context}` }] },
-      ], {
-        type: "object", additionalProperties: false,
-        properties: { summary: { type: "string" }, topics: { type: "array", items: { type: "object", additionalProperties: false, properties: { title: { type: "string" }, explanation: { type: "string" } }, required: ["title", "explanation"] } } },
-        required: ["summary", "topics"],
-      });
-      return json(JSON.parse(outputText(data)));
+      const data = await callGemini(apiKey, [{
+        role: "user",
+        parts: [{ text: `Traduza o resumo e os tópicos do material para ${language}. Preserve nomes próprios, termos técnicos e estrutura. Retorne somente JSON.
+
+MATERIAL:
+${context}` }],
+      }], translateSchema);
+      return json(JSON.parse(textFromGemini(data)));
     }
 
-    if (action === "podcast") {
-      const style = String(body.style ?? "duas vozes");
-      const data = await callOpenAI(apiKey, [
-        { role: "user", content: [{ type: "input_text", text: `Crie um roteiro de podcast de estudo em português brasileiro, estilo ${style}, sobre o material abaixo. Duas pessoas devem conversar de forma natural, explicando conceitos, fazendo perguntas e retomando pontos importantes. Não invente fatos. Contexto:\n${context}` }] },
-      ], podcastSchema);
-      return json(JSON.parse(outputText(data)));
+    if (action === "podcast" || action === "podcast-audio") {
+      const style = String(body.style ?? "conversa natural e didática");
+      const scriptData = await callGemini(apiKey, [{
+        role: "user",
+        parts: [{ text: `Crie um roteiro de podcast educacional em português brasileiro sobre o material abaixo. Estilo: ${style}. Use duas pessoas chamadas Kai e Lia, com perguntas, explicações e retomadas naturais. Seja fiel ao material e não invente fatos. Produza 8 a 14 turnos curtos.
+
+MATERIAL:
+${context}` }],
+      }], podcastSchema);
+      const script = JSON.parse(textFromGemini(scriptData)) as {
+        title: string;
+        turns: Array<{ speaker: string; text: string }>;
+      };
+      if (action === "podcast") return json(script);
+      const audio = await callGeminiTts(apiKey, script.turns.map((turn) => ({
+        text: turn.text,
+        speaker: turn.speaker === "Lia" ? "Lia" : "Kai",
+        style: "conversa natural, clara e agradável para estudo",
+      })));
+      return json({ ...script, audio, mimeType: "audio/wav" });
     }
 
     if (action === "slides") {
       const style = String(body.style ?? "Pineapple Clean");
       const instructions = String(body.instructions ?? "");
-      const data = await callOpenAI(apiKey, [
-        { role: "user", content: [{ type: "input_text", text: `Crie uma apresentação de estudo em 7 a 10 slides. Estilo visual: ${style}. Instruções adicionais: ${instructions}. Cada slide deve ter título, corpo curto e takeaway. Contexto:\n${context}` }] },
-      ], slidesSchema);
-      return json(JSON.parse(outputText(data)));
+      const data = await callGemini(apiKey, [{
+        role: "user",
+        parts: [{ text: `Crie uma apresentação de estudo em 7 a 10 slides. Identidade visual: Pineapple Note. Estilo escolhido: ${style}. Instruções: ${instructions}. Cada slide deve ter título, corpo curto e takeaway. Não invente informações.
+
+MATERIAL:
+${context}` }],
+      }], slidesSchema);
+      return json(JSON.parse(textFromGemini(data)));
     }
 
     if (action === "mindmap") {
-      const data = await callOpenAI(apiKey, [
-        { role: "user", content: [{ type: "input_text", text: `Converta o material em um mapa mental hierárquico. Use de 4 a 7 ramificações e 2 a 5 filhos por ramificação. Não invente fatos. Contexto:\n${context}` }] },
-      ], mindmapSchema);
-      return json(JSON.parse(outputText(data)));
+      const data = await callGemini(apiKey, [{
+        role: "user",
+        parts: [{ text: `Converta o material em um mapa mental hierárquico. Use 4 a 7 ramificações e 2 a 5 filhos por ramificação. Não invente fatos.
+
+MATERIAL:
+${context}` }],
+      }], mindmapSchema);
+      return json(JSON.parse(textFromGemini(data)));
+    }
+
+    if (action === "exam") {
+      const count = Math.min(30, Math.max(5, Number(body.count ?? 15)));
+      const data = await callGemini(apiKey, [{
+        role: "user",
+        parts: [{ text: `Crie uma prova prática com exatamente ${count} questões de múltipla escolha sobre o material. Misture dificuldade fácil, média e difícil. Cada questão deve ter 4 alternativas, uma resposta correta e uma explicação. Não invente fatos e não repita perguntas.
+
+MATERIAL:
+${context}` }],
+      }], examSchema);
+      return json(JSON.parse(textFromGemini(data)));
     }
 
     return json({ error: "Ação de IA desconhecida." }, 400);
