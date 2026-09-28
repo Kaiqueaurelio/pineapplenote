@@ -472,7 +472,7 @@ function MaterialPage() {
         )}
         {output && (
           <section aria-label="Ferramentas de estudo" className="-mx-1 overflow-hidden">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 min-[390px]:grid-cols-2 sm:grid-cols-4">
               {[
                 { label: "Podcast", icon: Mic2, to: "/podcast/$materialId" as const },
                 { label: "Criar slides", icon: Presentation, to: "/slides/$materialId" as const },
