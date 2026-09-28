@@ -161,6 +161,7 @@ Deno.serve(async (req) => {
   if (!apiKey) return json({ error: "GEMINI_API_KEY não configurada no servidor." }, 503);
 
   let processingMaterialId: string | null = null;
+  let materialOwnerId = user.id;
 
   try {
     const { materialId } = await req.json();
@@ -172,7 +173,7 @@ Deno.serve(async (req) => {
     const { data: material, error: materialError } = await materialQuery.maybeSingle();
 
     if (materialError || !material) return json({ error: "Material não encontrado." }, 404);
-    const materialOwnerId = material.user_id;
+    materialOwnerId = material.user_id;
 
     await db
       .from("study_materials")
