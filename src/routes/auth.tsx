@@ -9,6 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
+import { formatAcceptedDomains, isInstitutionalEmail } from "@/lib/institutional-email";
+
+const ADMIN_EMAIL = "decoanalytics@outlook.com.br";
 
 const credentialsSchema = z.object({
   email: z.string().trim().email("Informe um e-mail válido.").max(255),
@@ -19,6 +22,9 @@ const signupSchema = credentialsSchema.extend({
   name: z.string().trim().min(2, "Informe seu nome.").max(80),
   institution: z.string().trim().max(120),
   course: z.string().trim().max(120),
+}).refine(({ email }) => email.toLowerCase() === ADMIN_EMAIL || isInstitutionalEmail(email), {
+  message: `Use um e-mail institucional aceito: ${formatAcceptedDomains()}.`,
+  path: ["email"],
 });
 
 export const Route = createFileRoute("/auth")({
@@ -195,7 +201,7 @@ function AuthPage() {
                 <div className="space-y-2"><Label htmlFor="course">Curso</Label><Input id="course" name="course" maxLength={120} placeholder="Seu curso" className="h-12 text-base" /></div>
               </div>
             </>}
-            <div className="space-y-2"><Label htmlFor="email">E-mail</Label><div className="relative"><Mail className="absolute left-3 top-3 text-muted-foreground" size={18} /><Input id="email" name="email" type="email" autoComplete="email" maxLength={255} required className="h-11 pl-10" placeholder="voce@exemplo.com" value={email} onChange={(event) => setEmail(event.target.value)} /></div></div>
+            <div className="space-y-2"><Label htmlFor="email">E-mail</Label><div className="relative"><Mail className="absolute left-3 top-3 text-muted-foreground" size={18} /><Input id="email" name="email" type="email" autoComplete="email" maxLength={255} required className="h-11 pl-10" placeholder="voce@instituicao.edu.br" value={email} onChange={(event) => setEmail(event.target.value)} /></div>{mode === "signup" && <p className="text-xs leading-relaxed text-muted-foreground">Aceitamos e-mails institucionais: <strong>{formatAcceptedDomains()}</strong>. Outras instituições podem ser incluídas pelo administrador.</p>}</div>
             <div className="space-y-2"><div className="flex items-center justify-between"><Label htmlFor="password">Senha</Label>{mode === "login" && <button type="button" onClick={sendRecovery} className="text-xs font-semibold text-green-strong hover:underline">Esqueci minha senha</button>}</div><div className="relative"><Input id="password" name="password" type={showPassword ? "text" : "password"} autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={8} maxLength={72} required className="h-11 pr-11" /><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</Button></div></div>
             <Button type="submit" className="w-full" disabled={pending}>{pending && <Loader2 className="animate-spin" size={17} />}{mode === "login" ? "Entrar" : "Criar conta"}</Button>
           </form>

@@ -94,6 +94,21 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_email_domains: {
+        Row: {
+          created_at: string
+          domain: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+        }
+        Relationships: []
+      }
       study_materials: {
         Row: {
           created_at: string

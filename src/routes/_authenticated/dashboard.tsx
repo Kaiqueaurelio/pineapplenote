@@ -416,7 +416,8 @@ function Index() {
             />
           </div>
 
-                    <Button
+          {isAdmin && <Button variant="outline" className="hidden sm:inline-flex" onClick={() => navigate({ to: "/admin" })}>Administração</Button>}
+          <Button
             variant="ghost"
             size="icon"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-violet text-sm font-bold text-brand-violet-foreground ring-4 ring-violet-soft"
