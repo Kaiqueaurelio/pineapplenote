@@ -18,7 +18,7 @@ function asFlashcards(value: Json): Flashcard[] {
   return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ question: String(item["question"] ?? ""), answer: String(item["answer"] ?? "") })) : [];
 }
 function asQuiz(value: Json): Quiz[] {
-  return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ question: String(item["question"] ?? ""), options: Array.isArray(item.options) ? item.options.map(String) : [], answer: String(item["answer"] ?? ""), explanation: String(item["explanation"] ?? "") })) : [];
+  return Array.isArray(value) ? value.filter((item): item is { [key: string]: Json | undefined } => typeof item === "object" && item !== null).map((item) => ({ question: String(item["question"] ?? ""), options: Array.isArray(item["options"]) ? item["options"].map(String) : [], answer: String(item["answer"] ?? ""), explanation: String(item["explanation"] ?? "") })) : [];
 }
 
 export const Route = createFileRoute("/_authenticated/material/$materialId")({
