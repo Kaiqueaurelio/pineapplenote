@@ -10,3 +10,5 @@
 - [x] Adicionar acesso por Google e recuperação de senha
 - [x] Proteger a central e criar perfil acadêmico individual
 - [x] Validar segurança, acesso e responsividade
+- [x] Criar papéis de administrador e estudante no banco
+- [x] Criar painel administrativo protegido por permissões

@@ -36,6 +36,13 @@
       "when": 1790606312292,
       "tag": "0004_sync_pending_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790607086000,
+      "tag": "0005_user_roles_and_admin_access",
+      "breakpoints": true
     }
   ]
 }

@@ -16,6 +16,7 @@ import {
   Plus,
   Search,
   Settings,
+  ShieldCheck,
   LogOut,
   Save,
   KeyRound,
@@ -32,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useUserRole } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
@@ -64,6 +66,7 @@ const navItems = [
 
 function Index() {
   const { user } = Route.useRouteContext();
+  const { isAdmin: roleIsAdmin } = useUserRole(user.id);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -379,7 +382,7 @@ function Index() {
     navigate({ to: "/material/$materialId", params: { materialId: savedMaterial.id } });
   }
 
-  const isAdmin = profile?.role === "admin";
+  const isAdmin = roleIsAdmin;
   const currentHour = new Date().getHours();
   const greeting = currentHour < 12 ? "Bom dia" : currentHour < 18 ? "Boa tarde" : "Boa noite";
 
@@ -458,6 +461,18 @@ function Index() {
             <button type="button" onClick={() => setHelpOpen(true)} className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
               <CircleHelp size={19} /> Ajuda
             </button>
+            {roleIsAdmin && (
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-brand-violet"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate({ to: "/admin" });
+                }}
+              >
+                <ShieldCheck size={19} /> Painel admin
+              </Button>
+            )}
             <Button variant="ghost" className="w-full justify-start" onClick={() => setProfileOpen(true)}>
               <Settings size={19} /> Configurações
             </Button>
@@ -714,7 +729,7 @@ function Index() {
           <div className="rounded-lg bg-green-soft p-3 text-sm text-green-strong">
             <div className="flex items-center justify-between gap-3">
               <strong className="block">E-mail confirmado</strong>
-              {profile?.role === "admin" && (
+              {roleIsAdmin && (
                 <span className="shrink-0 rounded-full bg-brand-violet px-2.5 py-1 text-[11px] font-bold text-brand-violet-foreground">
                   Administrador
                 </span>
