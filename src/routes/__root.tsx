@@ -12,23 +12,24 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster, toast } from "@/components/ui/sonner";
+import { AppErrorBoundary } from "@/components/error-boundary";
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          A página que você tentou acessar não existe ou foi movida.
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Go home
+            Voltar ao início
           </Link>
         </div>
       </div>
@@ -47,10 +48,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          Não foi possível carregar esta página
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          Ocorreu um erro inesperado. Tente novamente ou volte para o início.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -60,7 +61,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
+            Tentar novamente
           </button>
           <a
             href="/"
@@ -129,10 +130,71 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
+    const recentErrors = new Map<string, number>();
+
+    const notifyUnexpectedError = (error: unknown, mechanism: "onerror" | "unhandledrejection") => {
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === "string"
+            ? error
+            : "Erro inesperado";
+      const key = `${mechanism}:${message}`;
+      const now = Date.now();
+      const lastReported = recentErrors.get(key) ?? 0;
+
+      if (now - lastReported < 5000) return;
+      recentErrors.set(key, now);
+
+      reportLovableError(
+        error,
+        { boundary: "global_runtime_handler", message },
+        { mechanism, handled: true, severity: "error" },
+      );
+      toast.error("Ocorreu um erro inesperado. Tente novamente.");
+    };
+
+    const handleError = (event: ErrorEvent) => {
+      notifyUnexpectedError(event.error ?? event.message, "onerror");
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      notifyUnexpectedError(event.reason, "unhandledrejection");
+    };
+
+    window.addEventListener("error", handleError);
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener("error", handleError);
+      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+    };
+  }, []);
+
+  useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      if (
+        event !== "SIGNED_IN" &&
+        event !== "SIGNED_OUT" &&
+        event !== "USER_UPDATED" &&
+        event !== "TOKEN_REFRESHED"
+      ) {
+        return;
+      }
+
       router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+
+      if (event === "SIGNED_OUT") {
+        queryClient.clear();
+        if (window.location.pathname.startsWith("/dashboard") ||
+            window.location.pathname.startsWith("/library") ||
+            window.location.pathname.startsWith("/material/")) {
+          void router.navigate({ to: "/auth" });
+        }
+        return;
+      }
+
+      queryClient.invalidateQueries();
     });
     return () => data.subscription.unsubscribe();
   }, [queryClient, router]);
@@ -140,7 +202,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <AppErrorBoundary>
+        <Outlet />
+      </AppErrorBoundary>
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
   );

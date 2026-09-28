@@ -157,6 +157,17 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

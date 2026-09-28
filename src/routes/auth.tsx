@@ -22,6 +22,7 @@ const signupSchema = credentialsSchema.extend({
 });
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: z.object({ mode: z.enum(["login", "signup"]).optional() }).catch({}),
   head: () => ({
     meta: [
       { title: "Entrar ou criar conta — Pineapple Note" },
@@ -37,11 +38,17 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const searchParams = Route.useSearch();
+  const [mode, setMode] = useState<"login" | "signup">(searchParams.mode ?? "login");
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (searchParams.mode) setMode(searchParams.mode);
+  }, [searchParams.mode]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -141,8 +148,7 @@ function AuthPage() {
   }
 
   async function sendRecovery() {
-    const emailInput = document.querySelector<HTMLInputElement>('input[name="email"]');
-    const parsed = z.string().trim().email().safeParse(emailInput?.value ?? "");
+    const parsed = z.string().trim().email().safeParse(email);
     if (!parsed.success) return setError("Informe seu e-mail para receber o link de recuperação.");
     setPending(true);
     setError("");
@@ -153,8 +159,6 @@ function AuthPage() {
     if (recoveryError) return setError("Não foi possível enviar o link agora. Tente novamente.");
     setMessage("Se este e-mail estiver cadastrado, você receberá um link para criar uma nova senha.");
   }
-
-  const emailValue = () => document.querySelector<HTMLInputElement>('input[name="email"]')?.value ?? "";
 
   return (
     <main className="min-h-[100dvh] bg-background lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(440px,0.95fr)]">
@@ -191,13 +195,13 @@ function AuthPage() {
                 <div className="space-y-2"><Label htmlFor="course">Curso</Label><Input id="course" name="course" maxLength={120} placeholder="Seu curso" className="h-12 text-base" /></div>
               </div>
             </>}
-            <div className="space-y-2"><Label htmlFor="email">E-mail</Label><div className="relative"><Mail className="absolute left-3 top-3 text-muted-foreground" size={18} /><Input id="email" name="email" type="email" autoComplete="email" maxLength={255} required className="h-11 pl-10" placeholder="voce@instituicao.edu.br" /></div></div>
+            <div className="space-y-2"><Label htmlFor="email">E-mail</Label><div className="relative"><Mail className="absolute left-3 top-3 text-muted-foreground" size={18} /><Input id="email" name="email" type="email" autoComplete="email" maxLength={255} required className="h-11 pl-10" placeholder="voce@exemplo.com" value={email} onChange={(event) => setEmail(event.target.value)} /></div></div>
             <div className="space-y-2"><div className="flex items-center justify-between"><Label htmlFor="password">Senha</Label>{mode === "login" && <button type="button" onClick={sendRecovery} className="text-xs font-semibold text-green-strong hover:underline">Esqueci minha senha</button>}</div><div className="relative"><Input id="password" name="password" type={showPassword ? "text" : "password"} autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={8} maxLength={72} required className="h-11 pr-11" /><Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</Button></div></div>
             <Button type="submit" className="w-full" disabled={pending}>{pending && <Loader2 className="animate-spin" size={17} />}{mode === "login" ? "Entrar" : "Criar conta"}</Button>
           </form>
 
           {mode === "login" && (
-            <Button type="button" variant="ghost" className="mt-3 w-full text-sm" disabled={pending} onClick={() => resendConfirmation(emailValue())}>
+            <Button type="button" variant="ghost" className="mt-3 w-full text-sm" disabled={pending} onClick={() => resendConfirmation(email)}>
               Reenviar confirmação de e-mail
             </Button>
           )}

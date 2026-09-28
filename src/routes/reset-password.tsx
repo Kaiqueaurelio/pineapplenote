@@ -34,9 +34,8 @@ function ResetPasswordPage() {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") setRecoveryReady(true);
     });
-    supabase.auth.getSession().then(({ data: sessionData }) => {
-      if (sessionData.session) setRecoveryReady(true);
-    });
+    // A normal authenticated session is not enough to authorize a password reset.
+    // Supabase emits PASSWORD_RECOVERY after the recovery link establishes the reset session.
     return () => data.subscription.unsubscribe();
   }, []);
 

@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, FileText, Headphones, Loader2, Search, Trash2, Video } from "lucide-react";
+import { ArrowLeft, FileText, Headphones, Loader2, Search, Trash2, Video, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -25,6 +26,11 @@ function LibraryPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [openingId, setOpeningId] = useState<string | null>(null);
+  const [progressByMaterial, setProgressByMaterial] = useState<Record<string, number>>({});
+  const [filter, setFilter] = useState<"todos" | "audio" | "video" | "documento" | "pendentes">("todos");
+  const [deleteTarget, setDeleteTarget] = useState<Tables<"study_materials"> | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [sort, setSort] = useState<"recent" | "name">("recent");
 
   async function loadMaterials() {
     setLoading(true);
@@ -40,32 +46,55 @@ function LibraryPage() {
       return;
     }
     setMaterials(data ?? []);
+    if (data?.length) {
+      const { data: progressRows } = await supabase
+        .from("study_progress")
+        .select("material_id, progress")
+        .eq("user_id", user.id)
+        .in("material_id", data.map((item) => item.id));
+
+      setProgressByMaterial(
+        Object.fromEntries((progressRows ?? []).map((row) => [row.material_id, row.progress])),
+      );
+    } else {
+      setProgressByMaterial({});
+    }
   }
 
   useEffect(() => {
     void loadMaterials();
   }, [user.id]);
 
-  const filtered = useMemo(
-    () => materials.filter((item) => item.title.toLowerCase().includes(search.trim().toLowerCase())),
-    [materials, search],
-  );
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
 
-  async function openMaterial(material: Tables<"study_materials">) {
+    return materials.filter((item) => {
+      const matchesSearch = item.title.toLowerCase().includes(query);
+      const matchesFilter =
+        filter === "todos" ||
+        (filter === "audio" && item.source_type === "audio") ||
+        (filter === "video" && item.source_type === "video") ||
+        (filter === "documento" && item.source_type === "document") ||
+        (filter === "pendentes" && (item.status === "processing" || item.status === "failed" || item.status === "uploaded"));
+
+      return matchesSearch && matchesFilter;
+    });
+  }, [materials, search, filter]);
+
+  const sortedMaterials = useMemo(() => {
+    const result = [...filtered];
+    if (sort === "name") result.sort((a, b) => a.title.localeCompare(b.title, "pt-BR"));
+    return result;
+  }, [filtered, sort]);
+
+  function openMaterial(material: Tables<"study_materials">) {
     setOpeningId(material.id);
-    setOpeningId(null);
     navigate({ to: "/material/$materialId", params: { materialId: material.id } });
   }
 
   async function deleteMaterial(material: Tables<"study_materials">) {
-    const { error: storageError } = await supabase.storage
-      .from("study-materials")
-      .remove([material.storage_path]);
-
-    if (storageError) {
-      toast.error("Não foi possível remover o arquivo.");
-      return;
-    }
+    if (deleting) return;
+    setDeleting(true);
 
     const { error: rowError } = await supabase
       .from("study_materials")
@@ -74,12 +103,27 @@ function LibraryPage() {
       .eq("user_id", user.id);
 
     if (rowError) {
-      toast.error("O arquivo foi removido, mas o registro não pôde ser atualizado.");
+      setDeleting(false);
+      toast.error("Não foi possível remover o material.");
       return;
     }
 
+    const { error: storageError } = await supabase.storage
+      .from("study-materials")
+      .remove([material.storage_path]);
+
     setMaterials((current) => current.filter((item) => item.id !== material.id));
+    setDeleteTarget(null);
+    setDeleting(false);
+    if (storageError) {
+      toast.warning("Material removido da biblioteca. O arquivo temporário não pôde ser limpo.");
+      return;
+    }
     toast.success("Material removido.");
+  }
+
+  function requestDelete(material: Tables<"study_materials">) {
+    if (!deleting) setDeleteTarget(material);
   }
 
   const iconFor = (type: Tables<"study_materials">["source_type"]) => {
@@ -110,13 +154,50 @@ function LibraryPage() {
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar materiais"
             aria-label="Buscar materiais"
-            className="h-11 pl-10"
+            className="h-11 pl-10 pr-10"
           />
+          {search && <button type="button" aria-label="Limpar busca" onClick={() => setSearch("")} className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground"><X size={16} /></button>}
         </div>
 
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Filtrar biblioteca">
+          {[
+            ["todos", "Todos"],
+            ["audio", "Áudios"],
+            ["video", "Vídeos"],
+            ["documento", "Documentos"],
+            ["pendentes", "Pendentes"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setFilter(value as typeof filter)}
+              className={`min-h-9 shrink-0 rounded-full border px-3.5 text-xs font-bold transition ${
+                filter === value
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {!loading && filtered.length > 0 && (
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">{sortedMaterials.length} {sortedMaterials.length === 1 ? "material encontrado" : "materiais encontrados"}</p>
+            <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+              <span className="sr-only">Ordenar biblioteca</span>
+              <select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)} className="h-9 rounded-lg border border-border bg-card px-2 text-xs font-semibold text-foreground outline-none focus:border-primary/50">
+                <option value="recent">Mais recentes</option>
+                <option value="name">Nome A–Z</option>
+              </select>
+            </label>
+          </div>
+        )}
+
         {loading ? (
-          <div className="flex min-h-48 items-center justify-center text-muted-foreground">
-            <Loader2 className="animate-spin" size={22} />
+          <div className="mt-6 grid gap-3 sm:grid-cols-2" aria-label="Carregando biblioteca">
+            {[1, 2, 3, 4].map((item) => <div key={item} className="h-44 animate-pulse rounded-2xl border border-border bg-card" />)}
           </div>
         ) : filtered.length === 0 ? (
           <div className="mt-6 rounded-2xl border border-dashed border-border px-5 py-16 text-center">
@@ -133,7 +214,7 @@ function LibraryPage() {
           </div>
         ) : (
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {filtered.map((material) => {
+            {sortedMaterials.map((material) => {
               const Icon = iconFor(material.source_type);
               return (
                 <article key={material.id} className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5">
@@ -144,8 +225,17 @@ function LibraryPage() {
                     <div className="min-w-0 flex-1">
                       <h2 className="truncate font-bold">{material.title}</h2>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {material.source_type === "audio" ? "Áudio" : material.source_type === "video" ? "Vídeo" : "Documento"} · {material.status}
+                        {material.source_type === "audio" ? "Áudio" : material.source_type === "video" ? "Vídeo" : "Documento"} · {material.status === "ready" ? "Pronto para estudar" : material.status === "processing" ? "Organizando conteúdo..." : material.status === "failed" ? "Não foi possível organizar" : "Pronto para organizar"}
                       </p>
+                      <div className="mt-3">
+                        <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
+                          <span>Progresso</span>
+                          <span>{progressByMaterial[material.id] ?? 0}%</span>
+                        </div>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+                          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.min(100, Math.max(0, progressByMaterial[material.id] ?? 0))}%` }} />
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
@@ -153,7 +243,7 @@ function LibraryPage() {
                       {openingId === material.id && <Loader2 className="animate-spin" size={16} />}
                       Abrir
                     </Button>
-                    <Button variant="ghost" className="w-full text-destructive hover:text-destructive sm:w-auto" onClick={() => void deleteMaterial(material)}>
+                    <Button variant="ghost" className="w-full text-destructive hover:text-destructive sm:w-auto" onClick={() => requestDelete(material)}>
                       <Trash2 size={16} />
                       Remover
                     </Button>
@@ -163,6 +253,27 @@ function LibraryPage() {
             })}
           </div>
         )}
+        <Dialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && !deleting && setDeleteTarget(null)}>
+          <DialogContent className="w-[calc(100%-1rem)] rounded-2xl sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Remover material?</DialogTitle>
+              <DialogDescription>
+                {deleteTarget ? `“${deleteTarget.title}” será removido da sua biblioteca. Esta ação não pode ser desfeita.` : ""}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button variant="outline" className="w-full sm:w-auto" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" className="w-full sm:w-auto" onClick={() => deleteTarget && void deleteMaterial(deleteTarget)} disabled={deleting}>
+                {deleting && <Loader2 className="animate-spin" size={16} />}
+                {deleting ? "Removendo..." : "Remover material"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">Pineapple Note · Desenvolvido pela Decode Analytics</footer>
       </main>
     </div>
   );
