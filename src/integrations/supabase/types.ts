@@ -16,64 +16,81 @@ export type Database = {
     Tables: {
       material_outputs: {
         Row: {
+          created_at: string
+          flashcards: Json
           id: string
           material_id: string
-          user_id: string
+          quiz: Json
           summary: string
           topics: Json
-          flashcards: Json
-          quiz: Json
           transcript: string
-          created_at: string
           updated_at: string
+          user_id: string
         }
         Insert: {
+          created_at?: string
+          flashcards?: Json
           id?: string
           material_id: string
-          user_id: string
+          quiz?: Json
           summary?: string
           topics?: Json
-          flashcards?: Json
-          quiz?: Json
           transcript?: string
-          created_at?: string
           updated_at?: string
+          user_id: string
         }
         Update: {
+          created_at?: string
+          flashcards?: Json
           id?: string
           material_id?: string
-          user_id?: string
+          quiz?: Json
           summary?: string
           topics?: Json
-          flashcards?: Json
-          quiz?: Json
           transcript?: string
-          created_at?: string
           updated_at?: string
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "material_outputs_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: true
+            referencedRelation: "study_materials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      study_progress: {
+      profiles: {
         Row: {
-          id: string
+          avatar_url: string | null
+          course: string
+          created_at: string
+          display_name: string
+          institution: string
+          role: string
+          updated_at: string
           user_id: string
-          material_id: string
-          progress: number
-          last_opened_at: string
         }
         Insert: {
-          id?: string
+          avatar_url?: string | null
+          course?: string
+          created_at?: string
+          display_name?: string
+          institution?: string
+          role?: string
+          updated_at?: string
           user_id: string
-          material_id: string
-          progress?: number
-          last_opened_at?: string
         }
         Update: {
-          id?: string
+          avatar_url?: string | null
+          course?: string
+          created_at?: string
+          display_name?: string
+          institution?: string
+          role?: string
+          updated_at?: string
           user_id?: string
-          material_id?: string
-          progress?: number
-          last_opened_at?: string
         }
         Relationships: []
       }
@@ -82,8 +99,8 @@ export type Database = {
           created_at: string
           id: string
           mime_type: string
-          source_type: "audio" | "video" | "document"
-          status: "uploaded" | "processing" | "ready" | "failed"
+          source_type: string
+          status: string
           storage_path: string
           title: string
           updated_at: string
@@ -93,8 +110,8 @@ export type Database = {
           created_at?: string
           id?: string
           mime_type: string
-          source_type: "audio" | "video" | "document"
-          status?: "uploaded" | "processing" | "ready" | "failed"
+          source_type: string
+          status?: string
           storage_path: string
           title: string
           updated_at?: string
@@ -104,8 +121,8 @@ export type Database = {
           created_at?: string
           id?: string
           mime_type?: string
-          source_type?: "audio" | "video" | "document"
-          status?: "uploaded" | "processing" | "ready" | "failed"
+          source_type?: string
+          status?: string
           storage_path?: string
           title?: string
           updated_at?: string
@@ -113,38 +130,37 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
+      study_progress: {
         Row: {
-          avatar_url: string | null
-          course: string
-          created_at: string
-          display_name: string
-          institution: string
-          role: "user" | "admin"
-          updated_at: string
+          id: string
+          last_opened_at: string
+          material_id: string
+          progress: number
           user_id: string
         }
         Insert: {
-          avatar_url?: string | null
-          course?: string
-          created_at?: string
-          display_name?: string
-          institution?: string
-          role?: "user" | "admin"
-          updated_at?: string
+          id?: string
+          last_opened_at?: string
+          material_id: string
+          progress?: number
           user_id: string
         }
         Update: {
-          avatar_url?: string | null
-          course?: string
-          created_at?: string
-          display_name?: string
-          institution?: string
-          role?: "user" | "admin"
-          updated_at?: string
+          id?: string
+          last_opened_at?: string
+          material_id?: string
+          progress?: number
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "study_progress_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "study_materials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
