@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type Message = { role: "user" | "assistant"; content: string };
+type Message = { id?: string; role: "user" | "assistant"; content: string; created_at?: string };
 
 export const Route = createFileRoute("/_authenticated/chat/$materialId")({
   head: () => ({ meta: [{ title: "Conversar com esta nota — Pineapple Note" }] }),
@@ -23,35 +23,66 @@ function ChatPage() {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    supabase.from("study_materials").select("title").eq("id", materialId).eq("user_id", user.id).maybeSingle().then(({ data }) => {
-      if (data?.title) setTitle(data.title);
+    let active = true;
+    void Promise.all([
+      supabase.from("study_materials").select("title").eq("id", materialId).eq("user_id", user.id).maybeSingle(),
+      supabase.from("material_chat_messages").select("id,role,content,created_at").eq("material_id", materialId).eq("user_id", user.id).order("created_at", { ascending: true }),
+    ]).then(([materialResult, messagesResult]) => {
+      if (!active) return;
+      if (materialResult.data?.title) setTitle(materialResult.data.title);
+      if (messagesResult.error) {
+        toast.error("Não foi possível carregar o histórico desta conversa.");
+        return;
+      }
+      setMessages((messagesResult.data ?? []) as Message[]);
     });
-    const saved = localStorage.getItem(`pineapple-chat-${materialId}`);
-    if (saved) {
-      try { setMessages(JSON.parse(saved) as Message[]); } catch { /* ignore corrupt local history */ }
-    }
+    return () => { active = false; };
   }, [materialId, user.id]);
-
-  useEffect(() => {
-    localStorage.setItem(`pineapple-chat-${materialId}`, JSON.stringify(messages));
-  }, [materialId, messages]);
 
   async function sendQuestion() {
     const text = question.trim();
     if (!text || sending) return;
-    const next = [...messages, { role: "user" as const, content: text }];
-    setMessages(next);
     setQuestion("");
     setSending(true);
+    const { data: userMessage, error: userMessageError } = await supabase
+      .from("material_chat_messages")
+      .insert({ material_id: materialId, user_id: user.id, role: "user", content: text })
+      .select("id,role,content,created_at")
+      .single();
+    if (userMessageError) {
+      setSending(false);
+      toast.error("Não foi possível salvar sua pergunta.");
+      return;
+    }
+    setMessages((current) => [...current, userMessage as Message]);
+
     const { data, error } = await supabase.functions.invoke("ai-tools", {
       body: { action: "chat", materialId, question: text },
     });
-    setSending(false);
     if (error || data?.error) {
+      setSending(false);
       toast.error(data?.error ?? "Não foi possível responder agora.");
       return;
     }
-    setMessages([...next, { role: "assistant", content: String(data.answer ?? "") }]);
+
+    const answer = String(data.answer ?? "").trim();
+    if (!answer) {
+      setSending(false);
+      toast.error("O tutor não retornou uma resposta.");
+      return;
+    }
+
+    const { data: assistantMessage, error: assistantError } = await supabase
+      .from("material_chat_messages")
+      .insert({ material_id: materialId, user_id: user.id, role: "assistant", content: answer })
+      .select("id,role,content,created_at")
+      .single();
+    setSending(false);
+    if (assistantError) {
+      toast.error("A resposta foi gerada, mas não conseguimos salvar o histórico.");
+      return;
+    }
+    setMessages((current) => [...current, assistantMessage as Message]);
   }
 
   return (
