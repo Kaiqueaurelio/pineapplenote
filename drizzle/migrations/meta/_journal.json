@@ -29,6 +29,13 @@
       "when": 1790552000000,
       "tag": "0003_material_outputs_progress",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790606312292,
+      "tag": "0004_sync_pending_schema",
+      "breakpoints": true
     }
   ]
 }
