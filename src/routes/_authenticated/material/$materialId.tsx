@@ -9,6 +9,7 @@ import {
   Download,
   FileText,
   Gamepad2,
+  GraduationCap,
   HelpCircle,
   Languages,
   Loader2,
@@ -475,6 +476,7 @@ function MaterialPage() {
               {[
                 { label: "Podcast", icon: Mic2, to: "/podcast/$materialId" as const },
                 { label: "Criar slides", icon: Presentation, to: "/slides/$materialId" as const },
+                { label: "Prova prática", icon: GraduationCap, to: "/exam" as const },
                 { label: "Jogos de estudo", icon: Gamepad2, to: "/games/$materialId" as const },
                 { label: "Compartilhar", icon: Share2, to: null },
               ].map(({ label, icon: Icon, to }) => (
@@ -483,7 +485,11 @@ function MaterialPage() {
                   type="button"
                   onClick={() => {
                     if (to) {
-                      navigate({ to, params: { materialId } });
+                      if (to === "/exam") {
+                        navigate({ to: "/exam" });
+                      } else {
+                        navigate({ to, params: { materialId } });
+                      }
                     } else {
                       if (navigator.share) {
                         void navigator.share({
