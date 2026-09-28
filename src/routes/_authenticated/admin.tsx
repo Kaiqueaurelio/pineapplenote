@@ -521,7 +521,9 @@ function AdminPage() {
                 {[
                   ["Materiais por usuário", averageMaterialsPerUser, BookOpen],
                   ["Usuários com conteúdo", activeMaterialOwners, Users],
-                  ["Taxa de sucesso", `${materialSuccessRate}%`, CheckCircle2],
+                  ["Sessões de estudo", progressCount, Activity],
+                  ["Saídas de IA", outputCount, CheckCircle2],
+                  ["Taxa de sucesso", materialSuccessRate + "%", CheckCircle2],
                   ["Falhas atuais", failedMaterials, AlertTriangle],
                 ].map(([label, value, Icon]) => (
                   <article key={String(label)} className="rounded-2xl border border-border bg-card p-5 shadow-card">
