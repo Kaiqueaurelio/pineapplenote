@@ -38,7 +38,7 @@ function ExamPage() {
         setExam(data as Exam);
       })
       .finally(() => setLoading(false));
-  }, [navigate]);
+  }, [materialId, navigate]);
 
   const score = exam ? exam.questions.reduce((total, question, index) => total + (answers[index] === question.answer ? 1 : 0), 0) : 0;
 
