@@ -73,7 +73,7 @@ function PodcastPage() {
       toast.error(data?.error ?? "Não foi possível gerar o podcast.");
       return;
     }
-    setGeneratedScript(String(data.script ?? ""));
+    setGeneratedScript(Array.isArray(data.turns) ? data.turns.map((turn: { speaker?: string; text?: string }) => `${turn.speaker ?? "Pineapple"}: ${turn.text ?? ""}`).join("\n\n") : String(data.script ?? ""));
     toast.success("Roteiro do podcast gerado.");
   }
 
@@ -89,7 +89,7 @@ function PodcastPage() {
       return;
     }
     setGeneratedScript(String(data.script ?? ""));
-    setAudioUrl(`data:audio/mpeg;base64,${data.audio}`);
+    setAudioUrl(`data:${data.mimeType ?? "audio/wav"};base64,${data.audio}`);
     toast.success("Podcast em áudio pronto.");
   }
 

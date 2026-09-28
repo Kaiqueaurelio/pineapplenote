@@ -9,6 +9,7 @@ import {
   Download,
   FileText,
   Gamepad2,
+  GraduationCap,
   HelpCircle,
   Languages,
   Loader2,
@@ -475,6 +476,7 @@ function MaterialPage() {
               {[
                 { label: "Podcast", icon: Mic2, to: "/podcast/$materialId" as const },
                 { label: "Criar slides", icon: Presentation, to: "/slides/$materialId" as const },
+                { label: "Prova prática", icon: GraduationCap, to: "/exam" as const },
                 { label: "Jogos de estudo", icon: Gamepad2, to: "/games/$materialId" as const },
                 { label: "Compartilhar", icon: Share2, to: null },
               ].map(({ label, icon: Icon, to }) => (
@@ -483,7 +485,11 @@ function MaterialPage() {
                   type="button"
                   onClick={() => {
                     if (to) {
-                      navigate({ to, params: { materialId } });
+                      if (to === "/exam") {
+                        navigate({ to: "/exam" });
+                      } else {
+                        navigate({ to, params: { materialId } });
+                      }
                     } else {
                       if (navigator.share) {
                         void navigator.share({
@@ -941,18 +947,19 @@ function MaterialPage() {
               <label className="mt-6 block text-sm font-bold" htmlFor="translation-language">
                 Idioma
               </label>
-              <select
+              <input
                 id="translation-language"
                 value={language}
                 onChange={(event) => setLanguage(event.target.value)}
-                className="mt-2 h-12 w-full rounded-2xl border border-border bg-card px-4"
-              >
-                {["English", "Español", "Français", "Deutsch", "Italiano", "日本語", "한국어"].map(
-                  (item) => (
-                    <option key={item}>{item}</option>
-                  ),
+                placeholder="Ex.: English, Español, 日本語, العربية..."
+                className="mt-2 h-12 w-full rounded-2xl border border-border bg-card px-4 outline-none focus:border-brand-violet"
+                list="pineapple-language-suggestions"
+              />
+              <datalist id="pineapple-language-suggestions">
+                {["English", "Español", "Français", "Deutsch", "Italiano", "日本語", "한국어", "中文", "العربية", "Português"].map(
+                  (item) => <option key={item} value={item} />,
                 )}
-              </select>
+              </datalist>
               <Button className="mt-4 w-full" onClick={() => void translateNote()}>
                 Traduzir com IA
               </Button>

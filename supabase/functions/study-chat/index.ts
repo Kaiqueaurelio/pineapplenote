@@ -13,7 +13,7 @@ function json(body: unknown, status = 200) {
 }
 
 async function askGemini(apiKey: string, prompt: string) {
-  const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
+  const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash";
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     {
@@ -28,7 +28,7 @@ async function askGemini(apiKey: string, prompt: string) {
           ],
         },
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.35, maxOutputTokens: 900 },
+        generationConfig: { thinkingConfig: { thinkingLevel: "low" }, maxOutputTokens: 1200 },
       }),
     },
   );
