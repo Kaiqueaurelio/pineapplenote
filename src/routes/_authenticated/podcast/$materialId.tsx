@@ -167,7 +167,7 @@ function PodcastPage() {
 
         <section className="mt-10">
           <h3 className="text-2xl font-black">Podcast</h3>
-          <div className="mt-5 grid grid-cols-2 gap-4">
+          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {voices.map((item) => (
               <button
                 key={item.id}
