@@ -12,17 +12,19 @@ import {
   HelpCircle,
   Languages,
   Loader2,
+  MessageCircle,
   Mic2,
   Network,
   PenLine,
   Presentation,
   Share2,
+  Send,
   ThumbsDown,
   ThumbsUp,
   Trash2,
   Flag,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,10 +100,17 @@ function MaterialPage() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [showMindMap, setShowMindMap] = useState(false);
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
+  const [chatMessages, setChatMessages] = useState<Tables<"material_chat_messages">[]>([]);
+  const [chatText, setChatText] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [sendingChat, setSendingChat] = useState(false);
   const [translateOpen, setTranslateOpen] = useState(false);
   const [language, setLanguage] = useState("English");
   const [translated, setTranslated] = useState<{ summary: string; topics: Topic[] } | null>(null);
-  const [mindMap, setMindMap] = useState<{ center: string; branches: { title: string; children: string[] }[] } | null>(null);
+  const [mindMap, setMindMap] = useState<{
+    center: string;
+    branches: { title: string; children: string[] }[];
+  } | null>(null);
   const [mindMapLoading, setMindMapLoading] = useState(false);
 
   async function load() {
@@ -157,6 +166,16 @@ function MaterialPage() {
 
   useEffect(() => {
     void load();
+  }, [materialId, user.id]);
+
+  useEffect(() => {
+    void supabase
+      .from("material_chat_messages")
+      .select("*")
+      .eq("material_id", materialId)
+      .eq("user_id", user.id)
+      .order("created_at")
+      .then(({ data }) => setChatMessages(data ?? []));
   }, [materialId, user.id]);
 
   useEffect(() => {
@@ -247,7 +266,9 @@ function MaterialPage() {
   async function generateMindMap() {
     if (!output || mindMapLoading) return;
     setMindMapLoading(true);
-    const { data, error } = await supabase.functions.invoke("ai-tools", { body: { action: "mindmap", materialId } });
+    const { data, error } = await supabase.functions.invoke("ai-tools", {
+      body: { action: "mindmap", materialId },
+    });
     setMindMapLoading(false);
     if (error || data?.error) {
       toast.error(data?.error ?? "Não foi possível gerar o mapa mental.");
@@ -259,7 +280,9 @@ function MaterialPage() {
 
   async function translateNote() {
     if (!output) return;
-    const { data, error } = await supabase.functions.invoke("ai-tools", { body: { action: "translate", materialId, language } });
+    const { data, error } = await supabase.functions.invoke("ai-tools", {
+      body: { action: "translate", materialId, language },
+    });
     if (error || data?.error) {
       toast.error(data?.error ?? "Não foi possível traduzir a nota.");
       return;
@@ -318,6 +341,41 @@ function MaterialPage() {
       },
       { onConflict: "user_id,material_id" },
     );
+  }
+
+  async function sendChat(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const message = chatText.trim();
+    if (!message || sendingChat) return;
+    setSendingChat(true);
+    const { data, error } = await supabase.functions.invoke("study-chat", {
+      body: { materialId, message },
+    });
+    setSendingChat(false);
+    if (error || data?.error)
+      return toast.error(data?.error ?? "Não foi possível responder agora.");
+    const now = new Date().toISOString();
+    setChatMessages((current) => [
+      ...current,
+      {
+        id: crypto.randomUUID(),
+        material_id: materialId,
+        user_id: user.id,
+        role: "user",
+        content: message,
+        created_at: now,
+      },
+      {
+        id: crypto.randomUUID(),
+        material_id: materialId,
+        user_id: user.id,
+        role: "assistant",
+        content: String(data.answer),
+        created_at: new Date().toISOString(),
+      },
+    ]);
+    setChatText("");
+    setChatOpen(true);
   }
 
   const topics = useMemo(() => (output ? asTopics(output.topics) : []), [output]);
@@ -379,7 +437,7 @@ function MaterialPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-5 px-4 pb-10 pt-4 sm:px-6 sm:py-8">
+      <main className="mx-auto max-w-6xl space-y-5 px-4 pb-28 pt-4 sm:px-6 sm:py-8">
         {output && (
           <nav
             className="sticky top-[4.25rem] z-10 -mx-1 flex gap-1 overflow-x-auto rounded-xl border border-border bg-card/95 p-1 shadow-soft backdrop-blur-xl sm:top-[4.75rem]"
@@ -866,15 +924,42 @@ function MaterialPage() {
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 p-3 backdrop-blur-sm sm:items-center">
             <div className="w-full max-w-lg rounded-[2rem] border border-border bg-background p-6 shadow-soft sm:p-8">
               <div className="flex items-center justify-between gap-4">
-                <div><p className="text-sm font-black text-brand-violet">Pineapple Languages</p><h2 className="text-2xl font-black">Traduzir anotação</h2></div>
-                <button type="button" onClick={() => setTranslateOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-full border border-border">×</button>
+                <div>
+                  <p className="text-sm font-black text-brand-violet">Pineapple Languages</p>
+                  <h2 className="text-2xl font-black">Traduzir anotação</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTranslateOpen(false)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-border"
+                >
+                  ×
+                </button>
               </div>
-              <label className="mt-6 block text-sm font-bold" htmlFor="translation-language">Idioma</label>
-              <select id="translation-language" value={language} onChange={(event) => setLanguage(event.target.value)} className="mt-2 h-12 w-full rounded-2xl border border-border bg-card px-4">
-                {["English", "Español", "Français", "Deutsch", "Italiano", "日本語", "한국어"].map((item) => <option key={item}>{item}</option>)}
+              <label className="mt-6 block text-sm font-bold" htmlFor="translation-language">
+                Idioma
+              </label>
+              <select
+                id="translation-language"
+                value={language}
+                onChange={(event) => setLanguage(event.target.value)}
+                className="mt-2 h-12 w-full rounded-2xl border border-border bg-card px-4"
+              >
+                {["English", "Español", "Français", "Deutsch", "Italiano", "日本語", "한국어"].map(
+                  (item) => (
+                    <option key={item}>{item}</option>
+                  ),
+                )}
               </select>
-              <Button className="mt-4 w-full" onClick={() => void translateNote()}>Traduzir com IA</Button>
-              {translated && <div className="mt-5 max-h-72 overflow-y-auto rounded-2xl bg-secondary p-4 text-sm leading-6"><strong>Resumo</strong><p className="mt-2 whitespace-pre-line">{translated.summary}</p></div>}
+              <Button className="mt-4 w-full" onClick={() => void translateNote()}>
+                Traduzir com IA
+              </Button>
+              {translated && (
+                <div className="mt-5 max-h-72 overflow-y-auto rounded-2xl bg-secondary p-4 text-sm leading-6">
+                  <strong>Resumo</strong>
+                  <p className="mt-2 whitespace-pre-line">{translated.summary}</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -903,19 +988,38 @@ function MaterialPage() {
                   <p className="mt-2 text-xl font-black">{material.title}</p>
                 </div>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {mindMapLoading ? <div className="py-10 text-center text-sm text-muted-foreground">Gerando seu mapa mental…</div> : (mindMap?.branches ?? topics.map((topic) => ({ title: topic.title, explanation: topic.explanation, children: [] }))).map((topic) => (
-                    <div
-                      key={topic.title}
-                      className="rounded-2xl border border-border bg-card p-4 text-left"
-                    >
-                      <p className="font-black text-brand-violet">{topic.title}</p>
-                      {"children" in topic && Array.isArray(topic.children) ? (
-                        <ul className="mt-2 space-y-1 text-sm leading-6 text-muted-foreground">{topic.children.map((child) => <li key={child}>• {child}</li>)}</ul>
-                      ) : (
-                        <p className="mt-1 text-sm leading-6 text-muted-foreground">{topic.explanation}</p>
-                      )}
+                  {mindMapLoading ? (
+                    <div className="py-10 text-center text-sm text-muted-foreground">
+                      Gerando seu mapa mental…
                     </div>
-                  ))}
+                  ) : (
+                    (
+                      mindMap?.branches ??
+                      topics.map((topic) => ({
+                        title: topic.title,
+                        explanation: topic.explanation,
+                        children: [],
+                      }))
+                    ).map((topic) => (
+                      <div
+                        key={topic.title}
+                        className="rounded-2xl border border-border bg-card p-4 text-left"
+                      >
+                        <p className="font-black text-brand-violet">{topic.title}</p>
+                        {"children" in topic && Array.isArray(topic.children) ? (
+                          <ul className="mt-2 space-y-1 text-sm leading-6 text-muted-foreground">
+                            {topic.children.map((child) => (
+                              <li key={child}>• {child}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                            {topic.explanation}
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -926,6 +1030,56 @@ function MaterialPage() {
           Pineapple Note · Desenvolvido pela Decode Analytics
         </footer>
       </main>
+      {output && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/90 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl sm:left-1/2 sm:max-w-3xl sm:-translate-x-1/2 sm:rounded-t-3xl sm:border-x">
+          <div className="mx-auto max-w-3xl">
+            {chatOpen && chatMessages.length > 0 && (
+              <div className="mb-3 max-h-44 space-y-2 overflow-y-auto rounded-2xl border border-border bg-card p-3 shadow-card">
+                {chatMessages.slice(-4).map((message) => (
+                  <div
+                    key={message.id}
+                    className={
+                      message.role === "assistant"
+                        ? "rounded-xl bg-violet-soft p-3 text-sm"
+                        : "ml-8 rounded-xl bg-secondary p-3 text-sm"
+                    }
+                  >
+                    <strong className="block text-xs text-brand-violet">
+                      {message.role === "assistant" ? "Pineapple IA" : "Você"}
+                    </strong>
+                    <p className="mt-1 whitespace-pre-wrap">{message.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            <form onSubmit={sendChat} className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setChatOpen((open) => !open)}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border bg-card shadow-card"
+                aria-label="Abrir conversa"
+              >
+                <MessageCircle size={21} />
+              </button>
+              <input
+                value={chatText}
+                onChange={(event) => setChatText(event.target.value)}
+                maxLength={8000}
+                placeholder="Pergunte sobre este material"
+                className="h-12 min-w-0 flex-1 rounded-full border border-border bg-card px-4 text-sm outline-none focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/20"
+              />
+              <button
+                type="submit"
+                disabled={sendingChat || !chatText.trim()}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-foreground text-background disabled:opacity-50"
+                aria-label="Enviar pergunta"
+              >
+                {sendingChat ? <Loader2 className="animate-spin" size={19} /> : <Send size={19} />}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
