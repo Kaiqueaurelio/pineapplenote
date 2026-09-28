@@ -83,14 +83,14 @@ const features = [
     title: "Converse com seu material",
     description:
       "Faça perguntas diretamente sobre suas notas e receba explicações baseadas no conteúdo.",
-    status: "Em breve",
+    status: "Disponível",
   },
   {
     icon: Languages,
     title: "Mais idiomas",
     description:
       "Amplie o estudo para conteúdos em diferentes idiomas, com suporte de processamento e tradução.",
-    status: "Em breve",
+    status: "Disponível",
   },
   {
     icon: Gamepad2,
@@ -111,7 +111,7 @@ const features = [
     title: "Compartilhe o que aprendeu",
     description:
       "Organize materiais de estudo em um espaço que pode evoluir para colaboração e compartilhamento.",
-    status: "Em breve",
+    status: "Disponível",
   },
 ];
 
@@ -160,12 +160,12 @@ const faqs = [
   {
     question: "O Pineapple Note terá chat com os materiais?",
     answer:
-      "Essa experiência está no roadmap do produto. A landing page já apresenta a direção do recurso, mas ele só será marcado como disponível quando estiver implementado e validado.",
+      "Sim. O Pineapple Tutor permite conversar diretamente com uma nota processada e fazer perguntas sobre o conteúdo.",
   },
   {
     question: "O Pineapple Note terá jogos, podcasts e mais idiomas?",
     answer:
-      "Esses recursos fazem parte da evolução planejada da plataforma. O site diferencia claramente o que já está disponível do que está em desenvolvimento.",
+      "Sim. O Pineapple Note oferece jogos de estudo, podcasts e tradução para diferentes idiomas a partir dos materiais processados.",
   },
   {
     question: "O Pineapple Note é um projeto da Decode Analytics?",
