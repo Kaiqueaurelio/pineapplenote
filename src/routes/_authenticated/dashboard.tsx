@@ -3,6 +3,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
   AudioLines,
+  ChevronDown,
+  Link2,
+  FileUp,
   BookOpen,
   CalendarClock,
   CheckCircle2,
@@ -86,6 +89,11 @@ function Index() {
   const [selectedType, setSelectedType] = useState("Documento");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [urlOpen, setUrlOpen] = useState(false);
+  const [newNoteOpen, setNewNoteOpen] = useState(false);
+  const [noteFlow, setNoteFlow] = useState<"menu" | "record" | "audio" | "document" | "link">("menu");
+  const [audioLanguage, setAudioLanguage] = useState("inglês");
+  const [recordingType, setRecordingType] = useState("Aula");
+  const [multipleSpeakers, setMultipleSpeakers] = useState(false);
   const [sourceUrl, setSourceUrl] = useState("");
   const MAX_FILE_SIZE = 500 * 1024 * 1024;
   const [recording, setRecording] = useState(false);
@@ -808,7 +816,7 @@ function Index() {
                       <button
                         key={item.label}
                         type="button"
-                        onClick={() => item.label === "Colar um link" ? setUrlOpen(true) : chooseFile(item.label)}
+                        onClick={() => item.label === "Colar um link" ? openNewNote("link") : item.label === "Gravar áudio" ? openNewNote("record") : item.label === "Enviar vídeo" ? chooseFile(item.label) : openNewNote("document")}
                         className={`group flex min-h-32 flex-col items-start justify-between rounded-lg border p-4 text-left transition ${
                           selectedType === item.label
                             ? "border-primary bg-green-soft/70"
@@ -1125,6 +1133,7 @@ function Index() {
           <Home size={20} />
           Início
         </button>
+        <button type="button" className="relative -mt-7 flex h-14 w-14 items-center justify-center rounded-full bg-black text-white shadow-xl" onClick={() => openNewNote("menu")} aria-label="Nova nota"><Plus size={27} strokeWidth={2.2} /></button>
         <button
           type="button"
           className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground"
@@ -1142,6 +1151,88 @@ function Index() {
           Perfil
         </button>
       </nav>
+
+      {newNoteOpen && (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/20 backdrop-blur-md sm:items-center">
+          <div className="relative flex max-h-[96dvh] w-full max-w-[520px] flex-col overflow-hidden rounded-t-[34px] bg-[#f2f2f7] text-black shadow-2xl sm:max-h-[900px] sm:rounded-[34px]">
+            <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-[#b8b8be] sm:hidden" />
+            <div className="flex items-center justify-center px-5 pb-4 pt-5">
+              <h2 className="text-[22px] font-bold tracking-[-0.5px]">{noteFlow === "menu" ? "Nova nota" : noteFlow === "record" ? "" : noteFlow === "audio" ? "Enviar áudio" : noteFlow === "document" ? "Nova nota" : "Link da web"}</h2>
+              <button type="button" onClick={closeNewNote} className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-[#d4d4d8] bg-white/80" aria-label="Fechar"><X size={25} /></button>
+            </div>
+            {noteFlow === "menu" && (
+              <div className="space-y-4 overflow-y-auto px-5 pb-8 pt-2">
+                {[
+                  { label: "Gravar áudio", icon: Mic2, action: () => setNoteFlow("record") },
+                  { label: "Enviar áudio", icon: AudioLines, action: () => setNoteFlow("audio") },
+                  { label: "PDF, arquivo ou texto", icon: FileUp, action: () => setNoteFlow("document") },
+                  { label: "Link da web", icon: Link2, action: () => setNoteFlow("link") },
+                ].map((item) => (
+                  <button key={item.label} type="button" onClick={item.action} className="flex min-h-[112px] w-full items-center gap-5 rounded-[24px] bg-white px-6 text-left shadow-sm active:scale-[0.99]">
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f1f1f6] text-black"><item.icon size={25} strokeWidth={1.8} /></span>
+                    <span className="text-[22px] font-semibold tracking-[-0.4px]">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {noteFlow === "record" && (
+              <div className="flex min-h-[690px] flex-col items-center justify-between px-8 pb-8 pt-24 text-center">
+                <div className="flex flex-1 flex-col items-center justify-center">
+                  <div className="mb-8 text-[#8e8e93]"><AudioLines size={76} strokeWidth={1.25} /></div>
+                  <h3 className="text-[22px] font-bold">Comece a gravar para criar uma nota</h3>
+                  <p className="mt-1 text-[19px] text-[#8e8e93]">Toque abaixo para começar a gravar</p>
+                  {recording && <p className="mt-5 text-2xl font-semibold tabular-nums">{formatRecordingTime(recordingSeconds)}</p>}
+                </div>
+                <div className="w-full">
+                  <p className="mb-5 text-center text-xs leading-5 text-[#8e8e93]">Ao gravar, você confirma que tem permissão para gravar de acordo com nossa <span className="font-medium text-black">Política de Privacidade</span> e nossos <span className="font-medium text-black">Termos de Uso</span></p>
+                  <button type="button" onClick={() => void toggleRecording()} className={`min-h-16 w-full rounded-full px-8 text-lg font-bold shadow-lg ${recording ? "bg-[#ff453a] text-white" : "bg-black text-white"}`}>
+                    {recording ? "Parar gravação" : "Start Recording"}
+                  </button>
+                  {selectedFile && !recording && <Button className="mt-3 w-full rounded-full" onClick={() => void saveMaterial()}>Salvar gravação</Button>}
+                </div>
+              </div>
+            )}
+            {noteFlow === "audio" && (
+              <div className="overflow-y-auto px-5 pb-8">
+                <button type="button" className="mb-5 flex h-14 w-full items-center justify-between rounded-2xl bg-black px-5 text-white"><span className="flex items-center gap-3"><CircleHelp size={20} /> Como importar do Gravador</span><ChevronRight size={20} /></button>
+                <label className="block text-[17px] font-medium">Arquivo de áudio</label>
+                <button type="button" onClick={() => { setSelectedType("Gravar áudio"); fileRef.current?.click(); }} className="mt-3 flex h-16 w-full items-center justify-between rounded-2xl bg-white px-5 text-left"><span>{selectedFile?.name ?? "Selecione um arquivo"}</span><ChevronDown size={23} /></button>
+                <label className="mt-7 block text-[17px] font-medium">Idioma do áudio</label>
+                <select value={audioLanguage} onChange={(e) => setAudioLanguage(e.target.value)} className="mt-3 h-16 w-full appearance-none rounded-2xl bg-white px-5 text-[17px] outline-none"><option>inglês</option><option>português</option><option>espanhol</option><option>francês</option></select>
+                <label className="mt-7 block text-[17px] font-medium">Pasta</label>
+                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5"><span>📌 Todas as notas</span><ChevronDown size={23} /></div>
+                <label className="mt-7 block text-[17px] font-medium">Tipo de gravação</label>
+                <div className="mt-3 grid grid-cols-3 rounded-full bg-[#dedee3] p-0.5">{["Aula","Reunião","Outro"].map((type) => <button key={type} type="button" onClick={() => setRecordingType(type)} className={`rounded-full py-2 text-sm ${recordingType === type ? "bg-white font-semibold shadow-sm" : ""}`}>{type}</button>)}</div>
+                <div className="mt-6 flex items-center justify-between text-[17px]"><span>Várias pessoas falando?</span><button type="button" onClick={() => setMultipleSpeakers((v) => !v)} className={`h-8 w-14 rounded-full p-1 ${multipleSpeakers ? "bg-black" : "bg-[#b8b8be]"}`}><span className={`block h-6 w-6 rounded-full bg-white transition-transform ${multipleSpeakers ? "translate-x-6" : ""}`} /></button></div>
+                {selectedFile && <Button className="mt-8 w-full min-h-14 rounded-full" onClick={() => void saveMaterial()} disabled={uploadingMaterial}>{uploadingMaterial ? "Enviando..." : "Continuar"}</Button>}
+              </div>
+            )}
+            {noteFlow === "document" && (
+              <div className="px-5 pb-8">
+                <label className="block text-[17px] font-medium">Tipo de nota</label>
+                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5"><span>Documento</span><ChevronDown size={23} /></div>
+                <label className="mt-7 block text-[17px] font-medium">Documento</label>
+                <button type="button" onClick={() => { setSelectedType("Documento"); fileRef.current?.click(); }} className="mt-3 flex h-16 w-full items-center justify-between rounded-2xl bg-white px-5 text-left"><span className="truncate">{selectedFile?.name ?? "Selecione um arquivo"}</span><ChevronDown size={23} /></button>
+                <p className="mt-7 text-[17px] font-medium">Tipos compatíveis</p>
+                <p className="mt-2 text-[17px] leading-6 text-[#8e8e93]">txt, md, csv, docx, pptx, xlsx, epub, pdf, heic, heif, jpg, jpeg, png, webp</p>
+                <p className="mt-7 text-[17px] font-medium">Pasta</p>
+                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5"><span>📌 Todas as notas</span><ChevronDown size={23} /></div>
+                {selectedFile && <Button className="mt-8 w-full min-h-14 rounded-full" onClick={() => void saveMaterial()} disabled={uploadingMaterial}>{uploadingMaterial ? "Enviando..." : "Salvar nota"}</Button>}
+              </div>
+            )}
+            {noteFlow === "link" && (
+              <div className="px-5 pb-8">
+                <label className="block text-[22px] font-medium">Cole um link da web</label>
+                <Input value={sourceUrl} onChange={(event) => setSourceUrl(event.target.value)} placeholder="https://coconote.app" inputMode="url" className="mt-5 h-16 rounded-2xl border-0 bg-white px-5 text-[17px]" />
+                <p className="mt-2 px-1 text-[17px] text-[#8e8e93]">Funciona com sites, áudio, vídeo e muito mais</p>
+                <p className="mt-8 text-[17px] font-medium">Pasta</p>
+                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5"><span>📌 Todas as notas</span><ChevronDown size={23} /></div>
+                <Button className="mt-8 min-h-14 w-full rounded-full bg-black text-white hover:bg-black/90" onClick={() => void saveUrlMaterial()} disabled={uploadingMaterial || !sourceUrl.trim()}>{uploadingMaterial ? "Adicionando..." : "Continuar"}</Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <Dialog open={urlOpen} onOpenChange={setUrlOpen}>
         <DialogContent className="w-[calc(100%-1rem)] rounded-2xl sm:max-w-lg">
