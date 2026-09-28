@@ -486,7 +486,7 @@ function MaterialPage() {
                   onClick={() => {
                     if (to) {
                       if (to === "/exam") {
-                        navigate({ to: "/exam" });
+                        navigate({ to: "/exam", search: { materialId } });
                       } else {
                         navigate({ to, params: { materialId } });
                       }
