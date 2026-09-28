@@ -19,7 +19,7 @@
  */
 
 @theme inline {
-  --font-sans: Inter, "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -216,6 +216,37 @@ html {
         transparent 54%
       );
     background-size: 46px 46px;
+  }
+
+  .pineapple-ios-surface {
+    background: #f2f2f7;
+    color: #000;
+  }
+
+  .pineapple-ios-card {
+    border-radius: 1.5rem;
+    background: #fff;
+  }
+
+  .pineapple-ios-field {
+    min-height: 4rem;
+    border-radius: 1rem;
+    background: #fff;
+    color: #000;
+  }
+
+  .pineapple-ios-muted {
+    color: #8e8e93;
+  }
+
+  .pineapple-ios-danger {
+    color: #ff453a;
+  }
+
+  .pineapple-ios-sheet {
+    border-radius: 2.125rem 2.125rem 0 0;
+    background: #f2f2f7;
+    box-shadow: 0 -20px 60px rgb(0 0 0 / 12%);
   }
 
   .material-icon {
