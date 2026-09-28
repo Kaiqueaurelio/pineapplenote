@@ -22,9 +22,9 @@ function json(body: unknown, status = 200) {
 function extractJson(text: string): StudyPayload {
   const cleaned = text
     .trim()
-    .replace(/^\`\`\`json\s*/i, "")
-    .replace(/^\`\`\`\s*/i, "")
-    .replace(/\s*\`\`\`$/i, "");
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/i, "");
   const parsed = JSON.parse(cleaned) as StudyPayload;
   if (
     !parsed.summary ||
@@ -98,11 +98,21 @@ async function openAiResponses(apiKey: string, input: unknown) {
   return data;
 }
 
-function responseText(data: any): string {
-  if (typeof data?.output_text === "string") return data.output_text;
-  for (const item of data?.output ?? []) {
-    for (const part of item?.content ?? []) {
-      if (typeof part?.text === "string") return part.text;
+function responseText(data: unknown): string {
+  if (!data || typeof data !== "object") throw new Error("A IA não retornou conteúdo.");
+  const record = data as Record<string, unknown>;
+  if (typeof record["output_text"] === "string") return record["output_text"];
+  const output = record["output"];
+  if (Array.isArray(output)) {
+    for (const item of output) {
+      if (!item || typeof item !== "object") continue;
+      const content = (item as Record<string, unknown>)["content"];
+      if (!Array.isArray(content)) continue;
+      for (const part of content) {
+        if (!part || typeof part !== "object") continue;
+        const text = (part as Record<string, unknown>)["text"];
+        if (typeof text === "string") return text;
+      }
     }
   }
   throw new Error("A IA não retornou conteúdo.");
