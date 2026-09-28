@@ -29,3 +29,18 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Configuração do chat com IA
+
+O chat de cada material é executado no servidor pela Edge Function `study-chat`.
+Isso mantém a chave do provedor de IA fora do navegador e preserva o isolamento entre estudantes.
+
+Para concluir a publicação no Supabase:
+
+1. Aplique `drizzle/migrations/0006_material_chat_messages.sql` no projeto correto.
+2. Publique `supabase/functions/study-chat/index.ts` com verificação de JWT ativa.
+3. Em **Edge Functions → Secrets**, crie `GEMINI_API_KEY` com uma chave Gemini nova e ativa. Opcionalmente, defina `GEMINI_MODEL` (o padrão é `gemini-2.5-flash`).
+4. Confirme que a tabela `material_chat_messages` está com RLS ativado e que a função responde apenas a usuários autenticados.
+
+Para desenvolvimento local, copie `supabase/functions/.env.example` para
+`supabase/functions/.env` e preencha a chave apenas na sua máquina. Esse arquivo é ignorado pelo Git.
