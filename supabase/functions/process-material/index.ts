@@ -1,3 +1,4 @@
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -10,6 +11,7 @@ type StudyPayload = {
   topics: Array<{ title: string; explanation: string }>;
   flashcards: Array<{ question: string; answer: string }>;
   quiz: Array<{ question: string; options: string[]; answer: string; explanation: string }>;
+  transcript: string;
 };
 
 function json(body: unknown, status = 200) {
@@ -19,117 +21,115 @@ function json(body: unknown, status = 200) {
   });
 }
 
-function extractJson(text: string): StudyPayload {
-  const cleaned = text
-    .trim()
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "");
-  const parsed = JSON.parse(cleaned) as StudyPayload;
-  if (
-    !parsed.summary ||
-    !Array.isArray(parsed.topics) ||
-    !Array.isArray(parsed.flashcards) ||
-    !Array.isArray(parsed.quiz)
-  ) {
-    throw new Error("Formato de resposta da IA inválido.");
-  }
-  return parsed;
-}
-
-async function openAiResponses(apiKey: string, input: unknown) {
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "gpt-5",
-      input,
-      text: {
-        format: {
-          type: "json_schema",
-          name: "study_material",
-          strict: true,
-          schema: {
-            type: "object",
-            additionalProperties: false,
-            properties: {
-              summary: { type: "string" },
-              topics: {
-                type: "array",
-                items: {
-                  type: "object",
-                  additionalProperties: false,
-                  properties: { title: { type: "string" }, explanation: { type: "string" } },
-                  required: ["title", "explanation"],
-                },
-              },
-              flashcards: {
-                type: "array",
-                items: {
-                  type: "object",
-                  additionalProperties: false,
-                  properties: { question: { type: "string" }, answer: { type: "string" } },
-                  required: ["question", "answer"],
-                },
-              },
-              quiz: {
-                type: "array",
-                items: {
-                  type: "object",
-                  additionalProperties: false,
-                  properties: {
-                    question: { type: "string" },
-                    options: { type: "array", items: { type: "string" } },
-                    answer: { type: "string" },
-                    explanation: { type: "string" },
-                  },
-                  required: ["question", "options", "answer", "explanation"],
-                },
-              },
-            },
-            required: ["summary", "topics", "flashcards", "quiz"],
-          },
-        },
-      },
-    }),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message ?? "Falha ao processar com a IA.");
-  return data;
-}
-
-function responseText(data: unknown): string {
-  if (!data || typeof data !== "object") throw new Error("A IA não retornou conteúdo.");
-  const record = data as Record<string, unknown>;
-  if (typeof record["output_text"] === "string") return record["output_text"];
-  const output = record["output"];
-  if (Array.isArray(output)) {
-    for (const item of output) {
-      if (!item || typeof item !== "object") continue;
-      const content = (item as Record<string, unknown>)["content"];
-      if (!Array.isArray(content)) continue;
-      for (const part of content) {
-        if (!part || typeof part !== "object") continue;
-        const text = (part as Record<string, unknown>)["text"];
-        if (typeof text === "string") return text;
-      }
+function extractText(data: unknown) {
+  const candidates = (data as { candidates?: unknown[] })?.candidates;
+  for (const candidate of Array.isArray(candidates) ? candidates : []) {
+    const parts = (candidate as { content?: { parts?: unknown[] } })?.content?.parts;
+    for (const part of Array.isArray(parts) ? parts : []) {
+      const text = (part as { text?: unknown })?.text;
+      if (typeof text === "string" && text.trim()) return text;
     }
   }
-  throw new Error("A IA não retornou conteúdo.");
+  throw new Error("O Gemini não retornou conteúdo.");
 }
 
-async function transcribe(apiKey: string, bytes: ArrayBuffer, filename: string, mimeType: string) {
-  const form = new FormData();
-  form.append("file", new File([bytes], filename, { type: mimeType }));
-  form.append("model", "gpt-4o-transcribe");
-  const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+const studySchema = {
+  type: "object",
+  properties: {
+    summary: { type: "string" },
+    topics: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          explanation: { type: "string" },
+        },
+        required: ["title", "explanation"],
+      },
+    },
+    flashcards: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          question: { type: "string" },
+          answer: { type: "string" },
+        },
+        required: ["question", "answer"],
+      },
+    },
+    quiz: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          question: { type: "string" },
+          options: { type: "array", items: { type: "string" } },
+          answer: { type: "string" },
+          explanation: { type: "string" },
+        },
+        required: ["question", "options", "answer", "explanation"],
+      },
+    },
+    transcript: { type: "string" },
+  },
+  required: ["summary", "topics", "flashcards", "quiz", "transcript"],
+};
+
+async function uploadToGemini(apiKey: string, bytes: Uint8Array, mimeType: string, displayName: string) {
+  const start = await fetch("https://generativelanguage.googleapis.com/upload/v1beta/files", {
     method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}` },
-    body: form,
+    headers: {
+      "x-goog-api-key": apiKey,
+      "X-Goog-Upload-Protocol": "resumable",
+      "X-Goog-Upload-Command": "start",
+      "X-Goog-Upload-Header-Content-Length": String(bytes.byteLength),
+      "X-Goog-Upload-Header-Content-Type": mimeType || "application/octet-stream",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ file: { display_name: displayName.slice(0, 512) } }),
   });
+  if (!start.ok) {
+    const error = await start.text();
+    throw new Error(`Falha ao iniciar upload no Gemini: ${error.slice(0, 500)}`);
+  }
+  const uploadUrl = start.headers.get("x-goog-upload-url") ?? start.headers.get("X-Goog-Upload-URL");
+  if (!uploadUrl) throw new Error("O Gemini não retornou a URL de upload.");
+
+  const upload = await fetch(uploadUrl, {
+    method: "POST",
+    headers: {
+      "Content-Length": String(bytes.byteLength),
+      "X-Goog-Upload-Offset": "0",
+      "X-Goog-Upload-Command": "upload, finalize",
+    },
+    body: bytes,
+  });
+  const data = await upload.json();
+  if (!upload.ok) throw new Error(data?.error?.message ?? "Falha ao enviar arquivo ao Gemini.");
+  return String(data?.file?.uri ?? "");
+}
+
+async function generateStudy(apiKey: string, contents: unknown[]) {
+  const response = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+    {
+      method: "POST",
+      headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents,
+        generationConfig: {
+          thinkingConfig: { thinkingLevel: "medium" },
+          responseMimeType: "application/json",
+          responseSchema: studySchema,
+        },
+      }),
+    },
+  );
   const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message ?? "Falha na transcrição.");
-  return String(data.text ?? "");
+  if (!response.ok) throw new Error(data?.error?.message ?? "Falha ao processar com o Gemini.");
+  return JSON.parse(extractText(data)) as StudyPayload;
 }
 
 Deno.serve(async (req) => {
@@ -145,17 +145,14 @@ Deno.serve(async (req) => {
       JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}").default,
     { global: { headers: { Authorization: authHeader } } },
   );
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) return json({ error: "Sessão inválida." }, 401);
 
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!apiKey) return json({ error: "Processamento IA não configurado no servidor." }, 503);
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!apiKey) return json({ error: "GEMINI_API_KEY não configurada no servidor." }, 503);
 
   let processingMaterialId: string | null = null;
+
   try {
     const { materialId } = await req.json();
     processingMaterialId = materialId;
@@ -176,14 +173,7 @@ Deno.serve(async (req) => {
       .eq("id", material.id)
       .eq("user_id", user.id);
 
-    const { data: signed, error: signedError } = await supabase.storage
-      .from("study-materials")
-      .createSignedUrl(material.storage_path, 60 * 60);
-
-    if (signedError || !signed?.signedUrl) throw new Error("Não foi possível acessar o arquivo.");
-
-    let transcript = "";
-    let input: unknown;
+    let contents: unknown[];
 
     if (material.source_type === "url") {
       const url = material.storage_path;
@@ -196,71 +186,68 @@ Deno.serve(async (req) => {
       }
       const raw = await pageResponse.text();
       const textContent = raw
-        .replace(new RegExp("<script[\\\\s\\\\S]*?</script>", "gi"), " ")
-        .replace(new RegExp("<style[\\\\s\\\\S]*?</style>", "gi"), " ")
-        .replace(new RegExp("<noscript[\\\\s\\\\S]*?</noscript>", "gi"), " ")
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")
+        .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
         .replace(/<[^>]+>/g, " ")
         .replace(/&nbsp;/gi, " ")
         .replace(/&amp;/gi, "&")
         .replace(/&quot;/gi, '"')
-        .replace(/\\s+/g, " ")
+        .replace(/\s+/g, " ")
         .trim()
-        .slice(0, 120000);
+        .slice(0, 180000);
       if (!textContent) throw new Error("Não encontramos texto suficiente nesta página.");
-      input = [{ role: "user", content: [{ type: "input_text", text: `Transforme o conteúdo desta página em material de estudo. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões. Preserve os fatos e não invente informações. URL: ${url}\\n\\nConteúdo:\\n${textContent}` }] }];
-    } else if (material.source_type === "audio" || material.source_type === "video") {
-      const fileResponse = await fetch(signed.signedUrl);
-      if (!fileResponse.ok) throw new Error("Não foi possível baixar o arquivo para transcrição.");
-      transcript = await transcribe(
-        apiKey,
-        await fileResponse.arrayBuffer(),
-        material.title,
-        material.mime_type,
-      );
-      if (!transcript.trim()) throw new Error("Não foi possível encontrar fala no arquivo.");
-      input = [
-        {
-          role: "user",
-          content: [
-            {
-              type: "input_text",
-              text: `Transforme esta transcrição em material de estudo. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. Preserve fatos e não invente informações. Transcrição:\n\n${transcript}`,
-            },
-          ],
-        },
-      ];
-    } else if (material.mime_type === "text/plain") {
-      const fileResponse = await fetch(signed.signedUrl);
-      if (!fileResponse.ok) throw new Error("Não foi possível ler o documento.");
-      const text = await fileResponse.text();
-      input = [
-        {
-          role: "user",
-          content: [
-            {
-              type: "input_text",
-              text: `Transforme o conteúdo abaixo em material de estudo. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões. Não invente fatos.\n\n${text}`,
-            },
-          ],
-        },
-      ];
+      contents = [{
+        role: "user",
+        parts: [{
+          text: `Transforme o conteúdo abaixo em um material de estudo completo. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. O campo transcript deve conter o texto-fonte quando aplicável. Preserve fatos e não invente informações. Responda em português brasileiro.
+
+URL: ${url}
+
+CONTEÚDO:
+${textContent}`,
+        }],
+      }];
     } else {
-      input = [
-        {
-          role: "user",
-          content: [
-            { type: "input_file", file_url: signed.signedUrl },
-            {
-              type: "input_text",
-              text: "Analise este documento como material acadêmico. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. Preserve os fatos do documento e não invente informações.",
+      const { data: signed, error: signedError } = await supabase.storage
+        .from("study-materials")
+        .createSignedUrl(material.storage_path, 60 * 60);
+      if (signedError || !signed?.signedUrl) throw new Error("Não foi possível acessar o arquivo.");
+
+      const fileResponse = await fetch(signed.signedUrl);
+      if (!fileResponse.ok) throw new Error("Não foi possível baixar o arquivo para análise.");
+      const bytes = new Uint8Array(await fileResponse.arrayBuffer());
+      const fileUri = await uploadToGemini(
+        apiKey,
+        bytes,
+        material.mime_type || "application/octet-stream",
+        material.title,
+      );
+      if (!fileUri) throw new Error("O Gemini não retornou o arquivo processado.");
+
+      const kind = material.source_type === "audio"
+        ? "áudio"
+        : material.source_type === "video"
+          ? "vídeo"
+          : "documento";
+
+      contents = [{
+        role: "user",
+        parts: [
+          {
+            file_data: {
+              mime_type: material.mime_type || "application/octet-stream",
+              file_uri: fileUri,
             },
-          ],
-        },
-      ];
+          },
+          {
+            text: `Analise este ${kind} como material acadêmico. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. Se houver fala, transcreva-a no campo transcript. Preserve fatos, nomes, fórmulas e termos técnicos; não invente informações. Responda em português brasileiro.`,
+          },
+        ],
+      }];
     }
 
-    const aiData = await openAiResponses(apiKey, input);
-    const output = extractJson(responseText(aiData));
+    const output = await generateStudy(apiKey, contents);
 
     const { error: outputError } = await supabase.from("material_outputs").upsert(
       {
@@ -270,7 +257,7 @@ Deno.serve(async (req) => {
         topics: output.topics,
         flashcards: output.flashcards,
         quiz: output.quiz,
-        transcript,
+        transcript: output.transcript ?? "",
       },
       { onConflict: "material_id" },
     );
@@ -282,6 +269,7 @@ Deno.serve(async (req) => {
       .update({ status: "ready" })
       .eq("id", material.id)
       .eq("user_id", user.id);
+
     return json({ ok: true, output });
   } catch (error) {
     if (processingMaterialId) {
