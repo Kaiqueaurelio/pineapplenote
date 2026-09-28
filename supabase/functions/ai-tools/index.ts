@@ -169,6 +169,26 @@ Deno.serve(async (req) => {
       return json(JSON.parse(outputText(data)));
     }
 
+    if (action === "podcast-audio") {
+      const style = String(body.style ?? "conversa natural e didática");
+      const scriptData = await callOpenAI(apiKey, [
+        { role: "user", content: [{ type: "input_text", text: `Crie um roteiro curto de podcast de estudo em português brasileiro, estilo ${style}. Explique os conceitos principais de forma natural, didática e fiel ao material. Contexto:\n${context}` }] },
+      ], podcastSchema);
+      const scriptResult = JSON.parse(outputText(scriptData)) as { title: string; script: string; duration: string };
+      const speech = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "gpt-4o-mini-tts", voice: "alloy", input: scriptResult.script, response_format: "mp3", instructions: "Fale em português brasileiro, como um professor amigável e natural. Ritmo confortável para estudo." }),
+      });
+      if (!speech.ok) throw new Error("Falha ao gerar o áudio do podcast.");
+      const bytes = new Uint8Array(await speech.arrayBuffer());
+      let binary = "";
+      for (let index = 0; index < bytes.length; index += 0x8000) {
+        binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000));
+      }
+      return json({ title: scriptResult.title, script: scriptResult.script, duration: scriptResult.duration, audio: btoa(binary) });
+    }
+
     if (action === "podcast") {
       const style = String(body.style ?? "duas vozes");
       const data = await callOpenAI(apiKey, [
