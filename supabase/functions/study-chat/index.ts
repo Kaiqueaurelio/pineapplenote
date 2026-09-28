@@ -64,6 +64,7 @@ Deno.serve(async (req) => {
     const { materialId, message } = await req.json();
     if (typeof materialId !== "string" || typeof message !== "string" || !message.trim())
       return json({ error: "Material e pergunta são obrigatórios." }, 400);
+    if (message.trim().length > 4000) return json({ error: "A pergunta é grande demais." }, 413);
     const [{ data: material }, { data: output }] = await Promise.all([
       supabase
         .from("study_materials")
