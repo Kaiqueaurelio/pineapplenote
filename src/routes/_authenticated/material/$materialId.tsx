@@ -98,6 +98,11 @@ function MaterialPage() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [showMindMap, setShowMindMap] = useState(false);
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
+  const [translateOpen, setTranslateOpen] = useState(false);
+  const [language, setLanguage] = useState("English");
+  const [translated, setTranslated] = useState<{ summary: string; topics: Topic[] } | null>(null);
+  const [mindMap, setMindMap] = useState<{ center: string; branches: { title: string; children: string[] }[] } | null>(null);
+  const [mindMapLoading, setMindMapLoading] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -237,6 +242,30 @@ function MaterialPage() {
     setRetrying(true);
     await processMaterial();
     setRetrying(false);
+  }
+
+  async function generateMindMap() {
+    if (!output || mindMapLoading) return;
+    setMindMapLoading(true);
+    const { data, error } = await supabase.functions.invoke("ai-tools", { body: { action: "mindmap", materialId } });
+    setMindMapLoading(false);
+    if (error || data?.error) {
+      toast.error(data?.error ?? "Não foi possível gerar o mapa mental.");
+      return;
+    }
+    setMindMap(data);
+    setShowMindMap(true);
+  }
+
+  async function translateNote() {
+    if (!output) return;
+    const { data, error } = await supabase.functions.invoke("ai-tools", { body: { action: "translate", materialId, language } });
+    if (error || data?.error) {
+      toast.error(data?.error ?? "Não foi possível traduzir a nota.");
+      return;
+    }
+    setTranslated(data);
+    toast.success(`Nota traduzida para ${language}.`);
   }
 
   async function deleteMaterial() {
@@ -787,20 +816,21 @@ function MaterialPage() {
             </div>
 
             {[
-              { label: "Ver mapa mental", icon: Network, action: () => setShowMindMap(true) },
+              { label: "Ver mapa mental", icon: Network, action: () => void generateMindMap() },
               {
                 label: "Editar nota e transcrição",
                 icon: PenLine,
-                action: () =>
-                  document
-                    .getElementById("transcricao")
-                    ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                action: () => navigate({ to: "/editor/$materialId", params: { materialId } }),
               },
               {
                 label: "Traduzir anotação",
                 icon: Languages,
-                action: () =>
-                  toast.info("Tradução automática será conectada ao pipeline de idiomas."),
+                action: () => setTranslateOpen(true),
+              },
+              {
+                label: "Conversar com esta nota",
+                icon: Mic2,
+                action: () => navigate({ to: "/chat/$materialId", params: { materialId } }),
               },
               {
                 label: "Denunciar nota",
@@ -832,6 +862,23 @@ function MaterialPage() {
           </section>
         )}
 
+        {translateOpen && output && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 p-3 backdrop-blur-sm sm:items-center">
+            <div className="w-full max-w-lg rounded-[2rem] border border-border bg-background p-6 shadow-soft sm:p-8">
+              <div className="flex items-center justify-between gap-4">
+                <div><p className="text-sm font-black text-brand-violet">Pineapple Languages</p><h2 className="text-2xl font-black">Traduzir anotação</h2></div>
+                <button type="button" onClick={() => setTranslateOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-full border border-border">×</button>
+              </div>
+              <label className="mt-6 block text-sm font-bold" htmlFor="translation-language">Idioma</label>
+              <select id="translation-language" value={language} onChange={(event) => setLanguage(event.target.value)} className="mt-2 h-12 w-full rounded-2xl border border-border bg-card px-4">
+                {["English", "Español", "Français", "Deutsch", "Italiano", "日本語", "한국어"].map((item) => <option key={item}>{item}</option>)}
+              </select>
+              <Button className="mt-4 w-full" onClick={() => void translateNote()}>Traduzir com IA</Button>
+              {translated && <div className="mt-5 max-h-72 overflow-y-auto rounded-2xl bg-secondary p-4 text-sm leading-6"><strong>Resumo</strong><p className="mt-2 whitespace-pre-line">{translated.summary}</p></div>}
+            </div>
+          </div>
+        )}
+
         {showMindMap && output && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 p-3 backdrop-blur-sm sm:items-center">
             <div className="max-h-[85dvh] w-full max-w-2xl overflow-y-auto rounded-[2rem] border border-border bg-background p-6 shadow-soft sm:p-8">
@@ -856,15 +903,17 @@ function MaterialPage() {
                   <p className="mt-2 text-xl font-black">{material.title}</p>
                 </div>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {topics.map((topic) => (
+                  {mindMapLoading ? <div className="py-10 text-center text-sm text-muted-foreground">Gerando seu mapa mental…</div> : (mindMap?.branches ?? topics.map((topic) => ({ title: topic.title, explanation: topic.explanation, children: [] }))).map((topic) => (
                     <div
                       key={topic.title}
                       className="rounded-2xl border border-border bg-card p-4 text-left"
                     >
                       <p className="font-black text-brand-violet">{topic.title}</p>
-                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                        {topic.explanation}
-                      </p>
+                      {"children" in topic && Array.isArray(topic.children) ? (
+                        <ul className="mt-2 space-y-1 text-sm leading-6 text-muted-foreground">{topic.children.map((child) => <li key={child}>• {child}</li>)}</ul>
+                      ) : (
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">{topic.explanation}</p>
+                      )}
                     </div>
                   ))}
                 </div>
