@@ -18,6 +18,7 @@ import {
   Play,
   Plus,
   Search,
+  ShieldCheck,
   Settings,
   LogOut,
   Save,
@@ -644,6 +645,19 @@ function Index() {
               </button>
             ))}
           </nav>
+
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate({ to: "/admin" });
+              }}
+              className="flex h-11 w-full items-center gap-3 rounded-lg bg-violet-soft px-3 text-sm font-extrabold text-brand-violet hover:bg-violet-soft/80"
+            >
+              <ShieldCheck size={19} /> Administração
+            </button>
+          )}
 
           <div className="mt-auto space-y-1 border-t border-border pt-5">
             <button
