@@ -155,7 +155,7 @@ const faqs = [
   {
     question: "Que tipos de conteúdo posso enviar?",
     answer:
-      "O fluxo atual trabalha com gravações de áudio, vídeos e documentos compatíveis. Importação por links e outras fontes faz parte da evolução da plataforma.",
+      "O fluxo atual trabalha com gravações de áudio, vídeos e documentos compatíveis. Você também pode importar uma página por link para transformar o conteúdo em material de estudo.",
   },
   {
     question: "O Pineapple Note terá chat com os materiais?",
