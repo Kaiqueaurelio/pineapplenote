@@ -89,7 +89,7 @@ function SettingsPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-8 pb-28 pt-0 sm:px-6">
+      <main className="mx-auto max-w-3xl px-4 pb-28 pt-0 sm:px-6">
         <section className="overflow-hidden rounded-[28px] bg-white">
           <Row icon={CircleHelp} label="Central de Ajuda" onClick={() => setDialog("help")} />
         </section>
