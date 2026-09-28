@@ -2,6 +2,10 @@ import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-ro
 import {
   Activity,
   ArrowUpRight,
+  BarChart3,
+  ServerCog,
+  Settings2,
+  Trash2,
   BookOpen,
   CheckCircle2,
   Clock3,
@@ -27,7 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { normalizeDomain } from "@/lib/institutional-email";
 
-type AdminTab = "overview" | "users" | "materials" | "access";
+type AdminTab = "overview" | "users" | "materials" | "access" | "operations" | "settings";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async () => {
@@ -58,6 +62,8 @@ function AdminPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<Tables<"study_materials"> | null>(null);
 
   async function load() {
     setLoading(true);
@@ -82,6 +88,23 @@ function AdminPage() {
   useEffect(() => {
     void load();
   }, []);
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const timer = window.setInterval(() => void load(), 30000);
+    return () => window.clearInterval(timer);
+  }, [autoRefresh]);
+
+  async function deleteMaterial(material: Tables<"study_materials">) {
+    const { error } = await supabase.from("study_materials").delete().eq("id", material.id);
+    if (error) {
+      toast.error("Não foi possível excluir o material. Verifique as políticas do banco.");
+      return;
+    }
+    setConfirmDelete(null);
+    toast.success("Material excluído.");
+    await load();
+  }
 
   async function addDomain(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -153,6 +176,8 @@ function AdminPage() {
     { id: "users", label: "Usuários", icon: Users },
     { id: "materials", label: "Materiais", icon: BookOpen },
     { id: "access", label: "Acesso", icon: Globe2 },
+    { id: "operations", label: "Operações", icon: ServerCog },
+    { id: "settings", label: "Configurações", icon: Settings2 },
   ];
 
   return (
@@ -311,10 +336,52 @@ function AdminPage() {
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary"><FileText size={19} /></span>
                   <span className="min-w-0 flex-1"><strong className="block truncate">{material.title}</strong><span className="mt-1 block text-xs text-muted-foreground">{material.source_type} · {new Date(material.created_at).toLocaleString("pt-BR")}</span></span>
                   <span className={`hidden rounded-full px-3 py-1 text-xs font-black sm:inline-flex ${material.status === "failed" ? "bg-destructive/10 text-destructive" : material.status === "ready" ? "bg-green-soft text-green-strong" : "bg-yellow-soft text-yellow-strong"}`}>{material.status}</span>
-                  <ArrowUpRight size={17} className="text-muted-foreground" />
+                  <button type="button" onClick={(event) => { event.stopPropagation(); setConfirmDelete(material); }} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" aria-label="Excluir material"><Trash2 size={17} /></button><ArrowUpRight size={17} className="text-muted-foreground" />
                 </button>
               ))}</div>
               {!filteredMaterials.length && <p className="p-10 text-center text-sm text-muted-foreground">Nenhum material encontrado.</p>}
+            </section>
+          )}
+
+          {tab === "operations" && (
+            <section className="mt-6 grid gap-6 xl:grid-cols-2">
+              <article className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6">
+                <div className="flex items-center gap-3"><ServerCog className="text-brand-violet" size={21} /><div><p className="text-xs font-black uppercase tracking-[0.14em] text-brand-violet">Operações</p><h3 className="text-xl font-black">Saúde do Pineapple</h3></div></div>
+                <div className="mt-6 space-y-3">
+                  {[
+                    ["Autenticação", "Supabase Auth", "Ativo"],
+                    ["Banco de dados", "Supabase PostgreSQL", "Conectado"],
+                    ["Processamento", "Edge Functions", processingMaterials ? `${processingMaterials} na fila` : "Sem fila"],
+                    ["IA", "Pipeline de estudo", "Configurado pelo servidor"],
+                  ].map(([name, service, state]) => <div key={name} className="flex items-center justify-between rounded-xl border border-border p-4"><div><p className="font-black">{name}</p><p className="text-xs text-muted-foreground">{service}</p></div><span className="rounded-full bg-green-soft px-3 py-1 text-xs font-black text-green-strong">{state}</span></div>)}
+                </div>
+              </article>
+              <article className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6">
+                <div className="flex items-center gap-3"><BarChart3 className="text-green-strong" size={21} /><div><p className="text-xs font-black uppercase tracking-[0.14em] text-green-strong">Indicadores</p><h3 className="text-xl font-black">Distribuição da plataforma</h3></div></div>
+                <div className="mt-6 space-y-4">
+                  <div><div className="mb-1 flex justify-between text-sm font-bold"><span>Estudantes</span><span>{students}</span></div><div className="h-2 rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: `${profiles.length ? students / profiles.length * 100 : 0}%` }} /></div></div>
+                  <div><div className="mb-1 flex justify-between text-sm font-bold"><span>Administradores</span><span>{admins}</span></div><div className="h-2 rounded-full bg-secondary"><div className="h-full rounded-full bg-brand-violet" style={{ width: `${profiles.length ? admins / profiles.length * 100 : 0}%` }} /></div></div>
+                  <div><div className="mb-1 flex justify-between text-sm font-bold"><span>Materiais prontos</span><span>{readyMaterials}</span></div><div className="h-2 rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: `${materials.length ? readyMaterials / materials.length * 100 : 0}%` }} /></div></div>
+                </div>
+              </article>
+              <article className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6 xl:col-span-2">
+                <div className="flex items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[0.14em] text-destructive">Ações de manutenção</p><h3 className="text-xl font-black">Materiais com falha</h3><p className="mt-1 text-sm text-muted-foreground">Revise ou remova registros que não conseguiram ser processados.</p></div><span className="rounded-full bg-destructive/10 px-3 py-1 text-xs font-black text-destructive">{failedMaterials}</span></div>
+                <div className="mt-5 divide-y divide-border">{materials.filter((m) => m.status === "failed").map((material) => <div key={material.id} className="flex items-center gap-3 py-3"><FileText size={18} className="shrink-0 text-muted-foreground" /><div className="min-w-0 flex-1"><p className="truncate text-sm font-bold">{material.title}</p><p className="text-xs text-muted-foreground">{new Date(material.created_at).toLocaleString("pt-BR")}</p></div><Button variant="outline" size="sm" onClick={() => navigate({ to: "/material/$materialId", params: { materialId: material.id } })}>Abrir</Button><Button variant="ghost" size="icon" onClick={() => setConfirmDelete(material)} aria-label="Excluir material"><Trash2 size={16} /></Button></div>)}</div>
+              </article>
+            </section>
+          )}
+
+          {tab === "settings" && (
+            <section className="mt-6 grid gap-6 xl:grid-cols-2">
+              <article className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6">
+                <div className="flex items-center gap-3"><Settings2 className="text-brand-violet" size={21} /><div><p className="text-xs font-black uppercase tracking-[0.14em] text-brand-violet">Painel</p><h3 className="text-xl font-black">Preferências administrativas</h3></div></div>
+                <label className="mt-6 flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-border p-4"><span><strong className="block">Atualização automática</strong><span className="text-xs text-muted-foreground">Atualiza os indicadores a cada 30 segundos.</span></span><input type="checkbox" checked={autoRefresh} onChange={(event) => setAutoRefresh(event.target.checked)} /></label>
+                <div className="mt-3 rounded-2xl bg-secondary p-4 text-sm"><strong>Atualização manual</strong><p className="mt-1 text-muted-foreground">Use “Atualizar tudo” para consultar imediatamente os dados disponíveis.</p></div>
+              </article>
+              <article className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6">
+                <div className="flex items-center gap-3"><ShieldCheck className="text-green-strong" size={21} /><div><p className="text-xs font-black uppercase tracking-[0.14em] text-green-strong">Segurança</p><h3 className="text-xl font-black">Controle de acesso</h3></div></div>
+                <div className="mt-6 space-y-3 text-sm"><div className="rounded-xl bg-secondary p-4"><strong>Proteção de rota</strong><p className="mt-1 text-muted-foreground">Somente perfis com papel de administrador entram nesta central.</p></div><div className="rounded-xl bg-secondary p-4"><strong>Alteração de permissões</strong><p className="mt-1 text-muted-foreground">As alterações dependem das políticas RLS configuradas no Supabase.</p></div></div>
+              </article>
             </section>
           )}
 
@@ -338,6 +405,16 @@ function AdminPage() {
           )}
         </section>
       </div>
+      {confirmDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/30 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-border bg-background p-6 shadow-soft">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-destructive">Ação administrativa</p>
+            <h2 className="mt-2 text-2xl font-black">Excluir material?</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">“{confirmDelete.title}” será removido. Essa ação não deve ser usada para corrigir problemas de processamento sem necessidade.</p>
+            <div className="mt-6 flex gap-2 justify-end"><Button variant="outline" onClick={() => setConfirmDelete(null)}>Cancelar</Button><Button variant="destructive" onClick={() => void deleteMaterial(confirmDelete)}>Excluir</Button></div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
