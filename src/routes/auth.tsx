@@ -183,7 +183,7 @@ function AuthPage() {
         <img
           src={logoAsset.url}
           alt="Pineapple Note"
-          className="relative h-20 w-fit rounded-lg bg-background px-3"
+          className="relative h-16 max-w-[80vw] w-auto rounded-lg bg-background px-3 object-contain object-left sm:h-20"
         />
         <div className="relative max-w-xl">
           <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -208,7 +208,7 @@ function AuthPage() {
           <img
             src={logoAsset.url}
             alt="Pineapple Note"
-            className="mx-auto mb-8 h-20 w-auto lg:hidden"
+            className="mx-auto mb-8 h-16 max-w-[80vw] w-auto object-contain lg:hidden sm:h-20"
           />
           <div
             className="mb-8 grid grid-cols-2 rounded-lg bg-secondary p-1"
