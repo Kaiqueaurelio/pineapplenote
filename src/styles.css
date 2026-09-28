@@ -195,8 +195,27 @@ body,
 }
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
   * {
     border-color: var(--color-border);
+  }
+
+  img,
+  svg,
+  video,
+  canvas,
+  iframe {
+    max-width: 100%;
+  }
+
+  img,
+  video {
+    height: auto;
   }
 
   body {
@@ -305,3 +324,4 @@ body,
     transition-duration: 180ms;
   }
 }
+\n@media (max-width: 767px) {\n  input,\n  textarea,\n  select {\n    font-size: 16px;\n  }\n}\n
