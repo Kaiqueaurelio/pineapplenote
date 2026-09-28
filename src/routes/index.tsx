@@ -21,6 +21,7 @@ import {
   Headphones,
   Share2,
   FileStack,
+  Presentation,
 } from "lucide-react";
 
 import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
@@ -88,14 +89,14 @@ const features = [
   {
     icon: Gamepad2,
     title: "Jogos de estudo",
-    description: "Transforme a revisão em pequenas experiências interativas para praticar conceitos.",
-    status: "Em breve",
+    description: "Pratique com modos interativos baseados nos flashcards e quizzes do seu material.",
+    status: "Disponível",
   },
   {
     icon: Podcast,
     title: "Podcasts de estudo",
-    description: "Converta seus materiais em uma experiência de áudio para revisar enquanto continua sua rotina.",
-    status: "Em breve",
+    description: "Transforme o resumo em uma revisão falada e escolha uma voz para ouvir o conteúdo.",
+    status: "Disponível",
   },
   {
     icon: Share2,
