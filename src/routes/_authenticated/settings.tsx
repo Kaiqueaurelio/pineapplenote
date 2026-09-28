@@ -5,7 +5,6 @@ import {
   CircleHelp,
   LogOut,
   Monitor,
-  RotateCcw,
   Shield,
   Volume2,
   X,
@@ -85,7 +84,6 @@ function SettingsPage() {
         <section className="overflow-hidden rounded-[28px] bg-white">
           <Row icon={Volume2} label="Gravações e materiais" onClick={() => navigate({ to: "/library" })} />
           <Row icon={Bell} label={"Notificações: " + (notifications ? "ativadas" : "desativadas")} onClick={() => setNotifications((value) => !value)} />
-          <Row icon={RotateCcw} label="Restaurar compras" onClick={() => toast.info("Não há compras associadas a esta conta para restaurar.")} />
           <Row icon={Monitor} label="Termos de serviço" onClick={() => setDialog("terms")} />
           <Row icon={Shield} label="Política de Privacidade" onClick={() => setDialog("privacy")} />
           <Row icon={LogOut} label="Sair" danger onClick={() => void signOut()} />
