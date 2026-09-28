@@ -44,6 +44,9 @@ function SlidesPage() {
   const [material, setMaterial] = useState<Tables<"study_materials"> | null>(null);
   const [output, setOutput] = useState<Tables<"material_outputs"> | null>(null);
   const [style, setStyle] = useState(styles[0]);
+  const [instructions, setInstructions] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [slides, setSlides] = useState<{ title: string; body: string; takeaway: string }[]>([]);
 
   useEffect(() => {
     void (async () => {
@@ -116,7 +119,10 @@ function SlidesPage() {
         </p>
         <section className="mt-8 grid gap-4 sm:grid-cols-2">
           {styles.map((item) => (
-            <button
+            <label className="mt-8 block text-sm font-black" htmlFor="slide-instructions">Instruções personalizadas</label>
+        <textarea id="slide-instructions" value={instructions} onChange={(event) => setInstructions(event.target.value)} placeholder="Ex.: use exemplos práticos, destaque fórmulas e deixe o último slide para revisão." className="mt-2 min-h-28 w-full rounded-2xl border border-border bg-card p-4 text-sm outline-none focus:border-primary" />
+
+        <button
               key={item.id}
               type="button"
               onClick={() => setStyle(item)}
@@ -164,7 +170,7 @@ function SlidesPage() {
             </p>
             <h4 className="mt-3 text-3xl font-black">{material.title}</h4>
             <p className="mt-4 line-clamp-6 whitespace-pre-line text-sm leading-7 text-muted-foreground">
-              {output?.summary ?? "O resumo aparecerá aqui quando o material estiver processado."}
+              {slides.length ? slides.map((slide, index) => <article key={index} className="mb-5 rounded-2xl border border-border bg-card p-5 text-left"><p className="text-xs font-black uppercase text-brand-violet">Slide {index + 1}</p><h5 className="mt-2 text-xl font-black">{slide.title}</h5><p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted-foreground">{slide.body}</p><p className="mt-3 rounded-xl bg-secondary p-3 text-xs font-bold">{slide.takeaway}</p></article>) : (output?.summary ?? "O resumo aparecerá aqui quando o material estiver processado.")}
             </p>
           </div>
         </section>
