@@ -46,11 +46,12 @@ const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedMaterialMaterialIdRoute = AuthenticatedMaterialMaterialIdRouteImport.update({
-  id: '/material/$materialId',
-  path: '/material/$materialId',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
+const AuthenticatedMaterialMaterialIdRoute =
+  AuthenticatedMaterialMaterialIdRouteImport.update({
+    id: '/material/$materialId',
+    path: '/material/$materialId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -80,9 +81,21 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/reset-password' | '/dashboard' | '/library' | '/material/$materialId'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/dashboard'
+    | '/library'
+    | '/material/$materialId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/reset-password' | '/dashboard' | '/library' | '/material/$materialId'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/dashboard'
+    | '/library'
+    | '/material/$materialId'
   id:
     | '__root__'
     | '/'

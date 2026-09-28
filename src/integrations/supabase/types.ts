@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      material_outputs: {
+        Row: {
+          created_at: string
+          flashcards: Json
+          id: string
+          material_id: string
+          quiz: Json
+          summary: string
+          topics: Json
+          transcript: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          flashcards?: Json
+          id?: string
+          material_id: string
+          quiz?: Json
+          summary?: string
+          topics?: Json
+          transcript?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          flashcards?: Json
+          id?: string
+          material_id?: string
+          quiz?: Json
+          summary?: string
+          topics?: Json
+          transcript?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_outputs_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: true
+            referencedRelation: "study_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -21,6 +68,7 @@ export type Database = {
           created_at: string
           display_name: string
           institution: string
+          role: string
           updated_at: string
           user_id: string
         }
@@ -30,6 +78,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           institution?: string
+          role?: string
           updated_at?: string
           user_id: string
         }
@@ -39,10 +88,79 @@ export type Database = {
           created_at?: string
           display_name?: string
           institution?: string
+          role?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      study_materials: {
+        Row: {
+          created_at: string
+          id: string
+          mime_type: string
+          source_type: string
+          status: string
+          storage_path: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mime_type: string
+          source_type: string
+          status?: string
+          storage_path: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mime_type?: string
+          source_type?: string
+          status?: string
+          storage_path?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_progress: {
+        Row: {
+          id: string
+          last_opened_at: string
+          material_id: string
+          progress: number
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          last_opened_at?: string
+          material_id: string
+          progress?: number
+          user_id: string
+        }
+        Update: {
+          id?: string
+          last_opened_at?: string
+          material_id?: string
+          progress?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_progress_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "study_materials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
