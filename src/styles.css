@@ -231,8 +231,41 @@ body,
   }
 
   button,
-  input {
+  input,
+  select,
+  textarea {
     font: inherit;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    max-width: 100%;
+  }
+
+  button,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+
+  a {
+    overflow-wrap: anywhere;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  span,
+  label,
+  td,
+  th {
+    overflow-wrap: anywhere;
   }
 }
 
@@ -330,6 +363,36 @@ body,
   input,
   textarea,
   select {
+    min-height: 44px;
     font-size: 16px;
+  }
+
+  button:not([data-icon-button]),
+  [role="button"] {
+    min-height: 44px;
+  }
+
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+}
+
+@media (max-width: 380px) {
+  body {
+    font-size: 15px;
+  }
+
+  .pineapple-ios-field {
+    min-height: 3.5rem;
+  }
+}
+
+@supports not (overflow: clip) {
+  html {
+    overflow-x: hidden;
   }
 }
