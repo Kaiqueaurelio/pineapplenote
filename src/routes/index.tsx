@@ -183,7 +183,12 @@ function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-foreground scroll-smooth">\n      <div\n        aria-hidden="true"\n        className="fixed inset-x-0 top-0 z-[60] h-0.5 origin-left bg-primary transition-transform duration-100"\n        style={{ transform: `scaleX(${scrollProgress})` }}\n      />
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground scroll-smooth">
+      <div
+        aria-hidden="true"
+        className="fixed inset-x-0 top-0 z-[60] h-0.5 origin-left bg-primary transition-transform duration-100"
+        style={{ transform: `scaleX(${scrollProgress})` }}
+      />
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-xl">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-[72px] sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center" aria-label="Pineapple Note — início">
