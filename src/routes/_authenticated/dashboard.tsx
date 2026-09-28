@@ -569,7 +569,7 @@ function Index() {
   const greeting = currentHour < 12 ? "Bom dia" : currentHour < 18 ? "Boa tarde" : "Boa noite";
 
   return (
-    <div className="min-h-screen bg-background pb-36 text-foreground md:pb-0">
+    <div className="min-h-[100dvh] overflow-x-clip bg-background pb-[calc(9rem+env(safe-area-inset-bottom))] text-foreground md:pb-0">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/95 backdrop-blur-xl">
         <div className="mx-auto grid h-16 max-w-[1480px] grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-1.5 px-3 sm:h-[72px] sm:flex sm:gap-4 sm:px-6 lg:h-[76px] lg:px-8">
           <Button
@@ -620,7 +620,7 @@ function Index() {
           <Button
             variant="ghost"
             size="icon"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-violet text-sm font-bold text-brand-violet-foreground ring-4 ring-violet-soft"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-violet text-sm font-bold text-brand-violet-foreground ring-4 ring-violet-soft"
             aria-label={`Abrir perfil de ${displayName}`}
             onClick={() => setProfileOpen(true)}
           >
