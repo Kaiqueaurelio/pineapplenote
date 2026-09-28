@@ -81,7 +81,7 @@ function SettingsPage() {
     <div className="min-h-[100dvh] bg-[#f2f2f7] text-black">
       <header className="sticky top-0 z-30 border-b border-[#d8d8dd] bg-[#f2f2f7]/95 backdrop-blur-2xl">
         <div className="mx-auto flex h-[74px] max-w-3xl items-center px-4">
-          <button type="button" onClick={() => navigate({ to: "/dashboard" })} className="h-11 w-11 rounded-full" aria-label="Voltar" />
+          <div className="h-11 w-11" aria-hidden="true" />
           <h1 className="flex-1 text-center text-[22px] font-bold tracking-[-0.5px]">Configurações</h1>
           <button type="button" onClick={() => navigate({ to: "/dashboard" })} className="flex h-11 w-11 items-center justify-center rounded-full border border-[#d8d8dd] bg-[#f8f8fa]" aria-label="Fechar">
             <X size={25} strokeWidth={2.2} />
