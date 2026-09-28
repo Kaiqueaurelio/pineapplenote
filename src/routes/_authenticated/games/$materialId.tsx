@@ -121,7 +121,7 @@ function GamesPage() {
             material.
           </p>
         </div>
-        <div className="mt-10 grid grid-cols-2 gap-1 rounded-2xl bg-secondary p-1">
+        <div className="mt-10 grid grid-cols-1 gap-1 rounded-2xl bg-secondary p-1 sm:grid-cols-2">
           <button
             type="button"
             onClick={() => setMode("match")}
