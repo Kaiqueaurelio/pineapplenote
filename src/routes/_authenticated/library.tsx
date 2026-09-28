@@ -13,7 +13,7 @@ import {
   Video,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,7 +54,7 @@ function LibraryPage() {
   const [deleting, setDeleting] = useState(false);
   const [sort, setSort] = useState<"recent" | "name">("recent");
 
-  async function loadMaterials() {
+  const loadMaterials = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("study_materials")
@@ -84,11 +84,11 @@ function LibraryPage() {
     } else {
       setProgressByMaterial({});
     }
-  }
+  }, [user.id]);
 
   useEffect(() => {
     void loadMaterials();
-  }, [user.id]);
+  }, [loadMaterials]);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
