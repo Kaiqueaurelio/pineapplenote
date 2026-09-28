@@ -1,23 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  ArrowLeft,
   Bell,
   ChevronRight,
   CircleHelp,
-  Download,
-  Gift,
-  Heart,
-  Info,
-  KeyRound,
   LogOut,
   Monitor,
-  Plus,
   RotateCcw,
   Shield,
-  Smartphone,
-  Star,
-  Trash2,
-  Users,
   Volume2,
   X,
 } from "lucide-react";
@@ -100,7 +89,6 @@ function SettingsPage() {
           <Row icon={Monitor} label="Termos de serviço" onClick={() => setDialog("terms")} />
           <Row icon={Shield} label="Política de Privacidade" onClick={() => setDialog("privacy")} />
           <Row icon={LogOut} label="Sair" danger onClick={() => void signOut()} />
-          <Row icon={Trash2} label="Excluir conta" danger onClick={() => setDialog("delete")} />
         </section>
 
         <div className="mt-8 text-center text-xs text-[#8e8e93]">Pineapple Note · Desenvolvido pela Decode Analytics</div>
@@ -110,15 +98,14 @@ function SettingsPage() {
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 p-3 backdrop-blur-sm sm:items-center">
           <div className="w-full max-w-lg rounded-[28px] bg-[#f2f2f7] p-6 shadow-2xl sm:p-8">
             <div className="flex items-center justify-between gap-4">
-              <h3 className="text-2xl font-bold">{dialog === "help" ? "Central de Ajuda" : dialog === "terms" ? "Termos de serviço" : dialog === "privacy" ? "Política de Privacidade" : dialog === "delete" ? "Excluir conta" : dialog === "rating" ? "Avalie o Pineapple Note" : "Informações"}</h3>
+              <h3 className="text-2xl font-bold">{dialog === "help" ? "Central de Ajuda" : dialog === "terms" ? "Termos de serviço" : dialog === "privacy" ? "Política de Privacidade" : dialog === "rating" ? "Avalie o Pineapple Note" : "Informações"}</h3>
               <button type="button" onClick={() => setDialog(null)} className="flex h-10 w-10 items-center justify-center rounded-full bg-white"><X size={20} /></button>
             </div>
             <p className="mt-4 text-[15px] leading-7 text-[#636366]">
               {dialog === "help" && "Adicione um áudio, vídeo, documento ou link. O Pineapple Note organiza o conteúdo e prepara resumo, transcrição, flashcards, quiz, podcast, slides e jogos."}
               {dialog === "terms" && "O uso do Pineapple Note exige respeito às leis aplicáveis, aos direitos autorais e às regras de uso da plataforma. Este texto é informativo e não substitui os termos oficiais."}
               {dialog === "privacy" && "O Pineapple Note processa dados de conta e conteúdos enviados para oferecer os recursos da plataforma. Consulte a política oficial da Decode Analytics quando publicada para conhecer detalhes de retenção, segurança e direitos do usuário."}
-              {dialog === "delete" && "A exclusão permanente precisa ser executada por uma rotina segura no backend. Nenhum dado será removido de forma incompleta."}
-              {dialog !== "help" && dialog !== "terms" && dialog !== "privacy" && dialog !== "delete" && "Esta seção está preparada para receber o conteúdo oficial."}
+              {dialog !== "help" && dialog !== "terms" && dialog !== "privacy" && "Esta seção está preparada para receber o conteúdo oficial."}
             </p>
             <button type="button" onClick={() => setDialog(null)} className="mt-6 min-h-12 w-full rounded-full bg-black px-5 font-bold text-white">Fechar</button>
           </div>
