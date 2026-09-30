@@ -13,7 +13,7 @@ This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/ec59cb23-61a3-425c-9d11-f604ee058f6f).
+Continue desenvolvendo este project in the [Lovable editor](https://lovable.dev/projects/ec59cb23-61a3-425c-9d11-f604ee058f6f).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
 - **Stay in sync**: every change made in Lovable is committed straight to this repository.
@@ -44,3 +44,4 @@ Para concluir a publicação no Supabase:
 
 Para desenvolvimento local, copie `supabase/functions/.env.example` para
 `supabase/functions/.env` e preencha a chave apenas na sua máquina. Esse arquivo é ignorado pelo Git.
+
