@@ -174,15 +174,16 @@ function AdminPage() {
         const matchesCourse = courseFilter === "all" || profile.course === courseFilter;
         const matchesInstitution = institutionFilter === "all" || profile.institution === institutionFilter;
         const query = userSearch.trim().toLowerCase();
-        const matchesQuery =
+        const idQuery = profileSearch.trim().toLowerCase();
+        const matchesQuery = (!idQuery || profile.user_id.toLowerCase().includes(idQuery)) && (
           !query ||
           profile.display_name.toLowerCase().includes(query) ||
           profile.institution.toLowerCase().includes(query) ||
           profile.course.toLowerCase().includes(query) ||
-          profile.user_id.toLowerCase().includes(query);
+          profile.user_id.toLowerCase().includes(query));
         return matchesRole && matchesCourse && matchesInstitution && matchesQuery;
       }),
-    [profiles, roleFilter, userSearch, courseFilter, institutionFilter],
+    [profiles, roleFilter, userSearch, profileSearch, courseFilter, institutionFilter],
   );
 
   const institutions = useMemo(() => Array.from(new Set(profiles.map((p) => p.institution).filter(Boolean))).sort(), [profiles]);
@@ -367,7 +368,7 @@ function AdminPage() {
                 <span className="min-w-0"><strong className="block text-sm">{String(label)}</strong><span className="mt-0.5 block truncate text-xs text-muted-foreground">{String(description)}</span></span>
                 <ArrowUpRight className="ml-auto shrink-0 text-muted-foreground" size={16} />
               </button>
-            ))}
+            ); })}
           </section>
 
           {tab === "overview" && (
@@ -536,7 +537,7 @@ function AdminPage() {
                     <p className="mt-4 text-2xl font-black">{String(value)}</p>
                     <p className="mt-1 text-xs font-bold text-muted-foreground">{String(label)}</p>
                   </article>
-                ))}
+                ); })}
               </div>
               <div className="grid gap-6 xl:grid-cols-2">
                 <article className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6">
