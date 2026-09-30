@@ -1036,7 +1036,7 @@ function MaterialPage() {
                           </ul>
                         ) : (
                           <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                            {topic.explanation}
+                            {"explanation" in topic ? String(topic.explanation) : ""}
                           </p>
                         )}
                       </div>

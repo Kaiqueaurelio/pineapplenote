@@ -64,6 +64,7 @@ function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<AdminTab>("overview");
   const [userSearch, setUserSearch] = useState("");
+  const [profileSearch, setProfileSearch] = useState("");
   const [materialSearch, setMaterialSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -173,15 +174,16 @@ function AdminPage() {
         const matchesCourse = courseFilter === "all" || profile.course === courseFilter;
         const matchesInstitution = institutionFilter === "all" || profile.institution === institutionFilter;
         const query = userSearch.trim().toLowerCase();
-        const matchesQuery =
+        const idQuery = profileSearch.trim().toLowerCase();
+        const matchesQuery = (!idQuery || profile.user_id.toLowerCase().includes(idQuery)) && (
           !query ||
           profile.display_name.toLowerCase().includes(query) ||
           profile.institution.toLowerCase().includes(query) ||
           profile.course.toLowerCase().includes(query) ||
-          profile.user_id.toLowerCase().includes(query);
+          profile.user_id.toLowerCase().includes(query));
         return matchesRole && matchesCourse && matchesInstitution && matchesQuery;
       }),
-    [profiles, roleFilter, userSearch, courseFilter, institutionFilter],
+    [profiles, roleFilter, userSearch, profileSearch, courseFilter, institutionFilter],
   );
 
   const institutions = useMemo(() => Array.from(new Set(profiles.map((p) => p.institution).filter(Boolean))).sort(), [profiles]);
@@ -360,13 +362,13 @@ function AdminPage() {
               ["Materiais", "Buscar, revisar e remover", () => setTab("materials"), BookOpen],
               ["Acesso", "Domínios institucionais", () => setTab("access"), Globe2],
               ["Operações", "Fila e manutenção", () => setTab("operations"), ServerCog],
-            ].map(([label, description, action, Icon]) => (
+            ].map(([label, description, action, IconValue]) => { const Icon = IconValue as typeof Users; return (
               <button key={String(label)} type="button" onClick={action as () => void} className="flex min-h-16 items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-secondary/50">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary"><Icon size={18} /></span>
                 <span className="min-w-0"><strong className="block text-sm">{String(label)}</strong><span className="mt-0.5 block truncate text-xs text-muted-foreground">{String(description)}</span></span>
                 <ArrowUpRight className="ml-auto shrink-0 text-muted-foreground" size={16} />
               </button>
-            ))}
+            ); })}
           </section>
 
           {tab === "overview" && (
@@ -529,13 +531,13 @@ function AdminPage() {
                   ["Saídas de IA", outputCount, CheckCircle2],
                   ["Taxa de sucesso", materialSuccessRate + "%", CheckCircle2],
                   ["Falhas atuais", failedMaterials, AlertTriangle],
-                ].map(([label, value, Icon]) => (
+                ].map(([label, value, IconValue]) => { const Icon = IconValue as typeof Users; return (
                   <article key={String(label)} className="rounded-2xl border border-border bg-card p-5 shadow-card">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary"><Icon size={18} /></div>
                     <p className="mt-4 text-2xl font-black">{String(value)}</p>
                     <p className="mt-1 text-xs font-bold text-muted-foreground">{String(label)}</p>
                   </article>
-                ))}
+                ); })}
               </div>
               <div className="grid gap-6 xl:grid-cols-2">
                 <article className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6">
