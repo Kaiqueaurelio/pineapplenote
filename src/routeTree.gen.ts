@@ -13,10 +13,17 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedExamRouteImport } from './routes/_authenticated/exam'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedChatMaterialIdRouteImport } from './routes/_authenticated/chat/$materialId'
+import { Route as AuthenticatedEditorMaterialIdRouteImport } from './routes/_authenticated/editor/$materialId'
+import { Route as AuthenticatedGamesMaterialIdRouteImport } from './routes/_authenticated/games/$materialId'
 import { Route as AuthenticatedMaterialMaterialIdRouteImport } from './routes/_authenticated/material/$materialId'
+import { Route as AuthenticatedPodcastMaterialIdRouteImport } from './routes/_authenticated/podcast/$materialId'
+import { Route as AuthenticatedSlidesMaterialIdRouteImport } from './routes/_authenticated/slides/$materialId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -37,14 +44,19 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/_authenticated/admin',
-  path: '/admin',
+const AuthenticatedExamRoute = AuthenticatedExamRouteImport.update({
+  id: '/exam',
+  path: '/exam',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
@@ -52,10 +64,45 @@ const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedChatMaterialIdRoute =
+  AuthenticatedChatMaterialIdRouteImport.update({
+    id: '/chat/$materialId',
+    path: '/chat/$materialId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEditorMaterialIdRoute =
+  AuthenticatedEditorMaterialIdRouteImport.update({
+    id: '/editor/$materialId',
+    path: '/editor/$materialId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedGamesMaterialIdRoute =
+  AuthenticatedGamesMaterialIdRouteImport.update({
+    id: '/games/$materialId',
+    path: '/games/$materialId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMaterialMaterialIdRoute =
   AuthenticatedMaterialMaterialIdRouteImport.update({
     id: '/material/$materialId',
     path: '/material/$materialId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPodcastMaterialIdRoute =
+  AuthenticatedPodcastMaterialIdRouteImport.update({
+    id: '/podcast/$materialId',
+    path: '/podcast/$materialId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSlidesMaterialIdRoute =
+  AuthenticatedSlidesMaterialIdRouteImport.update({
+    id: '/slides/$materialId',
+    path: '/slides/$materialId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -63,19 +110,33 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/exam': typeof AuthenticatedExamRoute
   '/library': typeof AuthenticatedLibraryRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/chat/$materialId': typeof AuthenticatedChatMaterialIdRoute
+  '/editor/$materialId': typeof AuthenticatedEditorMaterialIdRoute
+  '/games/$materialId': typeof AuthenticatedGamesMaterialIdRoute
   '/material/$materialId': typeof AuthenticatedMaterialMaterialIdRoute
+  '/podcast/$materialId': typeof AuthenticatedPodcastMaterialIdRoute
+  '/slides/$materialId': typeof AuthenticatedSlidesMaterialIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/exam': typeof AuthenticatedExamRoute
   '/library': typeof AuthenticatedLibraryRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/chat/$materialId': typeof AuthenticatedChatMaterialIdRoute
+  '/editor/$materialId': typeof AuthenticatedEditorMaterialIdRoute
+  '/games/$materialId': typeof AuthenticatedGamesMaterialIdRoute
   '/material/$materialId': typeof AuthenticatedMaterialMaterialIdRoute
+  '/podcast/$materialId': typeof AuthenticatedPodcastMaterialIdRoute
+  '/slides/$materialId': typeof AuthenticatedSlidesMaterialIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,10 +144,17 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/exam': typeof AuthenticatedExamRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/chat/$materialId': typeof AuthenticatedChatMaterialIdRoute
+  '/_authenticated/editor/$materialId': typeof AuthenticatedEditorMaterialIdRoute
+  '/_authenticated/games/$materialId': typeof AuthenticatedGamesMaterialIdRoute
   '/_authenticated/material/$materialId': typeof AuthenticatedMaterialMaterialIdRoute
+  '/_authenticated/podcast/$materialId': typeof AuthenticatedPodcastMaterialIdRoute
+  '/_authenticated/slides/$materialId': typeof AuthenticatedSlidesMaterialIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -94,26 +162,50 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/admin'
     | '/dashboard'
+    | '/exam'
     | '/library'
+    | '/settings'
+    | '/chat/$materialId'
+    | '/editor/$materialId'
+    | '/games/$materialId'
     | '/material/$materialId'
+    | '/podcast/$materialId'
+    | '/slides/$materialId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/admin'
     | '/dashboard'
+    | '/exam'
     | '/library'
+    | '/settings'
+    | '/chat/$materialId'
+    | '/editor/$materialId'
+    | '/games/$materialId'
     | '/material/$materialId'
+    | '/podcast/$materialId'
+    | '/slides/$materialId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/_authenticated/admin'
     | '/_authenticated/dashboard'
+    | '/_authenticated/exam'
     | '/_authenticated/library'
+    | '/_authenticated/settings'
+    | '/_authenticated/chat/$materialId'
+    | '/_authenticated/editor/$materialId'
+    | '/_authenticated/games/$materialId'
     | '/_authenticated/material/$materialId'
+    | '/_authenticated/podcast/$materialId'
+    | '/_authenticated/slides/$materialId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -153,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -160,11 +259,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+    '/_authenticated/exam': {
+      id: '/_authenticated/exam'
+      path: '/exam'
+      fullPath: '/exam'
+      preLoaderRoute: typeof AuthenticatedExamRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/library': {
@@ -174,6 +273,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLibraryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/chat/$materialId': {
+      id: '/_authenticated/chat/$materialId'
+      path: '/chat/$materialId'
+      fullPath: '/chat/$materialId'
+      preLoaderRoute: typeof AuthenticatedChatMaterialIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/editor/$materialId': {
+      id: '/_authenticated/editor/$materialId'
+      path: '/editor/$materialId'
+      fullPath: '/editor/$materialId'
+      preLoaderRoute: typeof AuthenticatedEditorMaterialIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/games/$materialId': {
+      id: '/_authenticated/games/$materialId'
+      path: '/games/$materialId'
+      fullPath: '/games/$materialId'
+      preLoaderRoute: typeof AuthenticatedGamesMaterialIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/material/$materialId': {
       id: '/_authenticated/material/$materialId'
       path: '/material/$materialId'
@@ -181,21 +308,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMaterialMaterialIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/podcast/$materialId': {
+      id: '/_authenticated/podcast/$materialId'
+      path: '/podcast/$materialId'
+      fullPath: '/podcast/$materialId'
+      preLoaderRoute: typeof AuthenticatedPodcastMaterialIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/slides/$materialId': {
+      id: '/_authenticated/slides/$materialId'
+      path: '/slides/$materialId'
+      fullPath: '/slides/$materialId'
+      preLoaderRoute: typeof AuthenticatedSlidesMaterialIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedExamRoute: typeof AuthenticatedExamRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedChatMaterialIdRoute: typeof AuthenticatedChatMaterialIdRoute
+  AuthenticatedEditorMaterialIdRoute: typeof AuthenticatedEditorMaterialIdRoute
+  AuthenticatedGamesMaterialIdRoute: typeof AuthenticatedGamesMaterialIdRoute
   AuthenticatedMaterialMaterialIdRoute: typeof AuthenticatedMaterialMaterialIdRoute
+  AuthenticatedPodcastMaterialIdRoute: typeof AuthenticatedPodcastMaterialIdRoute
+  AuthenticatedSlidesMaterialIdRoute: typeof AuthenticatedSlidesMaterialIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedExamRoute: AuthenticatedExamRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedChatMaterialIdRoute: AuthenticatedChatMaterialIdRoute,
+  AuthenticatedEditorMaterialIdRoute: AuthenticatedEditorMaterialIdRoute,
+  AuthenticatedGamesMaterialIdRoute: AuthenticatedGamesMaterialIdRoute,
   AuthenticatedMaterialMaterialIdRoute: AuthenticatedMaterialMaterialIdRoute,
+  AuthenticatedPodcastMaterialIdRoute: AuthenticatedPodcastMaterialIdRoute,
+  AuthenticatedSlidesMaterialIdRoute: AuthenticatedSlidesMaterialIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
