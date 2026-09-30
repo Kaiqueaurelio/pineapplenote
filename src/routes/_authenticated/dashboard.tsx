@@ -92,6 +92,8 @@ function Index() {
   const [urlOpen, setUrlOpen] = useState(false);
   const [newNoteOpen, setNewNoteOpen] = useState(false);
   const [noteFlow, setNoteFlow] = useState<"menu" | "record" | "audio" | "document" | "link">("menu");
+  const openNewNote = (flow: "menu" | "record" | "audio" | "document" | "link") => { setNoteFlow(flow); setNewNoteOpen(true); };
+  const closeNewNote = () => { setNewNoteOpen(false); setNoteFlow("menu"); };
   const [audioLanguage, setAudioLanguage] = useState("inglês");
   const [recordingType, setRecordingType] = useState("Aula");
   const [multipleSpeakers, setMultipleSpeakers] = useState(false);

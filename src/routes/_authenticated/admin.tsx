@@ -64,6 +64,7 @@ function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<AdminTab>("overview");
   const [userSearch, setUserSearch] = useState("");
+  const [profileSearch, setProfileSearch] = useState("");
   const [materialSearch, setMaterialSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -360,7 +361,7 @@ function AdminPage() {
               ["Materiais", "Buscar, revisar e remover", () => setTab("materials"), BookOpen],
               ["Acesso", "Domínios institucionais", () => setTab("access"), Globe2],
               ["Operações", "Fila e manutenção", () => setTab("operations"), ServerCog],
-            ].map(([label, description, action, Icon]) => (
+            ].map(([label, description, action, IconValue]) => { const Icon = IconValue as typeof Users; return (
               <button key={String(label)} type="button" onClick={action as () => void} className="flex min-h-16 items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-secondary/50">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary"><Icon size={18} /></span>
                 <span className="min-w-0"><strong className="block text-sm">{String(label)}</strong><span className="mt-0.5 block truncate text-xs text-muted-foreground">{String(description)}</span></span>
@@ -529,7 +530,7 @@ function AdminPage() {
                   ["Saídas de IA", outputCount, CheckCircle2],
                   ["Taxa de sucesso", materialSuccessRate + "%", CheckCircle2],
                   ["Falhas atuais", failedMaterials, AlertTriangle],
-                ].map(([label, value, Icon]) => (
+                ].map(([label, value, IconValue]) => { const Icon = IconValue as typeof Users; return (
                   <article key={String(label)} className="rounded-2xl border border-border bg-card p-5 shadow-card">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary"><Icon size={18} /></div>
                     <p className="mt-4 text-2xl font-black">{String(value)}</p>
