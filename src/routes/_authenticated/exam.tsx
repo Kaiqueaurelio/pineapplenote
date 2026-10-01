@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
-import { ArrowLeft, CheckCircle2, Loader2, RotateCcw } from "lucide-react";
+import { ArrowLeft, CheckCircle2, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 type Question = { question: string; options: string[]; answer: string; explanation: string };
 type Exam = { title: string; instructions: string; questions: Question[] };
@@ -43,10 +44,30 @@ function ExamPage() {
   const score = exam ? exam.questions.reduce((total, question, index) => total + (answers[index] === question.answer ? 1 : 0), 0) : 0;
 
   if (loading) {
-    return <div className="flex min-h-[100dvh] items-center justify-center bg-background px-6 text-center"><div><Loader2 className="mx-auto animate-spin text-brand-violet" size={30} /><p className="mt-4 font-black">Criando sua prova prática</p><p className="mt-1 text-sm text-muted-foreground">O Gemini está preparando questões com base na sua nota.</p></div></div>;
+    return (
+      <>
+        <div className="min-h-[100dvh] bg-background px-4 pb-28 pt-6">
+          <div className="mx-auto max-w-3xl space-y-4" aria-label="Preparando prova">
+            <div className="skeleton-shimmer h-8 w-2/3 rounded-lg" />
+            <div className="skeleton-shimmer h-24 w-full rounded-3xl" />
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="rounded-3xl border border-border bg-card p-5">
+                <div className="skeleton-shimmer h-5 w-4/5 rounded" />
+                <div className="mt-5 space-y-2">
+                  <div className="skeleton-shimmer h-12 w-full rounded-2xl" />
+                  <div className="skeleton-shimmer h-12 w-full rounded-2xl" />
+                  <div className="skeleton-shimmer h-12 w-full rounded-2xl" />
+                </div>
+              </div>
+            ))}
+            <p className="text-center text-sm font-semibold text-muted-foreground">Preparando sua revisão…</p>
+          </div>
+        </div>
+        <MobileBottomNav />
+      </>
+    );
   }
-
-  if (!exam) return <div className="flex min-h-[100dvh] items-center justify-center p-6 text-center"><p>Não foi possível criar esta prova.</p></div>;
+  if (!exam) return <><div className="flex min-h-[100dvh] items-center justify-center p-6 pb-24 text-center"><p>Não foi possível criar esta prova.</p></div><MobileBottomNav /></>;
 
   return (
     <div className="min-h-[100dvh] bg-background text-foreground">
@@ -80,6 +101,7 @@ function ExamPage() {
           <button type="button" onClick={() => setSubmitted(true)} disabled={Object.keys(answers).length !== exam.questions.length} className="min-h-12 rounded-2xl bg-foreground px-5 font-black text-background disabled:opacity-40">Ver resultado</button>
         </div>
       </main>
+      <MobileBottomNav />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Configurações — Pineapple Note" }] }),
@@ -62,7 +63,7 @@ function SettingsPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#f2f2f7] text-black">
+    <div className="min-h-[100dvh] bg-[#f2f2f7] pb-24 text-black">
       <header className="sticky top-0 z-30 border-b border-[#d8d8dd] bg-[#f2f2f7]/95 backdrop-blur-2xl">
         <div className="mx-auto flex h-[74px] max-w-3xl items-center px-4">
           <div className="h-11 w-11" aria-hidden="true" />
@@ -109,6 +110,7 @@ function SettingsPage() {
           </div>
         </div>
       )}
+      <MobileBottomNav />
     </div>
   );
 }
