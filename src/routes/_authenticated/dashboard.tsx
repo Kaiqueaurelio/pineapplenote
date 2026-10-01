@@ -122,12 +122,12 @@ function Index() {
   const recordingTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (newAction) {
-      const action = newAction === "record" ? "record" : newAction === "link" ? "link" : "document";
-      openNewNote(action);
-      void navigate({ to: "/dashboard", search: { new: undefined }, replace: true });
-    }
-  }, [newAction]);
+    if (!newAction) return;
+    const action = newAction === "record" ? "record" : newAction === "link" ? "link" : "document";
+    setNoteFlow(action);
+    setNewNoteOpen(true);
+    void navigate({ to: "/dashboard", search: { new: undefined }, replace: true });
+  }, [newAction, navigate]);
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 1024px)");
