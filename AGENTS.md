@@ -15,3 +15,4 @@
 - Use the uploaded Pineapple Note logo as the canonical brand asset and derive the favicon from it; this preserves brand consistency.
 - Keep PWA support manifest-only unless offline behavior is explicitly requested; this avoids stale preview caches.
 - Keep the study dashboard at `/dashboard` behind the managed authenticated layout; public account flows live at `/auth` and `/reset-password`.
+- Keep the public backend URL/publishable key fallback in `vite.config.ts` `define`; `.gitignore` excludes `.env`, so published builds would otherwise ship without them and blank-screen.
