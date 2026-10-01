@@ -153,7 +153,6 @@ function Index() {
       .eq("user_id", user.id)
       .maybeSingle()
       .then(async ({ data, error }) => {
-        setMaterialsLoading(false);
         if (error) {
           toast.error("Não foi possível carregar seu perfil.");
           return;
@@ -190,6 +189,7 @@ function Index() {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .then(async ({ data, error }) => {
+        setMaterialsLoading(false);
         if (error) {
           toast.error("Não foi possível carregar seus materiais.");
           return;
