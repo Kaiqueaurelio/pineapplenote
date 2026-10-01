@@ -31,6 +31,7 @@ import {
   Upload,
   Video,
   X,
+  GraduationCap,
 } from "lucide-react";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { z } from "zod";
