@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle2, Loader2, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 type Question = { question: string; options: string[]; answer: string; explanation: string };
 type Exam = { title: string; instructions: string; questions: Question[] };
@@ -43,10 +44,10 @@ function ExamPage() {
   const score = exam ? exam.questions.reduce((total, question, index) => total + (answers[index] === question.answer ? 1 : 0), 0) : 0;
 
   if (loading) {
-    return <div className="flex min-h-[100dvh] items-center justify-center bg-background px-6 text-center"><div><Loader2 className="mx-auto animate-spin text-brand-violet" size={30} /><p className="mt-4 font-black">Criando sua prova prática</p><p className="mt-1 text-sm text-muted-foreground">O Gemini está preparando questões com base na sua nota.</p></div></div>;
+    return <><div className="flex min-h-[100dvh] items-center justify-center bg-background px-6 pb-24 text-center"><div><Loader2 className="mx-auto animate-spin text-brand-violet" size={30} /><p className="mt-4 font-black">Criando sua prova prática</p><p className="mt-1 text-sm text-muted-foreground">O Gemini está preparando questões com base na sua nota.</p></div></div><MobileBottomNav /></>;
   }
 
-  if (!exam) return <div className="flex min-h-[100dvh] items-center justify-center p-6 text-center"><p>Não foi possível criar esta prova.</p></div>;
+  if (!exam) return <><div className="flex min-h-[100dvh] items-center justify-center p-6 pb-24 text-center"><p>Não foi possível criar esta prova.</p></div><MobileBottomNav /></>;
 
   return (
     <div className="min-h-[100dvh] bg-background text-foreground">
@@ -80,6 +81,7 @@ function ExamPage() {
           <button type="button" onClick={() => setSubmitted(true)} disabled={Object.keys(answers).length !== exam.questions.length} className="min-h-12 rounded-2xl bg-foreground px-5 font-black text-background disabled:opacity-40">Ver resultado</button>
         </div>
       </main>
+      <MobileBottomNav />
     </div>
   );
 }
