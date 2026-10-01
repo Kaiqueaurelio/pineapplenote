@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({
@@ -418,30 +419,8 @@ function LibraryPage() {
           Pineapple Note · Desenvolvido pela Decode Analytics
         </footer>
       </main>
+      <MobileBottomNav />
 
-      <div className="fixed inset-x-4 bottom-[max(5.15rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-20 sm:hidden">
-        <Button
-          className="h-14 w-full rounded-[1.35rem] bg-[linear-gradient(135deg,var(--brand-violet),var(--primary))] text-base font-black shadow-soft"
-          onClick={() => navigate({ to: "/dashboard" })}
-        >
-          <Plus size={21} /> Nova nota
-        </Button>
-      </div>
-
-      <nav
-        className="fixed inset-x-0 bottom-0 z-30 flex h-[4.4rem] items-center justify-around border-t border-border bg-card/95 px-3 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
-        aria-label="Navegação móvel"
-      >
-        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => navigate({ to: "/dashboard" })}>
-          <Home size={20} /> Início
-        </button>
-        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-bold text-brand-violet" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          <Library size={20} /> Notas
-        </button>
-        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => navigate({ to: "/settings" })}>
-          <Settings size={20} /> Perfil
-        </button>
-      </nav>
     </div>
   );
 }
