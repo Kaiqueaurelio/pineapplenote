@@ -285,13 +285,19 @@ function LibraryPage() {
           </div>
         )}
 
-        {loading ? (
-          <div className="mt-5 grid gap-3 sm:grid-cols-2" aria-label="Carregando biblioteca">
+        {loading ? (          <div className="mt-5 grid gap-3 sm:grid-cols-2" aria-label="Carregando biblioteca">
             {[1, 2, 3, 4].map((item) => (
-              <div
-                key={item}
-                className="h-44 animate-pulse rounded-2xl border border-border bg-card"
-              />
+              <div key={item} className="rounded-[28px] border border-border bg-card p-5" aria-hidden="true">
+                <div className="flex items-start gap-3">
+                  <div className="skeleton-shimmer h-12 w-12 shrink-0 rounded-full" />
+                  <div className="min-w-0 flex-1">
+                    <div className="skeleton-shimmer h-5 w-3/4 rounded" />
+                    <div className="skeleton-shimmer mt-2 h-3 w-1/2 rounded" />
+                    <div className="skeleton-shimmer mt-5 h-1.5 w-full rounded" />
+                  </div>
+                </div>
+                <div className="skeleton-shimmer mt-5 h-10 w-28 rounded-full" />
+              </div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
