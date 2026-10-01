@@ -50,8 +50,10 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  validateSearch: z.object({ new: z.string().optional().catch("") }),
   head: () => ({
     meta: [
       { title: "Pineapple Note — Sua aula. Organizada pela IA." },
@@ -84,6 +86,7 @@ type InstallPromptEvent = Event & {
 
 function Index() {
   const { user } = Route.useRouteContext();
+  const { new: newAction } = Route.useSearch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -117,6 +120,14 @@ function Index() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordingChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (newAction) {
+      const action = newAction === "record" ? "record" : newAction === "link" ? "link" : "document";
+      openNewNote(action);
+      void navigate({ to: "/dashboard", search: { new: undefined }, replace: true });
+    }
+  }, [newAction]);
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 1024px)");
@@ -1167,42 +1178,6 @@ function Index() {
         </div>
       </div>
 
-      <nav
-        className="fixed inset-x-0 bottom-0 z-30 flex h-[4.4rem] items-center justify-around border-t border-border bg-card/95 px-3 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_color-mix(in_oklab,var(--foreground)_6%,transparent)] backdrop-blur md:hidden"
-        aria-label="Navegação móvel"
-      >
-        {[
-          { label: "Início", icon: Home, active: true, action: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
-          { label: "Notas", icon: Library, action: () => navigate({ to: "/library" }) },
-          null,
-          { label: "Revisão", icon: GraduationCap, action: () => navigate({ to: "/exam" }) },
-          { label: "Perfil", icon: Settings, action: () => navigate({ to: "/settings" }) },
-        ].map((tab) =>
-          tab === null ? (
-            <button
-              key="fab"
-              type="button"
-              className="relative -mt-8 flex h-15 w-15 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl ring-4 ring-background transition-transform duration-150 active:scale-90"
-              onClick={() => openNewNote("menu")}
-              aria-label="Nova nota"
-            >
-              <Plus size={28} strokeWidth={2.4} />
-            </button>
-          ) : (
-            <button
-              key={tab.label}
-              type="button"
-              aria-current={tab.active ? "page" : undefined}
-              className={`relative flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-1 text-[11px] transition-all duration-150 active:scale-90 ${tab.active ? "font-bold text-primary" : "font-semibold text-muted-foreground"}`}
-              onClick={tab.action}
-            >
-              {tab.active && <span className="absolute -top-2 h-1 w-6 rounded-full bg-primary" />}
-              <tab.icon size={21} strokeWidth={tab.active ? 2.4 : 2} />
-              {tab.label}
-            </button>
-          ),
-        )}
-      </nav>
 
       {newNoteOpen && (
         <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/20 backdrop-blur-md sm:items-center">
@@ -1491,6 +1466,7 @@ function Index() {
           </form>
         </DialogContent>
       </Dialog>
+      <MobileBottomNav onQuickAction={(action) => openNewNote(action)} />
     </div>
   );
 }
