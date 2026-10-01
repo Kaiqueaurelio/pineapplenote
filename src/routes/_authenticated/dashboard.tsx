@@ -110,6 +110,7 @@ function Index() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const [dashboardMaterials, setDashboardMaterials] = useState<Tables<"study_materials">[]>([]);
+  const [materialsLoading, setMaterialsLoading] = useState(true);
   const [dashboardProgress, setDashboardProgress] = useState<Record<string, number>>({});
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -152,6 +153,7 @@ function Index() {
       .eq("user_id", user.id)
       .maybeSingle()
       .then(async ({ data, error }) => {
+        setMaterialsLoading(false);
         if (error) {
           toast.error("Não foi possível carregar seu perfil.");
           return;
@@ -942,6 +944,22 @@ function Index() {
                 </Button>
               </div>
 
+              {materialsLoading ? (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Carregando materiais">
+                  {[1, 2, 3, 4, 5, 6].map((item) => (
+                    <div key={item} className="rounded-xl border border-border bg-card p-5 shadow-card" aria-hidden="true">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="skeleton-shimmer h-11 w-11 rounded-full" />
+                        <div className="skeleton-shimmer h-6 w-24 rounded-full" />
+                      </div>
+                      <div className="skeleton-shimmer mt-5 h-3 w-16 rounded" />
+                      <div className="skeleton-shimmer mt-2 h-5 w-4/5 rounded" />
+                      <div className="skeleton-shimmer mt-3 h-4 w-3/5 rounded" />
+                      <div className="skeleton-shimmer mt-5 h-11 w-full rounded-lg" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {visibleMaterials.map((material) => {
                   const progress = dashboardProgress[material.id] ?? 0;
@@ -974,15 +992,27 @@ function Index() {
                       <h3 className="mt-1 min-h-12 truncate text-base font-bold leading-snug">
                         {material.title}
                       </h3>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {material.status === "ready"
-                          ? "Pronto para estudar"
-                          : material.status === "processing"
-                            ? "Organizando conteúdo..."
+                      {material.status === "processing" ? (
+                        <div className="mt-3 rounded-xl bg-secondary/70 p-3" aria-live="polite">
+                          <div className="flex items-center gap-2 text-xs font-bold text-foreground">
+                            <Loader2 className="animate-spin text-primary" size={14} />
+                            Organizando seu material
+                          </div>
+                          <div className="mt-2 grid grid-cols-3 gap-1.5 text-[10px] font-semibold text-muted-foreground">
+                            <span className="rounded-md bg-card px-2 py-1.5 text-primary">1 · Conteúdo</span>
+                            <span className="rounded-md bg-card px-2 py-1.5">2 · Tópicos</span>
+                            <span className="rounded-md bg-card px-2 py-1.5">3 · Revisão</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          {material.status === "ready"
+                            ? "Pronto para estudar"
                             : material.status === "failed"
-                              ? "Não foi possível organizar"
+                              ? "Não foi possível organizar. Tente novamente."
                               : "Pronto para organizar"}
-                      </p>
+                        </p>
+                      )}
                       <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
                         <span>{new Date(material.created_at).toLocaleDateString("pt-BR")}</span>
                         <strong className="text-foreground">{progress}%</strong>
@@ -1009,8 +1039,9 @@ function Index() {
                   );
                 })}
               </div>
+              )}
 
-              {visibleMaterials.length === 0 && (
+              {visibleMaterials.length === 0 && !materialsLoading && (
                 <div className="rounded-xl border border-dashed border-border py-14 text-center">
                   <Search className="mx-auto text-muted-foreground" size={24} />
                   <p className="mt-3 font-semibold">Nenhum material encontrado</p>
@@ -1144,7 +1175,7 @@ function Index() {
           { label: "Início", icon: Home, active: true, action: () => window.scrollTo({ top: 0, behavior: "smooth" }) },
           { label: "Notas", icon: Library, action: () => navigate({ to: "/library" }) },
           null,
-          { label: "Estudar", icon: GraduationCap, action: () => navigate({ to: "/exam" }) },
+          { label: "Revisão", icon: GraduationCap, action: () => navigate({ to: "/exam" }) },
           { label: "Perfil", icon: Settings, action: () => navigate({ to: "/settings" }) },
         ].map((tab) =>
           tab === null ? (
