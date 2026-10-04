@@ -19,6 +19,7 @@ import {
   Loader2,
   Menu,
   Mic2,
+  Sparkles,
   Play,
   Plus,
   Search,
@@ -50,10 +51,10 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
-import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { AppBottomNav } from "@/components/app-bottom-nav";
+import { ensureDemoMaterial } from "@/lib/demo-material";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  validateSearch: z.object({ new: z.string().optional().catch("") }),
   head: () => ({
     meta: [
       { title: "Pineapple Note — Sua aula. Organizada pela IA." },
@@ -71,6 +72,9 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): { novo?: boolean | undefined } => ({
+    novo: search.novo === true || search.novo === "true" ? true : undefined,
+  }),
   component: Index,
 });
 
@@ -86,8 +90,9 @@ type InstallPromptEvent = Event & {
 
 function Index() {
   const { user } = Route.useRouteContext();
-  const { new: newAction } = Route.useSearch();
+  const { novo } = Route.useSearch();
   const navigate = useNavigate();
+  const [loadingDemo, setLoadingDemo] = useState(false);
   const queryClient = useQueryClient();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -122,12 +127,26 @@ function Index() {
   const recordingTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!newAction) return;
-    const action = newAction === "record" ? "record" : newAction === "link" ? "link" : "document";
-    setNoteFlow(action);
+    if (!novo) return;
+    setNoteFlow("menu");
     setNewNoteOpen(true);
-    void navigate({ to: "/dashboard", search: { new: undefined }, replace: true });
-  }, [newAction, navigate]);
+    void navigate({ to: "/dashboard", search: {}, replace: true });
+  }, [novo, navigate]);
+
+  async function openDemoLesson() {
+    if (loadingDemo) return;
+    setLoadingDemo(true);
+    try {
+      const materialId = await ensureDemoMaterial(user.id);
+      setNewNoteOpen(false);
+      toast.success("Aula exemplo pronta. Explore resumo, flashcards e simulado.");
+      void navigate({ to: "/material/$materialId", params: { materialId } });
+    } catch {
+      toast.error("Não foi possível carregar a aula exemplo agora.");
+    } finally {
+      setLoadingDemo(false);
+    }
+  }
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 1024px)");
@@ -1178,6 +1197,7 @@ function Index() {
         </div>
       </div>
 
+      <AppBottomNav onCreate={() => openNewNote("menu")} />
 
       {newNoteOpen && (
         <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/20 backdrop-blur-md sm:items-center">
@@ -1194,6 +1214,7 @@ function Index() {
                   { label: "Enviar áudio", icon: AudioLines, action: () => setNoteFlow("audio") },
                   { label: "PDF, arquivo ou texto", icon: FileUp, action: () => setNoteFlow("document") },
                   { label: "Link da web", icon: Link2, action: () => setNoteFlow("link") },
+                  { label: loadingDemo ? "Preparando aula exemplo…" : "Experimentar aula exemplo", icon: Sparkles, action: () => void openDemoLesson() },
                 ].map((item) => (
                   <button key={item.label} type="button" onClick={item.action} className="flex min-h-[112px] w-full min-w-0 items-center gap-4 rounded-[24px] bg-white px-4 text-left shadow-sm active:scale-[0.99] sm:gap-5 sm:px-6">
                     <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f1f1f6] text-black"><item.icon size={25} strokeWidth={1.8} /></span>
@@ -1466,7 +1487,6 @@ function Index() {
           </form>
         </DialogContent>
       </Dialog>
-      <MobileBottomNav onQuickAction={(action) => openNewNote(action)} />
     </div>
   );
 }

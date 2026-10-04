@@ -3,9 +3,12 @@ import {
   ArrowLeft,
   FileText,
   Headphones,
+  Home,
   Library,
   Loader2,
+  Plus,
   Search,
+  Settings,
   Trash2,
   Video,
   X,
@@ -25,7 +28,9 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
-import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { AppBottomNav } from "@/components/app-bottom-nav";
+import { MaterialListSkeleton } from "@/components/study-skeletons";
+import { ensureDemoMaterial } from "@/lib/demo-material";
 
 export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({
@@ -159,7 +164,7 @@ function LibraryPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-[#f2f2f7] pb-32 text-black sm:pb-8">
+    <div className="min-h-[100dvh] bg-[#f2f2f7] pb-44 text-black md:pb-8">
       <header className="sticky top-0 z-20 border-b border-[#d8d8dd] bg-[#f2f2f7]/95 backdrop-blur-2xl">
         <div className="mx-auto flex h-[74px] max-w-3xl items-center gap-3 px-4 sm:px-6">
           <Button
@@ -282,21 +287,8 @@ function LibraryPage() {
           </div>
         )}
 
-        {loading ? (          <div className="mt-5 grid gap-3 sm:grid-cols-2" aria-label="Carregando biblioteca">
-            {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="rounded-[28px] border border-border bg-card p-5" aria-hidden="true">
-                <div className="flex items-start gap-3">
-                  <div className="skeleton-shimmer h-12 w-12 shrink-0 rounded-full" />
-                  <div className="min-w-0 flex-1">
-                    <div className="skeleton-shimmer h-5 w-3/4 rounded" />
-                    <div className="skeleton-shimmer mt-2 h-3 w-1/2 rounded" />
-                    <div className="skeleton-shimmer mt-5 h-1.5 w-full rounded" />
-                  </div>
-                </div>
-                <div className="skeleton-shimmer mt-5 h-10 w-28 rounded-full" />
-              </div>
-            ))}
-          </div>
+        {loading ? (
+          <div className="mt-5"><MaterialListSkeleton /></div>
         ) : filtered.length === 0 ? (
           <div className="mt-6 rounded-2xl border border-dashed border-border px-5 py-16 text-center">
             <FileText className="mx-auto text-muted-foreground" size={28} />
@@ -309,9 +301,25 @@ function LibraryPage() {
                 : "Salve um áudio, vídeo ou documento na página inicial para encontrá-lo aqui."}
             </p>
             {!materials.length && (
-              <Button className="mt-5" onClick={() => navigate({ to: "/dashboard" })}>
-                Criar material
-              </Button>
+              <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
+                <Button className="rounded-full" onClick={() => navigate({ to: "/dashboard", search: { novo: true } })}>
+                  Criar primeira nota
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-full"
+                  onClick={async () => {
+                    try {
+                      const materialId = await ensureDemoMaterial(user.id);
+                      navigate({ to: "/material/$materialId", params: { materialId } });
+                    } catch {
+                      toast.error("Não foi possível carregar a aula exemplo.");
+                    }
+                  }}
+                >
+                  Ver aula exemplo
+                </Button>
+              </div>
             )}
           </div>
         ) : (
@@ -422,8 +430,17 @@ function LibraryPage() {
           Pineapple Note · Desenvolvido pela Decode Analytics
         </footer>
       </main>
-      <MobileBottomNav />
 
+      <div className="fixed inset-x-4 bottom-[max(5.15rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-20 sm:hidden">
+        <Button
+          className="h-14 w-full rounded-[1.35rem] bg-[linear-gradient(135deg,var(--brand-violet),var(--primary))] text-base font-black shadow-soft"
+          onClick={() => navigate({ to: "/dashboard" })}
+        >
+          <Plus size={21} /> Nova nota
+        </Button>
+      </div>
+
+      <AppBottomNav />
     </div>
   );
 }

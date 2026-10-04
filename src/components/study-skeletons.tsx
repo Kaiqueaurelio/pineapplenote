@@ -1,10 +1,8 @@
 function Shimmer({ className = "" }: { className?: string }) {
   return (
     <span
-      className={`block overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--foreground)_8%,transparent)] ${className}`}
-    >
-      <span className="block h-full w-full animate-[shimmer_1.6s_infinite] bg-[linear-gradient(90deg,transparent,color-mix(in_oklab,var(--card)_85%,transparent),transparent)]" />
-    </span>
+      className={`skeleton-shimmer relative block overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--foreground)_8%,transparent)] ${className}`}
+    />
   );
 }
 

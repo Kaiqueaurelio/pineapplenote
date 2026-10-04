@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { AppBottomNav } from "@/components/app-bottom-nav";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Configurações — Pineapple Note" }] }),
@@ -63,7 +63,7 @@ function SettingsPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#f2f2f7] pb-24 text-black">
+    <div className="min-h-[100dvh] bg-[#f2f2f7] text-black">
       <header className="sticky top-0 z-30 border-b border-[#d8d8dd] bg-[#f2f2f7]/95 backdrop-blur-2xl">
         <div className="mx-auto flex h-[74px] max-w-3xl items-center px-4">
           <div className="h-11 w-11" aria-hidden="true" />
@@ -93,6 +93,8 @@ function SettingsPage() {
         <div className="mt-8 text-center text-xs text-[#8e8e93]">Pineapple Note · Desenvolvido pela Decode Analytics</div>
       </main>
 
+      <AppBottomNav />
+
       {dialog && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 p-3 backdrop-blur-sm sm:items-center">
           <div className="w-full max-w-lg rounded-[28px] bg-[#f2f2f7] p-6 shadow-2xl sm:p-8">
@@ -110,7 +112,6 @@ function SettingsPage() {
           </div>
         </div>
       )}
-      <MobileBottomNav />
     </div>
   );
 }
