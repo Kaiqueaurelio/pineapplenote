@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AppBottomNav } from "@/components/app-bottom-nav";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Configurações — Pineapple Note" }] }),
@@ -91,6 +92,8 @@ function SettingsPage() {
 
         <div className="mt-8 text-center text-xs text-[#8e8e93]">Pineapple Note · Desenvolvido pela Decode Analytics</div>
       </main>
+
+      <AppBottomNav />
 
       {dialog && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 p-3 backdrop-blur-sm sm:items-center">

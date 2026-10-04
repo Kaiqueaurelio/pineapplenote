@@ -28,6 +28,9 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
+import { AppBottomNav } from "@/components/app-bottom-nav";
+import { MaterialListSkeleton } from "@/components/study-skeletons";
+import { ensureDemoMaterial } from "@/lib/demo-material";
 
 export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({
@@ -161,7 +164,7 @@ function LibraryPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-[#f2f2f7] pb-32 text-black sm:pb-8">
+    <div className="min-h-[100dvh] bg-[#f2f2f7] pb-44 text-black md:pb-8">
       <header className="sticky top-0 z-20 border-b border-[#d8d8dd] bg-[#f2f2f7]/95 backdrop-blur-2xl">
         <div className="mx-auto flex h-[74px] max-w-3xl items-center gap-3 px-4 sm:px-6">
           <Button
@@ -285,14 +288,7 @@ function LibraryPage() {
         )}
 
         {loading ? (
-          <div className="mt-5 grid gap-3 sm:grid-cols-2" aria-label="Carregando biblioteca">
-            {[1, 2, 3, 4].map((item) => (
-              <div
-                key={item}
-                className="h-44 animate-pulse rounded-2xl border border-border bg-card"
-              />
-            ))}
-          </div>
+          <div className="mt-5"><MaterialListSkeleton /></div>
         ) : filtered.length === 0 ? (
           <div className="mt-6 rounded-2xl border border-dashed border-border px-5 py-16 text-center">
             <FileText className="mx-auto text-muted-foreground" size={28} />
@@ -305,9 +301,25 @@ function LibraryPage() {
                 : "Salve um áudio, vídeo ou documento na página inicial para encontrá-lo aqui."}
             </p>
             {!materials.length && (
-              <Button className="mt-5" onClick={() => navigate({ to: "/dashboard" })}>
-                Criar material
-              </Button>
+              <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
+                <Button className="rounded-full" onClick={() => navigate({ to: "/dashboard", search: { novo: true } })}>
+                  Criar primeira nota
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-full"
+                  onClick={async () => {
+                    try {
+                      const materialId = await ensureDemoMaterial(user.id);
+                      navigate({ to: "/material/$materialId", params: { materialId } });
+                    } catch {
+                      toast.error("Não foi possível carregar a aula exemplo.");
+                    }
+                  }}
+                >
+                  Ver aula exemplo
+                </Button>
+              </div>
             )}
           </div>
         ) : (
@@ -428,20 +440,7 @@ function LibraryPage() {
         </Button>
       </div>
 
-      <nav
-        className="fixed inset-x-0 bottom-0 z-30 flex h-[4.4rem] items-center justify-around border-t border-border bg-card/95 px-3 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
-        aria-label="Navegação móvel"
-      >
-        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => navigate({ to: "/dashboard" })}>
-          <Home size={20} /> Início
-        </button>
-        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-bold text-brand-violet" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          <Library size={20} /> Notas
-        </button>
-        <button type="button" className="flex min-w-16 flex-col items-center gap-1 text-xs font-semibold text-muted-foreground" onClick={() => navigate({ to: "/settings" })}>
-          <Settings size={20} /> Perfil
-        </button>
-      </nav>
+      <AppBottomNav />
     </div>
   );
 }
