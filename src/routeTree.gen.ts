@@ -18,6 +18,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedExamRouteImport } from './routes/_authenticated/exam'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedStudyRouteImport } from './routes/_authenticated/study'
 import { Route as AuthenticatedChatMaterialIdRouteImport } from './routes/_authenticated/chat/$materialId'
 import { Route as AuthenticatedEditorMaterialIdRouteImport } from './routes/_authenticated/editor/$materialId'
 import { Route as AuthenticatedGamesMaterialIdRouteImport } from './routes/_authenticated/games/$materialId'
@@ -69,6 +70,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedStudyRoute = AuthenticatedStudyRouteImport.update({
+  id: '/study',
+  path: '/study',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedChatMaterialIdRoute =
   AuthenticatedChatMaterialIdRouteImport.update({
     id: '/chat/$materialId',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/exam': typeof AuthenticatedExamRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/study': typeof AuthenticatedStudyRoute
   '/chat/$materialId': typeof AuthenticatedChatMaterialIdRoute
   '/editor/$materialId': typeof AuthenticatedEditorMaterialIdRoute
   '/games/$materialId': typeof AuthenticatedGamesMaterialIdRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/exam': typeof AuthenticatedExamRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/study': typeof AuthenticatedStudyRoute
   '/chat/$materialId': typeof AuthenticatedChatMaterialIdRoute
   '/editor/$materialId': typeof AuthenticatedEditorMaterialIdRoute
   '/games/$materialId': typeof AuthenticatedGamesMaterialIdRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/exam': typeof AuthenticatedExamRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/study': typeof AuthenticatedStudyRoute
   '/_authenticated/chat/$materialId': typeof AuthenticatedChatMaterialIdRoute
   '/_authenticated/editor/$materialId': typeof AuthenticatedEditorMaterialIdRoute
   '/_authenticated/games/$materialId': typeof AuthenticatedGamesMaterialIdRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/exam'
     | '/library'
     | '/settings'
+    | '/study'
     | '/chat/$materialId'
     | '/editor/$materialId'
     | '/games/$materialId'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/exam'
     | '/library'
     | '/settings'
+    | '/study'
     | '/chat/$materialId'
     | '/editor/$materialId'
     | '/games/$materialId'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/_authenticated/exam'
     | '/_authenticated/library'
     | '/_authenticated/settings'
+    | '/_authenticated/study'
     | '/_authenticated/chat/$materialId'
     | '/_authenticated/editor/$materialId'
     | '/_authenticated/games/$materialId'
@@ -280,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/study': {
+      id: '/_authenticated/study'
+      path: '/study'
+      fullPath: '/study'
+      preLoaderRoute: typeof AuthenticatedStudyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/chat/$materialId': {
       id: '/_authenticated/chat/$materialId'
       path: '/chat/$materialId'
@@ -331,6 +350,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedExamRoute: typeof AuthenticatedExamRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedStudyRoute: typeof AuthenticatedStudyRoute
   AuthenticatedChatMaterialIdRoute: typeof AuthenticatedChatMaterialIdRoute
   AuthenticatedEditorMaterialIdRoute: typeof AuthenticatedEditorMaterialIdRoute
   AuthenticatedGamesMaterialIdRoute: typeof AuthenticatedGamesMaterialIdRoute
@@ -345,6 +365,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedExamRoute: AuthenticatedExamRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedStudyRoute: AuthenticatedStudyRoute,
   AuthenticatedChatMaterialIdRoute: AuthenticatedChatMaterialIdRoute,
   AuthenticatedEditorMaterialIdRoute: AuthenticatedEditorMaterialIdRoute,
   AuthenticatedGamesMaterialIdRoute: AuthenticatedGamesMaterialIdRoute,
