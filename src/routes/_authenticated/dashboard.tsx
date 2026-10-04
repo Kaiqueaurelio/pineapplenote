@@ -72,7 +72,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { novo?: boolean } => ({
     novo: search.novo === true || search.novo === "true" ? true : undefined,
   }),
   component: Index,
