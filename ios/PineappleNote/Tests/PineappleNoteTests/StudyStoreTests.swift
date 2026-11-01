@@ -110,6 +110,28 @@ final class StudyStoreTests: XCTestCase {
         }
     }
 
+    func testWebLinksAreSavedAndIncludedInBackupsWithoutDuplicates() async throws {
+        try await MainActor.run {
+            let source = StudyStore(defaults: makeStudyTestDefaults())
+            let url = URL(string: "https://example.com/aula")!
+            try source.addWebLink(url, displayName: "Aula de exemplo")
+            XCTAssertEqual(source.materials.count, 1)
+            XCTAssertEqual(source.materials.first?.kind, .link)
+
+            let backup = try source.makeBackupData()
+            let destinationDefaults = makeStudyTestDefaults()
+            let destination = StudyStore(defaults: destinationDefaults)
+            try destination.addWebLink(url, displayName: "Aula existente")
+            try destination.restoreBackup(from: backup)
+
+            XCTAssertEqual(destination.materials.filter { $0.sourceURL == url.absoluteString }.count, 1)
+            XCTAssertEqual(destination.materials.first?.name, "Aula de exemplo")
+
+            let reopened = StudyStore(defaults: destinationDefaults)
+            XCTAssertEqual(reopened.materials.first?.sourceURL, url.absoluteString)
+        }
+    }
+
     func testQuestionValidationRequiresFourNonEmptyOptionsAndValidAnswer() {
         let valid = StudyQuestion(
             prompt: "Quanto é 2 + 2?",

@@ -150,9 +150,14 @@ struct StudyMaterialsView: View {
                                         .foregroundStyle(PineapplePalette.ink)
                                         .lineLimit(2)
                                         .multilineTextAlignment(.leading)
-                                    Text("\(material.kind.title) • \(ByteCountFormatter.string(fromByteCount: material.sizeInBytes, countStyle: .file))")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(PineapplePalette.muted)
+                                    Text(
+                                        material.kind == .link
+                                        ? (material.sourceURL ?? "Link salvo")
+                                        : "\(material.kind.title) • \(ByteCountFormatter.string(fromByteCount: material.sizeInBytes, countStyle: .file))"
+                                    )
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(PineapplePalette.muted)
+                                    .lineLimit(1)
                                 }
                                 Spacer()
                                 Image(systemName: "arrow.up.right")

@@ -130,7 +130,8 @@ final class StudyStore: ObservableObject {
             notes: notes,
             flashcards: flashcards,
             questions: questions,
-            quizAttempts: quizAttempts
+            quizAttempts: quizAttempts,
+            links: materials.filter { $0.kind == .link }
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -152,7 +153,8 @@ final class StudyStore: ObservableObject {
         }
         guard backup.notes.count <= 10_000,
               backup.flashcards.count <= 20_000,
-              backup.questions.count <= 20_000 else {
+              backup.questions.count <= 20_000,
+              (backup.links?.count ?? 0) <= 5_000 else {
             throw StudyBackupError.tooManyItems
         }
 
@@ -198,14 +200,32 @@ final class StudyStore: ObservableObject {
             }
         }
 
+        var mergedLinks = materials
+        for item in backup.links ?? [] where item.kind == .link {
+            guard let rawURL = item.sourceURL,
+                  let components = URLComponents(string: rawURL),
+                  let scheme = components.scheme?.lowercased(),
+                  ["http", "https"].contains(scheme),
+                  let host = components.host,
+                  !host.isEmpty else { continue }
+
+            if let index = mergedLinks.firstIndex(where: { $0.sourceURL == rawURL }) {
+                mergedLinks[index] = item
+            } else {
+                mergedLinks.append(item)
+            }
+        }
+
         notes = mergedNotes.sorted { $0.updatedAt > $1.updatedAt }
         flashcards = mergedFlashcards.sorted { $0.createdAt > $1.createdAt }
         questions = mergedQuestions.sorted { $0.createdAt > $1.createdAt }
         quizAttempts = mergedAttempts.sorted { $0.completedAt > $1.completedAt }
+        materials = mergedLinks.sorted { $0.importedAt > $1.importedAt }
         persist(notes, forKey: notesKey)
         persist(flashcards, forKey: flashcardsKey)
         persist(questions, forKey: questionsKey)
         persist(quizAttempts, forKey: quizAttemptsKey)
+        persist(materials, forKey: materialsKey)
     }
 
 
@@ -418,6 +438,7 @@ struct StudyBackup: Codable {
     var flashcards: [StudyFlashcard]
     var questions: [StudyQuestion]
     var quizAttempts: [StudyQuizAttempt]?
+    var links: [StudyMaterial]?
 }
 
 enum StudyBackupError: LocalizedError {

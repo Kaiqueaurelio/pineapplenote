@@ -53,6 +53,7 @@ struct StudyBackupView: View {
                     backupRow("Flashcards", count: store.flashcards.count, icon: "rectangle.on.rectangle")
                     backupRow("Questões", count: store.questions.count, icon: "checkmark.circle")
                     backupRow("Tentativas de simulado", count: store.quizAttempts.count, icon: "chart.bar.fill")
+                    backupRow("Links da web", count: store.materials.filter { $0.kind == .link }.count, icon: "link")
                 }
                 .padding(15)
                 .background(.white, in: RoundedRectangle(cornerRadius: 17))
@@ -79,7 +80,7 @@ struct StudyBackupView: View {
                     Label("Como funciona", systemImage: "info.circle.fill")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(PineapplePalette.green)
-                    Text("O backup inclui anotações, flashcards, questões e histórico de simulados. A restauração mescla os itens pelo identificador, evitando duplicar os que já existem. Os arquivos PDF, áudios, vídeos e imagens não são incluídos; eles permanecem na biblioteca local do aparelho.")
+                    Text("O backup inclui anotações, flashcards, questões, histórico de simulados e links da web. A restauração mescla os itens pelo identificador, evitando duplicar os que já existem. Os arquivos PDF, áudios, vídeos e imagens não são incluídos; eles permanecem na biblioteca local do aparelho.")
                         .font(.system(size: 11))
                         .foregroundStyle(PineapplePalette.muted)
                     Text("O arquivo é gerado no próprio iPhone. Você escolhe onde salvá-lo ou de onde importá-lo.")
