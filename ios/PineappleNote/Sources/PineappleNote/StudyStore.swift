@@ -189,6 +189,7 @@ final class StudyStore: ObservableObject {
         persist(notes, forKey: notesKey)
         persist(flashcards, forKey: flashcardsKey)
         persist(questions, forKey: questionsKey)
+        persist(quizAttempts, forKey: quizAttemptsKey)
     }
 
 

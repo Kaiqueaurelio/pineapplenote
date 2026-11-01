@@ -113,9 +113,9 @@ struct ContentView: View {
         HStack(spacing: 10) {
             ZStack {
                 RoundedRectangle(cornerRadius: 13).fill(PineapplePalette.green)
-                Image(systemName: "sun.max.fill")
-                    .font(.system(size: 21, weight: .bold))
-                    .foregroundStyle(PineapplePalette.lime)
+                Text("🍍")
+                    .font(.system(size: 25))
+                    .accessibilityHidden(true)
             }
             .frame(width: 44, height: 44)
             VStack(alignment: .leading, spacing: 1) {

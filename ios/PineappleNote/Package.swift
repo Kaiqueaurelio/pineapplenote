@@ -17,6 +17,11 @@ let package = Package(
         .target(
             name: "PineappleNote",
             path: "Sources/PineappleNote"
+        ),
+        .testTarget(
+            name: "PineappleNoteTests",
+            dependencies: ["PineappleNote"],
+            path: "Tests/PineappleNoteTests"
         )
     ]
 )
