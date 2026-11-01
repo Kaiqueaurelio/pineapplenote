@@ -1,0 +1,70 @@
+name: iOS Simulator smoke test
+
+on:
+  push:
+    branches:
+      - feature/ios-native-swiftui
+    paths:
+      - "ios/PineappleNote/**"
+      - ".github/workflows/ios-simulator-smoke.yml"
+  pull_request:
+    paths:
+      - "ios/PineappleNote/**"
+      - ".github/workflows/ios-simulator-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  simulator:
+    name: Launch on iPhone Simulator
+    runs-on: xcode-27
+    timeout-minutes: 35
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Install xtool
+        run: brew install xtool-org/tap/xtool
+
+      - name: Find and boot an iPhone simulator
+        id: simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEVICE_UDID="$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)
+          devices = [device for group in data["devices"].values() for device in group
+                     if device.get("isAvailable") and device.get("name", "").startswith("iPhone")]
+          print(devices[0]["udid"] if devices else "")
+          ')"
+          if [[ -z "$DEVICE_UDID" ]]; then
+            echo "No available iPhone simulator was found on this runner."
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "Using simulator $DEVICE_UDID"
+          xcrun simctl boot "$DEVICE_UDID" || true
+          xcrun simctl bootstatus "$DEVICE_UDID" -b
+          echo "udid=$DEVICE_UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Build and install app in simulator
+        working-directory: ios/PineappleNote
+        run: xtool dev run --simulator --configuration debug
+
+      - name: Launch Pineapple Note
+        run: |
+          set -euo pipefail
+          xcrun simctl launch "${{ steps.simulator.outputs.udid }}" com.decodeanalytics.pineapplenote
+          sleep 5
+          xcrun simctl io "${{ steps.simulator.outputs.udid }}" screenshot "$RUNNER_TEMP/PineappleNote-iOS-simulator.png"
+
+      - name: Upload simulator screenshot
+        uses: actions/upload-artifact@v6
+        with:
+          name: PineappleNote-iOS-simulator-preview
+          path: ${{ runner.temp }}/PineappleNote-iOS-simulator.png
+          if-no-files-found: error
+          retention-days: 7
