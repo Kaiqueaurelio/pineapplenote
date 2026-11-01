@@ -70,7 +70,7 @@ struct StudyToolsView: View {
                     }
                     .buttonStyle(.plain)
 
-                    Text("Importação, flashcards e simulados funcionam localmente. Os recursos de IA serão conectados ao servidor existente; nenhuma chave de provedor será armazenada no iPhone.")
+                    Text("Materiais, flashcards e simulados funcionam localmente. Resumos e chat serão conectados ao servidor seguro; nenhuma chave de IA ficará no iPhone.")
                         .font(.system(size: 11))
                         .foregroundStyle(PineapplePalette.muted)
                         .padding(.top, 5)
