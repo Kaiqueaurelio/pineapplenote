@@ -45,6 +45,7 @@ private final class StudySpeechController: NSObject, ObservableObject, AVSpeechS
 }
 
 struct StudyPodcastView: View {
+    @Environment(\.dismiss) private var dismiss
     @ObservedObject var store: StudyStore
     @StateObject private var speech = StudySpeechController()
     @State private var selectedNoteID: UUID?
@@ -74,7 +75,7 @@ struct StudyPodcastView: View {
                         title: "Nenhuma anotação disponível",
                         message: "Crie uma anotação para começar a ouvir seu conteúdo.",
                         actionTitle: "Voltar às ferramentas"
-                    ) {}
+                    ) { dismiss() }
                 } else {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Escolha uma anotação")

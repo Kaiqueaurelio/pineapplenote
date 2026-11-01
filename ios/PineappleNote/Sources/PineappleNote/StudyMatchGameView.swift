@@ -1,6 +1,6 @@
 import SwiftUI
 
-private enum MatchCardSide {
+private enum MatchCardSide: Equatable {
     case question
     case answer
 }
@@ -13,6 +13,7 @@ private struct MatchGameCard: Identifiable {
 }
 
 struct StudyMatchGameView: View {
+    @Environment(\.dismiss) private var dismiss
     @ObservedObject var store: StudyStore
     @State private var cards: [MatchGameCard] = []
     @State private var selectedCardIDs: [UUID] = []
@@ -51,7 +52,7 @@ struct StudyMatchGameView: View {
                         title: "Crie flashcards primeiro",
                         message: "O jogo usa os cartões que você já cadastrou. Crie pelo menos um par de pergunta e resposta para começar.",
                         actionTitle: "Voltar às ferramentas"
-                    ) {}
+                    ) { dismiss() }
                 } else {
                     HStack(spacing: 10) {
                         scoreTile(title: "Jogadas", value: "\(moves)", icon: "hand.tap")
