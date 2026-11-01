@@ -29,12 +29,33 @@ final class StudyStoreTests: XCTestCase {
             let store = StudyStore(defaults: defaults)
             let card = StudyFlashcard(question: "O que é Swift?", answer: "Uma linguagem.")
             store.save(card)
-            store.markReviewed(card)
+            store.markReviewed(card, remembered: true)
 
             let reopenedStore = StudyStore(defaults: defaults)
             XCTAssertEqual(reopenedStore.flashcards.first?.id, card.id)
             XCTAssertEqual(reopenedStore.flashcards.first?.reviewCount, 1)
             XCTAssertNotNil(reopenedStore.flashcards.first?.lastReviewedAt)
+            XCTAssertEqual(reopenedStore.flashcards.first?.correctStreak, 1)
+            XCTAssertNotNil(reopenedStore.flashcards.first?.nextReviewAt)
+        }
+    }
+
+
+    func testForgottenFlashcardIsScheduledForQuickReview() async {
+        await MainActor.run {
+            let store = StudyStore(defaults: Self.makeDefaults())
+            let card = StudyFlashcard(question: "Pergunta", answer: "Resposta")
+            store.save(card)
+            store.markReviewed(card, remembered: false)
+
+            let reviewedCard = store.flashcards.first
+            XCTAssertEqual(reviewedCard?.reviewCount, 1)
+            XCTAssertEqual(reviewedCard?.correctStreak, 0)
+            XCTAssertNotNil(reviewedCard?.nextReviewAt)
+            if let nextReviewAt = reviewedCard?.nextReviewAt {
+                let minutes = Calendar.current.dateComponents([.minute], from: .now, to: nextReviewAt).minute ?? 0
+                XCTAssertTrue((9...10).contains(minutes))
+            }
         }
     }
 

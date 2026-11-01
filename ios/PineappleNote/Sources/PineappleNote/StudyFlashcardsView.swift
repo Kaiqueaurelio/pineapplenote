@@ -7,6 +7,13 @@ struct FlashcardsView: View {
     @State private var showingEditor = false
     @State private var editingCard: StudyFlashcard?
 
+    private var dueCount: Int {
+        store.flashcards.filter { card in
+            guard let nextReviewAt = card.nextReviewAt else { return true }
+            return nextReviewAt <= .now
+        }.count
+    }
+
     private var activeCard: StudyFlashcard? {
         if let currentCardID,
            let matching = store.flashcards.first(where: { $0.id == currentCardID }) {
@@ -27,7 +34,7 @@ struct FlashcardsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Flashcards")
                             .font(.system(size: 27, weight: .bold, design: .rounded))
-                        Text("\(store.flashcards.count) cartões salvos neste iPhone")
+                        Text("\(store.flashcards.count) cartões • \(dueCount) para revisar")
                             .font(.system(size: 12))
                             .foregroundStyle(PineapplePalette.muted)
                     }
@@ -65,9 +72,16 @@ struct FlashcardsView: View {
                     .buttonStyle(.bordered)
                     .tint(PineapplePalette.green)
 
-                    Text("Este cartão já foi revisado \(card.reviewCount) vez(es).")
-                        .font(.system(size: 11))
-                        .foregroundStyle(PineapplePalette.muted)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Revisões: \(card.reviewCount) • sequência correta: \(card.correctStreak ?? 0)")
+                        if let nextReviewAt = card.nextReviewAt {
+                            Text("Próxima revisão: \(nextReviewAt.formatted(date: .abbreviated, time: .shortened))")
+                        } else {
+                            Text("Ainda não revisado")
+                        }
+                    }
+                    .font(.system(size: 11))
+                    .foregroundStyle(PineapplePalette.muted)
                 } else {
                     EmptyStudyState(
                         icon: "rectangle.on.rectangle.angled",
@@ -154,18 +168,40 @@ struct FlashcardsView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             Spacer(minLength: 22)
 
-            Button {
-                if !showingAnswer {
-                    store.markReviewed(card)
+            if showingAnswer {
+                HStack(spacing: 10) {
+                    Button {
+                        rate(card, remembered: false)
+                    } label: {
+                        Label("Preciso revisar", systemImage: "arrow.counterclockwise")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(PineapplePalette.green)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 13)
+                            .background(PineapplePalette.lime.opacity(0.55), in: Capsule())
+                    }
+                    Button {
+                        rate(card, remembered: true)
+                    } label: {
+                        Label("Lembrei!", systemImage: "checkmark")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 13)
+                            .background(PineapplePalette.green, in: Capsule())
+                    }
                 }
-                showingAnswer.toggle()
-            } label: {
-                Label(showingAnswer ? "Voltar à pergunta" : "Mostrar resposta", systemImage: "eye")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                    .background(PineapplePalette.green, in: Capsule())
+            } else {
+                Button {
+                    showingAnswer = true
+                } label: {
+                    Label("Mostrar resposta", systemImage: "eye")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(PineapplePalette.green, in: Capsule())
+                }
             }
         }
         .padding(22)
@@ -178,6 +214,11 @@ struct FlashcardsView: View {
                 .padding(18)
                 .allowsHitTesting(false)
         }
+    }
+
+    private func rate(_ card: StudyFlashcard, remembered: Bool) {
+        store.markReviewed(card, remembered: remembered)
+        move(by: 1)
     }
 
     private func move(by offset: Int) {
@@ -243,7 +284,9 @@ private struct FlashcardEditorSheet: View {
                             subject: cleanSubject.isEmpty ? "Geral" : cleanSubject,
                             createdAt: existingCard?.createdAt ?? .now,
                             reviewCount: existingCard?.reviewCount ?? 0,
-                            lastReviewedAt: existingCard?.lastReviewedAt
+                            lastReviewedAt: existingCard?.lastReviewedAt,
+                            correctStreak: existingCard?.correctStreak ?? 0,
+                            nextReviewAt: existingCard?.nextReviewAt
                         ))
                         dismiss()
                     }

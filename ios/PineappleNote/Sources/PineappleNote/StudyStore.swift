@@ -84,10 +84,22 @@ final class StudyStore: ObservableObject {
         persist(flashcards, forKey: flashcardsKey)
     }
 
-    func markReviewed(_ flashcard: StudyFlashcard) {
+    func markReviewed(_ flashcard: StudyFlashcard, remembered: Bool) {
         guard let index = flashcards.firstIndex(where: { $0.id == flashcard.id }) else { return }
         flashcards[index].reviewCount += 1
         flashcards[index].lastReviewedAt = .now
+
+        if remembered {
+            let streak = (flashcards[index].correctStreak ?? 0) + 1
+            flashcards[index].correctStreak = streak
+            let intervalsInDays = [1, 3, 7, 14, 30]
+            let days = intervalsInDays[min(streak - 1, intervalsInDays.count - 1)]
+            flashcards[index].nextReviewAt = Calendar.current.date(byAdding: .day, value: days, to: .now)
+        } else {
+            flashcards[index].correctStreak = 0
+            flashcards[index].nextReviewAt = Calendar.current.date(byAdding: .minute, value: 10, to: .now)
+        }
+
         persist(flashcards, forKey: flashcardsKey)
     }
 

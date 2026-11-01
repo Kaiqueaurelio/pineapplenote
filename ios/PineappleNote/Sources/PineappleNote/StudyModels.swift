@@ -39,6 +39,8 @@ struct StudyFlashcard: Identifiable, Codable, Equatable {
     var createdAt: Date
     var reviewCount: Int
     var lastReviewedAt: Date?
+    var correctStreak: Int?
+    var nextReviewAt: Date?
 
     init(
         id: UUID = UUID(),
@@ -47,7 +49,9 @@ struct StudyFlashcard: Identifiable, Codable, Equatable {
         subject: String = "Geral",
         createdAt: Date = .now,
         reviewCount: Int = 0,
-        lastReviewedAt: Date? = nil
+        lastReviewedAt: Date? = nil,
+        correctStreak: Int? = 0,
+        nextReviewAt: Date? = nil
     ) {
         self.id = id
         self.question = question
@@ -56,6 +60,8 @@ struct StudyFlashcard: Identifiable, Codable, Equatable {
         self.createdAt = createdAt
         self.reviewCount = reviewCount
         self.lastReviewedAt = lastReviewedAt
+        self.correctStreak = correctStreak
+        self.nextReviewAt = nextReviewAt
     }
 }
 
