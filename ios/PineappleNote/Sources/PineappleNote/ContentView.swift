@@ -90,6 +90,9 @@ struct ContentView: View {
                             ForEach(store.notes.prefix(4)) { note in
                                 NoteRow(note: note) { open(note) }
                                     .contextMenu {
+                                        ShareLink(item: note.exportText) {
+                                            Label("Compartilhar anotação", systemImage: "square.and.arrow.up")
+                                        }
                                         Button(role: .destructive) { store.delete(note) } label: {
                                             Label("Excluir anotação", systemImage: "trash")
                                         }
@@ -239,6 +242,9 @@ struct ContentView: View {
                         ForEach(filteredNotes) { note in
                             NoteRow(note: note) { open(note) }
                                 .contextMenu {
+                                    ShareLink(item: note.exportText) {
+                                        Label("Compartilhar anotação", systemImage: "square.and.arrow.up")
+                                    }
                                     Button(role: .destructive) { store.delete(note) } label: {
                                         Label("Excluir", systemImage: "trash")
                                     }
@@ -288,7 +294,7 @@ struct ContentView: View {
                     Label("Backup e restauração", systemImage: "externaldrive.fill")
                         .foregroundStyle(PineapplePalette.green)
                 }
-                                Label("Sincronização em nuvem: em desenvolvimento", systemImage: "icloud")
+                Label("Sincronização em nuvem: em desenvolvimento", systemImage: "icloud")
                 Label("Pineapple Note • Gratuito", systemImage: "heart.fill").foregroundStyle(PineapplePalette.green)
                 Text("O Pineapple Note não terá assinatura obrigatória nem bloqueio de funcionalidades por plano.")
                     .font(.system(size: 12))

@@ -19,6 +19,16 @@ struct StudyNote: Identifiable, Codable, Equatable {
         let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? "Toque para adicionar suas anotações." : trimmed
     }
+
+    var exportText: String {
+        """
+        \(title)
+        Matéria: \(subject)
+        Atualizada em: \(updatedAt.formatted(date: .long, time: .shortened))
+
+        \(body)
+        """
+    }
 }
 
 struct StudyFlashcard: Identifiable, Codable, Equatable {
