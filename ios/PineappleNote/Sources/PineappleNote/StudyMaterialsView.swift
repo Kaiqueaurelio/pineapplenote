@@ -64,7 +64,7 @@ struct StudyMaterialsView: View {
                         Text("Importar materiais")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(PineapplePalette.ink)
-                        Text("PDF, áudio, vídeo, imagens e documentos de texto")
+                        Text("PDF, Word, planilhas, apresentações, áudio, vídeo e imagens")
                             .font(.system(size: 11))
                             .foregroundStyle(PineapplePalette.muted)
                             .multilineTextAlignment(.center)
@@ -139,7 +139,7 @@ struct StudyMaterialsView: View {
                     }
                 }
 
-                Text("Os arquivos são copiados para o armazenamento privado do aplicativo. Nesta versão, a importação e a abertura são locais; envio para a nuvem, transcrição e geração automática de conteúdo ainda serão integrados.")
+                Text("Os arquivos são copiados para o armazenamento privado do aplicativo. A pré-visualização depende do suporte do iOS ao formato. Nesta versão, importação e abertura são locais; envio para a nuvem, transcrição e geração automática de conteúdo ainda serão integrados.")
                     .font(.system(size: 11))
                     .foregroundStyle(PineapplePalette.muted)
             }
@@ -150,7 +150,7 @@ struct StudyMaterialsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .fileImporter(
             isPresented: $showingImporter,
-            allowedContentTypes: [.pdf, .audio, .movie, .image, .text],
+            allowedContentTypes: [.pdf, .audio, .movie, .image, .text, .item],
             allowsMultipleSelection: true
         ) { result in
             switch result {
