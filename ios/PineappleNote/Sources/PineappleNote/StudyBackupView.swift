@@ -31,9 +31,9 @@ struct StudyBackupView: View {
     @State private var showingAlert = false
 
     private var fileName: String {
-        "pineapple-backup-" + Date.now.formatted(
-            .iso8601.year().month().day().dateSeparator(.dash)
-        )
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return "pineapple-backup-\(formatter.string(from: .now))"
     }
 
     var body: some View {
