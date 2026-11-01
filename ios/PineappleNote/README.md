@@ -50,7 +50,7 @@ A versão SwiftUI está sendo desenvolvida isoladamente em `feature/ios-native-s
 - Anotações com criação, edição, exclusão, pesquisa e compartilhamento em texto.
 - Biblioteca local de PDFs, documentos, imagens, áudio e vídeo, com pré-visualização suportada pelo iOS.
 - Gravação de aulas em M4A, com solicitação de permissão e suporte à gravação em segundo plano.
-- Flashcards com autoavaliação e repetição espaçada (10 minutos quando precisa revisar; 1, 3, 7, 14 e 30 dias conforme a sequência de acertos).
+- Flashcards com autoavaliação e repetição espaçada (10 minutos quando precisa revisar; 1, 3, 7, 14 e 30 dias conforme a sequência de acertos).\n- Jogo Card Match offline, que associa perguntas e respostas dos flashcards.\n- Leitura em voz alta de anotações em português brasileiro usando o sintetizador nativo do iOS.\n- Pesquisa de materiais por nome, tipo e extensão.
 - Questões de múltipla escolha, simulados e histórico de resultados.
 - Backup JSON versionado de anotações, flashcards, questões e tentativas de simulados.
 
