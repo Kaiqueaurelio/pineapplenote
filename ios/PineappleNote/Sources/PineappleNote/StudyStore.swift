@@ -19,21 +19,25 @@ final class StudyStore: ObservableObject {
     private let materialsKey = "pineapple.local-materials.v1"
     private let materialsFolder = "StudyMaterials"
 
+    private static let welcomeNotes = [
+        StudyNote(
+            id: UUID(uuidString: "00000000-0000-4000-8000-000000000001")!,
+            title: "Bem-vindo ao Pineapple!",
+            body: "Este é seu espaço de estudos. Crie sua primeira anotação, organize suas ideias e monte seus materiais de revisão.",
+            subject: "Comece aqui"
+        ),
+        StudyNote(
+            id: UUID(uuidString: "00000000-0000-4000-8000-000000000002")!,
+            title: "Como estudar melhor",
+            body: "• Divida assuntos grandes em pequenas partes.\n• Faça revisões espaçadas.\n• Explique o conteúdo com suas próprias palavras.",
+            subject: "Métodos de estudo"
+        )
+    ]
+
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
 
-        let welcomeNotes = [
-            StudyNote(
-                title: "Bem-vindo ao Pineapple!",
-                body: "Este é seu espaço de estudos. Crie sua primeira anotação, organize suas ideias e monte seus materiais de revisão.",
-                subject: "Comece aqui"
-            ),
-            StudyNote(
-                title: "Como estudar melhor",
-                body: "• Divida assuntos grandes em pequenas partes.\n• Faça revisões espaçadas.\n• Explique o conteúdo com suas próprias palavras.",
-                subject: "Métodos de estudo"
-            )
-        ]
+        let welcomeNotes = Self.welcomeNotes
 
         notes = Self.loadNotes(
             from: defaults,

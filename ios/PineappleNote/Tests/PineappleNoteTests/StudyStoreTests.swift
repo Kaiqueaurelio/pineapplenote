@@ -79,6 +79,21 @@ final class StudyStoreTests: XCTestCase {
         }
     }
 
+    func testRestoringBackupOnFreshInstallDoesNotDuplicateWelcomeNotes() async throws {
+        try await MainActor.run {
+            let source = StudyStore(defaults: Self.makeDefaults())
+            let backup = try source.makeBackupData()
+
+            let destination = StudyStore(defaults: Self.makeDefaults())
+            let originalWelcomeCount = destination.notes.count
+            try destination.restoreBackup(from: backup)
+
+            XCTAssertEqual(destination.notes.count, originalWelcomeCount)
+            XCTAssertEqual(destination.notes.filter { $0.title == "Bem-vindo ao Pineapple!" }.count, 1)
+            XCTAssertEqual(destination.notes.filter { $0.title == "Como estudar melhor" }.count, 1)
+        }
+    }
+
     func testBackupRestoreMergesWithoutDuplicatingExistingNotes() async throws {
         try await MainActor.run {
             let defaults = makeDefaults()
