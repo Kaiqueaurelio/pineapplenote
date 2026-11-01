@@ -190,7 +190,7 @@ struct StudyMaterialsView: View {
                         }
                         .buttonStyle(.plain)
                         .contextMenu {
-                            if material.kind == .pdf || material.kind == .text {
+                            if material.kind == .pdf || material.kind == .text || material.kind == .image {
                                 Button {
                                     do {
                                         let note = try store.createNoteFromMaterial(material)
@@ -211,7 +211,7 @@ struct StudyMaterialsView: View {
                     }
                 }
 
-                Text("Os arquivos são copiados para o armazenamento privado do aplicativo. A pré-visualização depende do suporte do iOS ao formato. PDFs com texto selecionável e arquivos de texto também podem virar anotações offline pelo menu de contexto. PDFs escaneados, transcrição, envio para a nuvem e geração automática ainda dependem de OCR/IA e do backend.")
+                Text("Os arquivos são copiados para o armazenamento privado do aplicativo. A pré-visualização depende do suporte do iOS ao formato. PDFs com texto selecionável, imagens com texto legível e arquivos de texto podem virar anotações offline pelo menu de contexto. PDFs escaneados, transcrição de áudio, envio para a nuvem e geração automática ainda dependem de processamento adicional e do backend.")
                     .font(.system(size: 11))
                     .foregroundStyle(PineapplePalette.muted)
             }

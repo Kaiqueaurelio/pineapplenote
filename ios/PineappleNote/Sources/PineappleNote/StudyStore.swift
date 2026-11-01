@@ -1,5 +1,6 @@
 import Foundation
 import PDFKit
+import Vision
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -323,7 +324,7 @@ final class StudyStore: ObservableObject {
 
 
     func createNoteFromMaterial(_ material: StudyMaterial) throws -> StudyNote {
-        guard material.kind == .pdf || material.kind == .text else {
+        guard material.kind == .pdf || material.kind == .text || material.kind == .image else {
             throw StudyMaterialStoreError.unsupportedTextExtraction
         }
         guard let url = localURL(for: material) else {
@@ -341,8 +342,26 @@ final class StudyStore: ObservableObject {
             extractedText = (0..<document.pageCount)
                 .compactMap { document.page(at: $0)?.string }
                 .joined(separator: "\\n\\n")
-        } else {
+        } else if material.kind == .text {
             extractedText = try String(contentsOf: url, encoding: .utf8)
+        } else {
+            let request = VNRecognizeTextRequest()
+            request.recognitionLevel = .accurate
+            request.usesLanguageCorrection = true
+            let supportedLanguages = try VNRecognizeTextRequest.supportedRecognitionLanguages(
+                for: request.recognitionLevel,
+                revision: request.revision
+            )
+            let preferredLanguages = ["pt-BR", "en-US"]
+            let availableLanguages = preferredLanguages.filter { supportedLanguages.contains($0) }
+            if !availableLanguages.isEmpty {
+                request.recognitionLanguages = availableLanguages
+            }
+            let handler = VNImageRequestHandler(url: url, options: [:])
+            try handler.perform([request])
+            extractedText = (request.results ?? [])
+                .compactMap { $0.topCandidates(1).first?.string }
+                .joined(separator: "\\n")
         }
 
         let cleanText = extractedText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -470,7 +489,7 @@ enum StudyMaterialStoreError: LocalizedError {
         case .duplicateWebLink:
             return "Este link já está salvo na sua biblioteca."
         case .unsupportedTextExtraction:
-            return "A extração offline está disponível para PDFs e arquivos de texto."
+            return "A extração offline está disponível para PDFs, imagens e arquivos de texto."
         case .couldNotReadPDF:
             return "Não foi possível abrir este PDF."
         case .extractedTextEmpty:
