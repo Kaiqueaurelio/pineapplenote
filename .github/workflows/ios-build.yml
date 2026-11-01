@@ -1,0 +1,66 @@
+name: iOS build (xtool)
+
+on:
+  push:
+    branches:
+      - feature/ios-native-swiftui
+    paths:
+      - "ios/PineappleNote/**"
+      - ".github/workflows/ios-build.yml"
+  pull_request:
+    paths:
+      - "ios/PineappleNote/**"
+      - ".github/workflows/ios-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-ios:
+    name: Build unsigned iOS app
+    runs-on: xcode-27
+    timeout-minutes: 35
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Show Apple toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+          xcrun -sdk iphoneos -show-sdk-path
+
+      - name: Install xtool
+        run: brew install xtool-org/tap/xtool
+
+      - name: Build iOS app without signing
+        working-directory: ios/PineappleNote
+        shell: bash
+        run: |
+          set -o pipefail
+          xtool dev build --configuration debug 2>&1 | tee "$RUNNER_TEMP/xtool-build.log"
+
+      - name: Locate and package the app
+        id: app
+        working-directory: ios/PineappleNote
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_PATH="$(sed -n 's/^Wrote to //p' "$RUNNER_TEMP/xtool-build.log" | tail -n 1)"
+          if [[ -z "$APP_PATH" ]]; then
+            APP_PATH="$(find .build -type d -name '*.app' -print -quit)"
+          fi
+          test -n "$APP_PATH"
+          test -d "$APP_PATH"
+          echo "Found app bundle: $APP_PATH"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$RUNNER_TEMP/PineappleNote-iOS-unsigned.zip"
+          echo "artifact=$RUNNER_TEMP/PineappleNote-iOS-unsigned.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Upload unsigned app artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: PineappleNote-iOS-unsigned
+          path: ${{ steps.app.outputs.artifact }}
+          if-no-files-found: error
+          retention-days: 7
