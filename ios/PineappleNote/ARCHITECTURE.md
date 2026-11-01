@@ -16,7 +16,7 @@
 - Migração dos dados salvos na chave anterior `pineapple.local-notes.v1`.
 - Os exemplos são inicializados somente no primeiro uso; apagar todas as anotações não os recria.
 
-### Gravação de áudio local\n- Gravação AAC em contêiner M4A com AVAudioRecorder.\n- Solicitação explícita da permissão de microfone do iOS.\n- Áudio salvo na pasta privada StudyMaterials e registrado na biblioteca local.\n- Nenhum áudio é enviado automaticamente para a nuvem.\n\n### Materiais e arquivos locais
+### Gravação de áudio local\n- Gravação AAC em contêiner M4A com AVAudioRecorder.\n- Solicitação explícita da permissão de microfone do iOS.\n- Modo de áudio em segundo plano habilitado para permitir gravação com tela bloqueada; interrupções do iOS ainda podem ocorrer.\n- Áudio salvo na pasta privada StudyMaterials e registrado na biblioteca local.\n- Nenhum áudio é enviado automaticamente para a nuvem.\n\n### Materiais e arquivos locais
 - Importação pelo seletor nativo de arquivos do iOS.
 - Tipos aceitos: PDF, áudio, vídeo, imagem e texto.
 - Cópia para o diretório privado do aplicativo, com metadados persistidos.

@@ -12,7 +12,7 @@ Aplicativo iOS nativo em SwiftUI, estruturado como pacote SwiftPM para desenvolv
 
 As funcionalidades precisam passar por compilação e testes no iPhone antes de serem consideradas validadas.
 
-## Gravação de aulas\n\nA gravação nativa usa o microfone apenas após ação explícita do estudante e consentimento do iOS. Os áudios são salvos na biblioteca local do aplicativo. A mensagem de privacidade do microfone está declarada no Info.plist.\n\n## Requisitos de desenvolvimento
+## Gravação de aulas\n\nA gravação nativa usa o microfone apenas após ação explícita do estudante e consentimento do iOS. Os áudios são salvos na biblioteca local do aplicativo. O modo de áudio em segundo plano permite continuar a gravação com a tela bloqueada, sujeito às interrupções do sistema. A mensagem de privacidade do microfone está declarada no Info.plist.\n\n## Requisitos de desenvolvimento
 - Linux com Swift 6.4.
 - xtool instalado e configurado.
 - SDK iOS preparado a partir de um Xcode.xip obtido no portal oficial Apple Developer.
