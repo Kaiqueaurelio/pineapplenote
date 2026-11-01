@@ -50,6 +50,32 @@ jobs:
           xcrun simctl bootstatus "$DEVICE_UDID" -b
           echo "udid=$DEVICE_UDID" >> "$GITHUB_OUTPUT"
 
+      - name: Run native iOS unit tests
+        working-directory: ios/PineappleNote
+        shell: bash
+        run: |
+          set -euo pipefail
+          SCHEME="$(xcodebuild -list -json | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)
+          schemes = data.get("workspace", {}).get("schemes", [])
+          if not schemes:
+              schemes = data.get("project", {}).get("schemes", [])
+          candidates = [name for name in schemes if name.endswith("-Package")]
+          print(candidates[0] if candidates else (schemes[0] if schemes else ""))
+          ')"
+          if [[ -z "$SCHEME" ]]; then
+            echo "Could not find a Swift package test scheme."
+            xcodebuild -list
+            exit 1
+          fi
+          echo "Testing scheme: $SCHEME"
+          xcodebuild test \
+            -scheme "$SCHEME" \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}" \
+            -derivedDataPath "$RUNNER_TEMP/PineappleNoteTestBuild" \
+            CODE_SIGNING_ALLOWED=NO
+
       - name: Build and install app in simulator
         working-directory: ios/PineappleNote
         run: xtool dev run --simulator --configuration debug
