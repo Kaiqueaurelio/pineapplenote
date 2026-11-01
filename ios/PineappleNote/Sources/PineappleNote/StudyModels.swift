@@ -105,6 +105,7 @@ enum StudyMaterialKind: String, Codable {
     case video
     case image
     case text
+    case link
     case other
 
     var title: String {
@@ -114,6 +115,7 @@ enum StudyMaterialKind: String, Codable {
         case .video: "Vídeo"
         case .image: "Imagem"
         case .text: "Texto"
+        case .link: "Link"
         case .other: "Arquivo"
         }
     }
@@ -125,6 +127,7 @@ enum StudyMaterialKind: String, Codable {
         case .video: "video.fill"
         case .image: "photo.fill"
         case .text: "doc.plaintext"
+        case .link: "link"
         case .other: "doc.fill"
         }
     }
@@ -138,6 +141,7 @@ struct StudyMaterial: Identifiable, Codable, Equatable {
     var fileExtension: String
     var sizeInBytes: Int64
     var importedAt: Date
+    var sourceURL: String?
 
     init(
         id: UUID = UUID(),
@@ -146,7 +150,8 @@ struct StudyMaterial: Identifiable, Codable, Equatable {
         kind: StudyMaterialKind,
         fileExtension: String,
         sizeInBytes: Int64,
-        importedAt: Date = .now
+        importedAt: Date = .now,
+        sourceURL: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -155,6 +160,7 @@ struct StudyMaterial: Identifiable, Codable, Equatable {
         self.fileExtension = fileExtension
         self.sizeInBytes = sizeInBytes
         self.importedAt = importedAt
+        self.sourceURL = sourceURL
     }
 }
 

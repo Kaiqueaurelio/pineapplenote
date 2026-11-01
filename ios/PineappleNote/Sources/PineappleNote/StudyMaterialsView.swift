@@ -5,9 +5,11 @@ import UniformTypeIdentifiers
 struct StudyMaterialsView: View {
     @ObservedObject var store: StudyStore
     @State private var showingImporter = false
+    @State private var showingLinkEditor = false
     @State private var previewURL: URL?
     @State private var importError: String?
     @State private var searchText = ""
+    @Environment(\.openURL) private var openURL
 
     private var filteredMaterials: [StudyMaterial] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -15,7 +17,8 @@ struct StudyMaterialsView: View {
         return store.materials.filter {
             $0.name.localizedCaseInsensitiveContains(query) ||
             $0.kind.title.localizedCaseInsensitiveContains(query) ||
-            $0.fileExtension.localizedCaseInsensitiveContains(query)
+            $0.fileExtension.localizedCaseInsensitiveContains(query) ||
+            ($0.sourceURL?.localizedCaseInsensitiveContains(query) ?? false)
         }
     }
 
@@ -119,6 +122,15 @@ struct StudyMaterialsView: View {
 
                     ForEach(filteredMaterials) { material in
                         Button {
+                            if material.kind == .link {
+                                guard let rawURL = material.sourceURL,
+                                      let url = URL(string: rawURL) else {
+                                    importError = "Este link não contém um endereço válido."
+                                    return
+                                }
+                                openURL(url)
+                                return
+                            }
                             guard let url = store.localURL(for: material),
                                   FileManager.default.fileExists(atPath: url.path) else {
                                 importError = "Este arquivo não foi encontrado no armazenamento local."
@@ -189,6 +201,15 @@ struct StudyMaterialsView: View {
                 importError = error.localizedDescription
             }
         }
+        .sheet(isPresented: $showingLinkEditor) {
+            StudyLinkEditorSheet { title, url in
+                do {
+                    try store.addWebLink(url, displayName: title)
+                } catch {
+                    importError = error.localizedDescription
+                }
+            }
+        }
         .quickLookPreview($previewURL)
         .alert("Não foi possível abrir ou importar", isPresented: Binding(
             get: { importError != nil },
@@ -197,6 +218,70 @@ struct StudyMaterialsView: View {
             Button("OK", role: .cancel) { importError = nil }
         } message: {
             Text(importError ?? "Ocorreu um erro desconhecido.")
+        }
+    }
+}
+
+private struct StudyLinkEditorSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var title = ""
+    @State private var address = ""
+    @State private var validationMessage: String?
+    let onSave: (String, URL) -> Void
+
+    private var validatedURL: URL? {
+        guard let components = URLComponents(string: address.trimmingCharacters(in: .whitespacesAndNewlines)),
+              let scheme = components.scheme?.lowercased(),
+              ["http", "https"].contains(scheme),
+              let host = components.host,
+              !host.isEmpty else { return nil }
+        return components.url
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Endereço da página") {
+                    TextField("https://exemplo.com/aula", text: $address)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                }
+                Section("Nome (opcional)") {
+                    TextField("Ex.: Aula de biologia", text: $title)
+                }
+                if let validationMessage {
+                    Section {
+                        Text(validationMessage)
+                            .font(.system(size: 12))
+                            .foregroundStyle(.red)
+                    }
+                }
+                Section {
+                    Text("O link será salvo na biblioteca e aberto no navegador. A importação e o resumo automático do conteúdo online serão conectados ao servidor em uma etapa futura.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(PineapplePalette.muted)
+                }
+            }
+            .navigationTitle("Adicionar link")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancelar") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Salvar") {
+                        guard let url = validatedURL else {
+                            validationMessage = "Informe um endereço http ou https válido."
+                            return
+                        }
+                        onSave(title, url)
+                        dismiss()
+                    }
+                    .fontWeight(.bold)
+                    .disabled(validatedURL == nil)
+                }
+            }
         }
     }
 }

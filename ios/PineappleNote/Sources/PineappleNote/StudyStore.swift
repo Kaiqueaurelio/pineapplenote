@@ -224,6 +224,32 @@ final class StudyStore: ObservableObject {
         persist(quizAttempts, forKey: quizAttemptsKey)
     }
 
+    func addWebLink(_ url: URL, displayName: String) throws {
+        guard let scheme = url.scheme?.lowercased(),
+              ["http", "https"].contains(scheme),
+              let host = url.host,
+              !host.isEmpty else {
+            throw StudyMaterialStoreError.invalidWebLink
+        }
+
+        let normalizedURL = url.absoluteString
+        guard !materials.contains(where: { $0.sourceURL == normalizedURL }) else {
+            throw StudyMaterialStoreError.duplicateWebLink
+        }
+
+        let cleanName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let material = StudyMaterial(
+            name: cleanName.isEmpty ? host : cleanName,
+            relativePath: "",
+            kind: .link,
+            fileExtension: "url",
+            sizeInBytes: 0,
+            sourceURL: normalizedURL
+        )
+        materials.insert(material, at: 0)
+        persist(materials, forKey: materialsKey)
+    }
+
     func importMaterial(from sourceURL: URL) throws {
         let didStartAccess = sourceURL.startAccessingSecurityScopedResource()
         defer {
@@ -305,6 +331,7 @@ final class StudyStore: ObservableObject {
     }
 
     func localURL(for material: StudyMaterial) -> URL? {
+        guard material.kind != .link, !material.relativePath.isEmpty else { return nil }
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documentsURL.appendingPathComponent(material.relativePath)
         return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
@@ -366,6 +393,8 @@ final class StudyStore: ObservableObject {
 enum StudyMaterialStoreError: LocalizedError {
     case fileOutsideLibrary
     case fileNotFound
+    case invalidWebLink
+    case duplicateWebLink
 
     var errorDescription: String? {
         switch self {
@@ -373,6 +402,10 @@ enum StudyMaterialStoreError: LocalizedError {
             return "A gravação precisa estar dentro da biblioteca do Pineapple Note."
         case .fileNotFound:
             return "O arquivo da gravação não foi encontrado."
+        case .invalidWebLink:
+            return "Informe um endereço web válido começando com http:// ou https://."
+        case .duplicateWebLink:
+            return "Este link já está salvo na sua biblioteca."
         }
     }
 }
