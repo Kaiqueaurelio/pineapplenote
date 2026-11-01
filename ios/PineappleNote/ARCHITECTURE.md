@@ -23,7 +23,7 @@
 - Pré-visualização com Quick Look e exclusão de arquivos importados.
 - Abertura e importação são locais; upload, transcrição e IA ainda não estão ligados.
 
-### Flashcards offline
+### Backup local\n- Exportação JSON versionada de anotações, flashcards e questões.\n- Restauração com mesclagem por UUID e validação básica de versão/tamanho.\n- Arquivos de mídia não são incorporados ao JSON; permanecem no armazenamento local.\n\n### Flashcards offline
 - Criar, editar e excluir cartões.
 - Pergunta, resposta e matéria/categoria.
 - Revisão com mostrar/ocultar resposta, navegação e contagem de revisões.

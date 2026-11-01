@@ -277,7 +277,13 @@ struct ContentView: View {
                 Label("Arquivos: \(store.materials.count)", systemImage: "folder")
                 Label("Flashcards: \(store.flashcards.count)", systemImage: "rectangle.on.rectangle")
                 Label("Questões: \(store.questions.count)", systemImage: "checkmark.circle")
-                Label("Sincronização em nuvem: em desenvolvimento", systemImage: "icloud")
+                NavigationLink {
+                    StudyBackupView(store: store)
+                } label: {
+                    Label("Backup e restauração", systemImage: "externaldrive.fill")
+                        .foregroundStyle(PineapplePalette.green)
+                }
+                                Label("Sincronização em nuvem: em desenvolvimento", systemImage: "icloud")
                 Label("Pineapple Note • Gratuito", systemImage: "heart.fill").foregroundStyle(PineapplePalette.green)
                 Text("O Pineapple Note não terá assinatura obrigatória nem bloqueio de funcionalidades por plano.")
                     .font(.system(size: 12))

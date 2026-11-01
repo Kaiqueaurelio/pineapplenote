@@ -7,7 +7,7 @@ Aplicativo iOS nativo em SwiftUI, estruturado como pacote SwiftPM para desenvolv
 - Materiais: importar PDF, áudio, vídeo, imagens e textos pelo seletor nativo; arquivos copiados para armazenamento local e abertos com Quick Look.
 - Flashcards: criar, editar, excluir, revisar e contar revisões.
 - Quiz e simulados: cadastrar perguntas de quatro alternativas, corrigir respostas e acompanhar pontuação.
-- Armazenamento local para uso offline.
+- Armazenamento local para uso offline.\n- Backup JSON de anotações, flashcards e questões, com restauração mesclada por identificador.\n- Gravação de aulas em segundo plano, com autorização do microfone.
 - Interface com abas Início, Biblioteca, Estudar e Perfil.
 
 As funcionalidades precisam passar por compilação e testes no iPhone antes de serem consideradas validadas.

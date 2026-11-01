@@ -102,6 +102,77 @@ final class StudyStore: ObservableObject {
         persist(questions, forKey: questionsKey)
     }
 
+
+    func makeBackupData() throws -> Data {
+        let backup = StudyBackup(
+            schemaVersion: 1,
+            exportedAt: .now,
+            notes: notes,
+            flashcards: flashcards,
+            questions: questions
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        return try encoder.encode(backup)
+    }
+
+    func restoreBackup(from data: Data) throws {
+        guard data.count <= 25 * 1024 * 1024 else {
+            throw StudyBackupError.fileTooLarge
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let backup = try decoder.decode(StudyBackup.self, from: data)
+
+        guard backup.schemaVersion == 1 else {
+            throw StudyBackupError.unsupportedVersion
+        }
+        guard backup.notes.count <= 10_000,
+              backup.flashcards.count <= 20_000,
+              backup.questions.count <= 20_000 else {
+            throw StudyBackupError.tooManyItems
+        }
+
+        var mergedNotes = notes
+        for item in backup.notes where !item.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if let index = mergedNotes.firstIndex(where: { $0.id == item.id }) {
+                mergedNotes[index] = item
+            } else {
+                mergedNotes.append(item)
+            }
+        }
+
+        var mergedFlashcards = flashcards
+        for item in backup.flashcards where
+            !item.question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !item.answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if let index = mergedFlashcards.firstIndex(where: { $0.id == item.id }) {
+                mergedFlashcards[index] = item
+            } else {
+                mergedFlashcards.append(item)
+            }
+        }
+
+        var mergedQuestions = questions
+        for item in backup.questions where item.hasValidAnswers &&
+            !item.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if let index = mergedQuestions.firstIndex(where: { $0.id == item.id }) {
+                mergedQuestions[index] = item
+            } else {
+                mergedQuestions.append(item)
+            }
+        }
+
+        notes = mergedNotes.sorted { $0.updatedAt > $1.updatedAt }
+        flashcards = mergedFlashcards.sorted { $0.createdAt > $1.createdAt }
+        questions = mergedQuestions.sorted { $0.createdAt > $1.createdAt }
+        persist(notes, forKey: notesKey)
+        persist(flashcards, forKey: flashcardsKey)
+        persist(questions, forKey: questionsKey)
+    }
+
     func importMaterial(from sourceURL: URL) throws {
         let didStartAccess = sourceURL.startAccessingSecurityScopedResource()
         defer {
@@ -251,6 +322,32 @@ enum StudyMaterialStoreError: LocalizedError {
             return "A gravação precisa estar dentro da biblioteca do Pineapple Note."
         case .fileNotFound:
             return "O arquivo da gravação não foi encontrado."
+        }
+    }
+}
+
+
+struct StudyBackup: Codable {
+    var schemaVersion: Int
+    var exportedAt: Date
+    var notes: [StudyNote]
+    var flashcards: [StudyFlashcard]
+    var questions: [StudyQuestion]
+}
+
+enum StudyBackupError: LocalizedError {
+    case fileTooLarge
+    case unsupportedVersion
+    case tooManyItems
+
+    var errorDescription: String? {
+        switch self {
+        case .fileTooLarge:
+            return "O arquivo de backup ultrapassa o limite de 25 MB."
+        case .unsupportedVersion:
+            return "Este backup foi criado por uma versão incompatível do Pineapple Note."
+        case .tooManyItems:
+            return "O backup contém mais itens do que o aplicativo aceita."
         }
     }
 }
