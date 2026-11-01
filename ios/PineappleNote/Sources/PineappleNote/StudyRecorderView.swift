@@ -83,29 +83,33 @@ struct StudyRecorderView: View {
         }
         .onDisappear {
             if recorder.isRecording {
-                _ = recorder.stopRecording()
+                finishAndSaveRecording()
             }
+        }
+    }
+
+    private func finishAndSaveRecording() {
+        guard let url = recorder.stopRecording() else {
+            errorMessage = "A gravação ficou vazia ou não pôde ser salva."
+            return
+        }
+        let cleanName = recordingName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let fallbackName = "Aula • " + Date.now.formatted(date: .abbreviated, time: .shortened)
+        do {
+            try store.registerRecordedAudio(
+                at: url,
+                displayName: cleanName.isEmpty ? fallbackName : cleanName
+            )
+            statusMessage = "Gravação salva na biblioteca."
+            recordingName = ""
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 
     private func toggleRecording() {
         if recorder.isRecording {
-            guard let url = recorder.stopRecording() else {
-                errorMessage = "A gravação ficou vazia ou não pôde ser salva."
-                return
-            }
-            let cleanName = recordingName.trimmingCharacters(in: .whitespacesAndNewlines)
-            let fallbackName = "Aula • " + Date.now.formatted(date: .abbreviated, time: .shortened)
-            do {
-                try store.registerRecordedAudio(
-                    at: url,
-                    displayName: cleanName.isEmpty ? fallbackName : cleanName
-                )
-                statusMessage = "Gravação salva na biblioteca."
-                recordingName = ""
-            } catch {
-                errorMessage = error.localizedDescription
-            }
+            finishAndSaveRecording()
             return
         }
 

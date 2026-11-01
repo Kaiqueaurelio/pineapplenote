@@ -73,7 +73,9 @@ final class StudyAudioRecorder: ObservableObject {
         elapsedTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(1))
-                guard let self, let startedAt = self.startedAt else { return }
+                guard !Task.isCancelled,
+                      let self,
+                      let startedAt = self.startedAt else { return }
                 self.elapsedSeconds = Int(Date().timeIntervalSince(startedAt))
             }
         }
