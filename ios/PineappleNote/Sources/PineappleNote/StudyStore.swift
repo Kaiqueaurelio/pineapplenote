@@ -152,6 +152,36 @@ final class StudyStore: ObservableObject {
         persist(materials, forKey: materialsKey)
     }
 
+
+    func registerRecordedAudio(at fileURL: URL, displayName: String) throws {
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .standardizedFileURL
+        let folderURL = documentsURL.appendingPathComponent(materialsFolder, isDirectory: true)
+            .standardizedFileURL
+        let candidateURL = fileURL.standardizedFileURL
+
+        guard candidateURL.path.hasPrefix(folderURL.path + "/") else {
+            throw StudyMaterialStoreError.fileOutsideLibrary
+        }
+        guard FileManager.default.fileExists(atPath: candidateURL.path) else {
+            throw StudyMaterialStoreError.fileNotFound
+        }
+
+        let attributes = try FileManager.default.attributesOfItem(atPath: candidateURL.path)
+        let size = (attributes[.size] as? NSNumber)?.int64Value ?? 0
+        let relativePath = String(candidateURL.path.dropFirst(documentsURL.path.count + 1))
+        let cleanName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let material = StudyMaterial(
+            name: cleanName.isEmpty ? candidateURL.lastPathComponent : cleanName,
+            relativePath: relativePath,
+            kind: .audio,
+            fileExtension: candidateURL.pathExtension.lowercased(),
+            sizeInBytes: size
+        )
+        materials.insert(material, at: 0)
+        persist(materials, forKey: materialsKey)
+    }
+
     func localURL(for material: StudyMaterial) -> URL? {
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documentsURL.appendingPathComponent(material.relativePath)
@@ -207,5 +237,20 @@ final class StudyStore: ObservableObject {
     private func persist<Element: Codable>(_ values: [Element], forKey key: String) {
         guard let data = try? JSONEncoder().encode(values) else { return }
         defaults.set(data, forKey: key)
+    }
+}
+
+
+enum StudyMaterialStoreError: LocalizedError {
+    case fileOutsideLibrary
+    case fileNotFound
+
+    var errorDescription: String? {
+        switch self {
+        case .fileOutsideLibrary:
+            return "A gravação precisa estar dentro da biblioteca do Pineapple Note."
+        case .fileNotFound:
+            return "O arquivo da gravação não foi encontrado."
+        }
     }
 }

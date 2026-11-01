@@ -19,7 +19,34 @@ struct StudyMaterialsView: View {
                             .foregroundStyle(PineapplePalette.muted)
                     }
                     Spacer()
-                    Button { showingImporter = true } label: {
+                    NavigationLink {
+                    StudyRecorderView(store: store)
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "mic.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(PineapplePalette.green)
+                            .frame(width: 43, height: 43)
+                            .background(PineapplePalette.lime.opacity(0.38), in: RoundedRectangle(cornerRadius: 12))
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Gravar uma aula")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(PineapplePalette.ink)
+                            Text("Grave e salve o áudio neste iPhone")
+                                .font(.system(size: 11))
+                                .foregroundStyle(PineapplePalette.muted)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(PineapplePalette.muted)
+                    }
+                    .padding(12)
+                    .background(.white, in: RoundedRectangle(cornerRadius: 15))
+                }
+                .buttonStyle(.plain)
+
+                Button { showingImporter = true } label: {
                         Image(systemName: "plus")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(.white)
@@ -70,7 +97,8 @@ struct StudyMaterialsView: View {
 
                     ForEach(store.materials) { material in
                         Button {
-                            guard let url = store.localURL(for: material) else {
+                            guard let url = store.localURL(for: material),
+                                  FileManager.default.fileExists(atPath: url.path) else {
                                 importError = "Este arquivo não foi encontrado no armazenamento local."
                                 return
                             }
