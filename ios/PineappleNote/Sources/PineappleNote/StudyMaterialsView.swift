@@ -62,14 +62,25 @@ struct StudyMaterialsView: View {
                 }
                 .buttonStyle(.plain)
 
-                Button { showingImporter = true } label: {
+                Menu {
+                        Button {
+                            showingImporter = true
+                        } label: {
+                            Label("Importar arquivo", systemImage: "square.and.arrow.down")
+                        }
+                        Button {
+                            showingLinkEditor = true
+                        } label: {
+                            Label("Adicionar link da web", systemImage: "link")
+                        }
+                    } label: {
                         Image(systemName: "plus")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(.white)
                             .frame(width: 40, height: 40)
                             .background(PineapplePalette.green, in: Circle())
                     }
-                    .accessibilityLabel("Importar arquivo")
+                    .accessibilityLabel("Adicionar material")
                 }
 
                 if let statusMessage {
@@ -253,7 +264,6 @@ private struct StudyLinkEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
     @State private var address = ""
-    @State private var validationMessage: String?
     let onSave: (String, URL) -> Void
 
     private var validatedURL: URL? {
@@ -277,9 +287,9 @@ private struct StudyLinkEditorSheet: View {
                 Section("Nome (opcional)") {
                     TextField("Ex.: Aula de biologia", text: $title)
                 }
-                if let validationMessage {
+                if !address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && validatedURL == nil {
                     Section {
-                        Text(validationMessage)
+                        Text("Use um endereço completo começando com http:// ou https://.")
                             .font(.system(size: 12))
                             .foregroundStyle(.red)
                     }
@@ -298,10 +308,7 @@ private struct StudyLinkEditorSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Salvar") {
-                        guard let url = validatedURL else {
-                            validationMessage = "Informe um endereço http ou https válido."
-                            return
-                        }
+                        guard let url = validatedURL else { return }
                         onSave(title, url)
                         dismiss()
                     }
