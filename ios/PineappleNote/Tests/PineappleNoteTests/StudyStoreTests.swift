@@ -1,15 +1,16 @@
 import XCTest
 @testable import PineappleNote
 
+private func makeStudyTestDefaults() -> UserDefaults {
+    let suiteName = "PineappleNoteTests.\(UUID().uuidString)"
+    return UserDefaults(suiteName: suiteName)!
+}
+
 final class StudyStoreTests: XCTestCase {
-    private static func makeDefaults() -> UserDefaults {
-        let suiteName = "PineappleNoteTests.\(UUID().uuidString)"
-        return UserDefaults(suiteName: suiteName)!
-    }
 
     func testDeletingAllWelcomeNotesStaysEmptyAfterReopeningStore() async {
         await MainActor.run {
-            let defaults = Self.makeDefaults()
+            let defaults = makeStudyTestDefaults()
             let firstStore = StudyStore(defaults: defaults)
             XCTAssertFalse(firstStore.notes.isEmpty)
 
@@ -25,7 +26,7 @@ final class StudyStoreTests: XCTestCase {
 
     func testFlashcardReviewCountPersists() async {
         await MainActor.run {
-            let defaults = makeDefaults()
+            let defaults = makeStudyTestDefaults()
             let store = StudyStore(defaults: defaults)
             let card = StudyFlashcard(question: "O que é Swift?", answer: "Uma linguagem.")
             store.save(card)
@@ -43,7 +44,7 @@ final class StudyStoreTests: XCTestCase {
 
     func testForgottenFlashcardIsScheduledForQuickReview() async {
         await MainActor.run {
-            let store = StudyStore(defaults: Self.makeDefaults())
+            let store = StudyStore(defaults: makeStudyTestDefaults())
             let card = StudyFlashcard(question: "Pergunta", answer: "Resposta")
             store.save(card)
             store.markReviewed(card, remembered: false)
@@ -61,11 +62,11 @@ final class StudyStoreTests: XCTestCase {
 
     func testQuizAttemptsAreRestoredAndPersistedByBackup() async throws {
         try await MainActor.run {
-            let source = StudyStore(defaults: Self.makeDefaults())
+            let source = StudyStore(defaults: makeStudyTestDefaults())
             source.recordQuizAttempt(totalQuestions: 10, correctAnswers: 8, subject: "Biologia")
             let backup = try source.makeBackupData()
 
-            let destinationDefaults = Self.makeDefaults()
+            let destinationDefaults = makeStudyTestDefaults()
             let destination = StudyStore(defaults: destinationDefaults)
             try destination.restoreBackup(from: backup)
 
@@ -81,10 +82,10 @@ final class StudyStoreTests: XCTestCase {
 
     func testRestoringBackupOnFreshInstallDoesNotDuplicateWelcomeNotes() async throws {
         try await MainActor.run {
-            let source = StudyStore(defaults: Self.makeDefaults())
+            let source = StudyStore(defaults: makeStudyTestDefaults())
             let backup = try source.makeBackupData()
 
-            let destination = StudyStore(defaults: Self.makeDefaults())
+            let destination = StudyStore(defaults: makeStudyTestDefaults())
             let originalWelcomeCount = destination.notes.count
             try destination.restoreBackup(from: backup)
 
@@ -96,7 +97,7 @@ final class StudyStoreTests: XCTestCase {
 
     func testBackupRestoreMergesWithoutDuplicatingExistingNotes() async throws {
         try await MainActor.run {
-            let defaults = makeDefaults()
+            let defaults = makeStudyTestDefaults()
             let store = StudyStore(defaults: defaults)
             let note = StudyNote(title: "Cálculo", body: "Derivadas", subject: "Matemática")
             store.save(note)
