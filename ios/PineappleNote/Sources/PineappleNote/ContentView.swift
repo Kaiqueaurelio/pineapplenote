@@ -118,18 +118,11 @@ struct ContentView: View {
                     .foregroundStyle(PineapplePalette.lime)
             }
             .frame(width: 44, height: 44)
-
             VStack(alignment: .leading, spacing: 1) {
-                Text("Pineapple")
-                    .font(.system(size: 21, weight: .heavy, design: .rounded))
-                    .foregroundStyle(PineapplePalette.ink)
-                Text("Sua aula. Organizada pela IA.")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(PineapplePalette.muted)
+                Text("Pineapple").font(.system(size: 21, weight: .heavy, design: .rounded)).foregroundStyle(PineapplePalette.ink)
+                Text("Sua aula. Organizada pela IA.").font(.system(size: 10, weight: .medium)).foregroundStyle(PineapplePalette.muted)
             }
-
             Spacer()
-
             Button { showingAssistantInfo = true } label: {
                 Image(systemName: "sparkles")
                     .font(.system(size: 18, weight: .semibold))
@@ -179,18 +172,11 @@ struct ContentView: View {
 
     private var quickActions: some View {
         VStack(alignment: .leading, spacing: 13) {
-            Text("Acesso rápido")
-                .font(.system(size: 17, weight: .bold, design: .rounded))
+            Text("Acesso rápido").font(.system(size: 17, weight: .bold, design: .rounded))
             HStack(spacing: 10) {
-                QuickAction(title: "Anotação", icon: "square.and.pencil", tint: Color(red: 0.91, green: 0.83, blue: 0.67)) {
-                    createNote()
-                }
-                QuickAction(title: "Flashcards", icon: "rectangle.on.rectangle.angled", tint: Color(red: 0.82, green: 0.88, blue: 0.96)) {
-                    selectedTab = .study
-                }
-                QuickAction(title: "Assistente IA", icon: "sparkles", tint: Color(red: 0.85, green: 0.90, blue: 0.78)) {
-                    showingAssistantInfo = true
-                }
+                QuickAction(title: "Anotação", icon: "square.and.pencil", tint: Color(red: 0.91, green: 0.83, blue: 0.67)) { createNote() }
+                QuickAction(title: "Flashcards", icon: "rectangle.on.rectangle.angled", tint: Color(red: 0.82, green: 0.88, blue: 0.96)) { selectedTab = .study }
+                QuickAction(title: "Arquivos", icon: "doc.fill", tint: Color(red: 0.85, green: 0.90, blue: 0.78)) { selectedTab = .library }
             }
         }
     }
@@ -202,6 +188,33 @@ struct ContentView: View {
                     Text("Sua biblioteca")
                         .font(.system(size: 29, weight: .bold, design: .rounded))
                         .foregroundStyle(PineapplePalette.ink)
+
+                    NavigationLink {
+                        StudyMaterialsView(store: store)
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "folder.fill")
+                                .font(.system(size: 19, weight: .semibold))
+                                .foregroundStyle(PineapplePalette.green)
+                                .frame(width: 44, height: 44)
+                                .background(PineapplePalette.lime.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Arquivos e materiais")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundStyle(PineapplePalette.ink)
+                                Text("\(store.materials.count) arquivos salvos neste iPhone")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(PineapplePalette.muted)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(PineapplePalette.muted)
+                        }
+                        .padding(12)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 16))
+                    }
+                    .buttonStyle(.plain)
 
                     TextField("Buscar anotações", text: $searchText)
                         .textInputAutocapitalization(.never)
@@ -233,7 +246,7 @@ struct ContentView: View {
                         }
                     }
 
-                    Text("Esta biblioteca já funciona offline para suas anotações. A importação de PDF, áudio e outros arquivos será adicionada junto ao módulo de materiais.")
+                    Text("As anotações e os arquivos importados ficam disponíveis offline. A sincronização em nuvem será adicionada após confirmar o projeto Supabase correto.")
                         .font(.system(size: 11))
                         .foregroundStyle(PineapplePalette.muted)
                 }
@@ -247,30 +260,25 @@ struct ContentView: View {
     private var profileView: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 18) {
-                Text("Seu perfil")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                Text("Seu perfil").font(.system(size: 28, weight: .bold, design: .rounded))
                 HStack(spacing: 12) {
                     Image(systemName: "person.crop.circle.fill")
                         .font(.system(size: 48))
                         .foregroundStyle(PineapplePalette.green)
                     VStack(alignment: .leading) {
                         Text("Estudante Pineapple").fontWeight(.bold)
-                        Text("Sua jornada de aprendizado")
-                            .font(.caption)
-                            .foregroundStyle(PineapplePalette.muted)
+                        Text("Sua jornada de aprendizado").font(.caption).foregroundStyle(PineapplePalette.muted)
                     }
                 }
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(.white, in: RoundedRectangle(cornerRadius: 18))
-
-                Label("Anotações neste iPhone: \(store.notes.count)", systemImage: "iphone")
-                Label("Flashcards criados: \(store.flashcards.count)", systemImage: "rectangle.on.rectangle")
-                Label("Questões cadastradas: \(store.questions.count)", systemImage: "checkmark.circle")
+                Label("Anotações: \(store.notes.count)", systemImage: "note.text")
+                Label("Arquivos: \(store.materials.count)", systemImage: "folder")
+                Label("Flashcards: \(store.flashcards.count)", systemImage: "rectangle.on.rectangle")
+                Label("Questões: \(store.questions.count)", systemImage: "checkmark.circle")
                 Label("Sincronização em nuvem: em desenvolvimento", systemImage: "icloud")
-                Label("Pineapple Note • Gratuito", systemImage: "heart.fill")
-                    .foregroundStyle(PineapplePalette.green)
-
+                Label("Pineapple Note • Gratuito", systemImage: "heart.fill").foregroundStyle(PineapplePalette.green)
                 Text("O Pineapple Note não terá assinatura obrigatória nem bloqueio de funcionalidades por plano.")
                     .font(.system(size: 12))
                     .foregroundStyle(PineapplePalette.muted)
@@ -292,16 +300,11 @@ struct ContentView: View {
                     .frame(width: 48, height: 48)
                     .background(PineapplePalette.lime.opacity(0.45), in: RoundedRectangle(cornerRadius: 15))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Estude com inteligência")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(PineapplePalette.ink)
-                    Text("O assistente de IA será integrado ao seu conteúdo.")
-                        .font(.system(size: 12))
-                        .foregroundStyle(PineapplePalette.muted)
+                    Text("Estude com inteligência").font(.system(size: 14, weight: .bold)).foregroundStyle(PineapplePalette.ink)
+                    Text("O assistente de IA será integrado ao seu conteúdo.").font(.system(size: 12)).foregroundStyle(PineapplePalette.muted)
                 }
                 Spacer()
-                Image(systemName: "arrow.right")
-                    .foregroundStyle(PineapplePalette.green)
+                Image(systemName: "arrow.right").foregroundStyle(PineapplePalette.green)
             }
             .padding(15)
             .background(.white, in: RoundedRectangle(cornerRadius: 19))
@@ -311,11 +314,8 @@ struct ContentView: View {
 
     private var emptyNotesState: some View {
         VStack(spacing: 10) {
-            Image(systemName: "note.text")
-                .font(.system(size: 32))
-                .foregroundStyle(PineapplePalette.green)
-            Text("Sua biblioteca está esperando")
-                .font(.system(size: 15, weight: .bold))
+            Image(systemName: "note.text").font(.system(size: 32)).foregroundStyle(PineapplePalette.green)
+            Text("Sua biblioteca está esperando").font(.system(size: 15, weight: .bold))
             Text("Crie uma anotação para começar a organizar seus estudos.")
                 .font(.system(size: 12))
                 .foregroundStyle(PineapplePalette.muted)
@@ -348,7 +348,6 @@ private struct NoteEditorSheet: View {
     @State private var title: String
     @State private var bodyText: String
     @State private var subject: String
-
     let existingNote: StudyNote?
     let onSave: (StudyNote) -> Void
 
@@ -398,14 +397,13 @@ private struct NoteEditorSheet: View {
                         let cleanTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !cleanTitle.isEmpty else { return }
                         let cleanSubject = subject.trimmingCharacters(in: .whitespacesAndNewlines)
-                        let note = StudyNote(
+                        onSave(StudyNote(
                             id: existingNote?.id ?? UUID(),
                             title: cleanTitle,
                             body: bodyText,
                             subject: cleanSubject.isEmpty ? "Geral" : cleanSubject,
                             updatedAt: .now
-                        )
-                        onSave(note)
+                        ))
                         dismiss()
                     }
                     .fontWeight(.bold)
@@ -429,23 +427,12 @@ private struct NoteRow: View {
                     .frame(width: 47, height: 47)
                     .background(PineapplePalette.lime.opacity(0.38), in: RoundedRectangle(cornerRadius: 14))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(note.title)
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(PineapplePalette.ink)
-                        .lineLimit(1)
-                    Text(note.preview)
-                        .font(.system(size: 11))
-                        .foregroundStyle(PineapplePalette.muted)
-                        .lineLimit(2)
-                    Text(note.subject.uppercased())
-                        .font(.system(size: 9, weight: .bold))
-                        .tracking(0.8)
-                        .foregroundStyle(PineapplePalette.green)
+                    Text(note.title).font(.system(size: 14, weight: .bold)).foregroundStyle(PineapplePalette.ink).lineLimit(1)
+                    Text(note.preview).font(.system(size: 11)).foregroundStyle(PineapplePalette.muted).lineLimit(2)
+                    Text(note.subject.uppercased()).font(.system(size: 9, weight: .bold)).tracking(0.8).foregroundStyle(PineapplePalette.green)
                 }
                 Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(PineapplePalette.muted)
+                Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold)).foregroundStyle(PineapplePalette.muted)
             }
             .padding(12)
             .background(.white, in: RoundedRectangle(cornerRadius: 17))
@@ -468,11 +455,7 @@ private struct QuickAction: View {
                     .foregroundStyle(PineapplePalette.green)
                     .frame(width: 39, height: 39)
                     .background(tint, in: RoundedRectangle(cornerRadius: 12))
-                Text(title)
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(PineapplePalette.ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                Text(title).font(.system(size: 11, weight: .bold)).foregroundStyle(PineapplePalette.ink).lineLimit(1).minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(13)

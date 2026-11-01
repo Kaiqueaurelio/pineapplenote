@@ -7,13 +7,7 @@ struct StudyNote: Identifiable, Codable, Equatable {
     var subject: String
     var updatedAt: Date
 
-    init(
-        id: UUID = UUID(),
-        title: String,
-        body: String,
-        subject: String = "Geral",
-        updatedAt: Date = .now
-    ) {
+    init(id: UUID = UUID(), title: String, body: String, subject: String = "Geral", updatedAt: Date = .now) {
         self.id = id
         self.title = title
         self.body = body
@@ -86,5 +80,64 @@ struct StudyQuestion: Identifiable, Codable, Equatable {
         options.count == 4 &&
         options.allSatisfy { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } &&
         options.indices.contains(correctOptionIndex)
+    }
+}
+
+enum StudyMaterialKind: String, Codable {
+    case pdf
+    case audio
+    case video
+    case image
+    case text
+    case other
+
+    var title: String {
+        switch self {
+        case .pdf: "PDF"
+        case .audio: "Áudio"
+        case .video: "Vídeo"
+        case .image: "Imagem"
+        case .text: "Texto"
+        case .other: "Arquivo"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .pdf: "doc.text.fill"
+        case .audio: "waveform"
+        case .video: "video.fill"
+        case .image: "photo.fill"
+        case .text: "doc.plaintext"
+        case .other: "doc.fill"
+        }
+    }
+}
+
+struct StudyMaterial: Identifiable, Codable, Equatable {
+    var id: UUID
+    var name: String
+    var relativePath: String
+    var kind: StudyMaterialKind
+    var fileExtension: String
+    var sizeInBytes: Int64
+    var importedAt: Date
+
+    init(
+        id: UUID = UUID(),
+        name: String,
+        relativePath: String,
+        kind: StudyMaterialKind,
+        fileExtension: String,
+        sizeInBytes: Int64,
+        importedAt: Date = .now
+    ) {
+        self.id = id
+        self.name = name
+        self.relativePath = relativePath
+        self.kind = kind
+        self.fileExtension = fileExtension
+        self.sizeInBytes = sizeInBytes
+        self.importedAt = importedAt
     }
 }
