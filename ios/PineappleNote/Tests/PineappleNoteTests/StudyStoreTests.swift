@@ -2,14 +2,14 @@ import XCTest
 @testable import PineappleNote
 
 final class StudyStoreTests: XCTestCase {
-    private func makeDefaults() -> UserDefaults {
+    private static func makeDefaults() -> UserDefaults {
         let suiteName = "PineappleNoteTests.\(UUID().uuidString)"
         return UserDefaults(suiteName: suiteName)!
     }
 
     func testDeletingAllWelcomeNotesStaysEmptyAfterReopeningStore() async {
         await MainActor.run {
-            let defaults = makeDefaults()
+            let defaults = Self.makeDefaults()
             let firstStore = StudyStore(defaults: defaults)
             XCTAssertFalse(firstStore.notes.isEmpty)
 
@@ -40,11 +40,11 @@ final class StudyStoreTests: XCTestCase {
 
     func testQuizAttemptsAreRestoredAndPersistedByBackup() async throws {
         try await MainActor.run {
-            let source = StudyStore(defaults: makeDefaults())
+            let source = StudyStore(defaults: Self.makeDefaults())
             source.recordQuizAttempt(totalQuestions: 10, correctAnswers: 8, subject: "Biologia")
             let backup = try source.makeBackupData()
 
-            let destinationDefaults = makeDefaults()
+            let destinationDefaults = Self.makeDefaults()
             let destination = StudyStore(defaults: destinationDefaults)
             try destination.restoreBackup(from: backup)
 
