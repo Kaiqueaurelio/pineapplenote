@@ -3,12 +3,18 @@ import PackageDescription
 
 let package = Package(
     name: "PineappleNote",
-    platforms: [.iOS(.v17)],
+    platforms: [
+        .iOS(.v17),
+        .macOS(.v14),
+    ],
     products: [
-        .executable(name: "PineappleNote", targets: ["PineappleNote"])
+        .library(
+            name: "PineappleNote",
+            targets: ["PineappleNote"]
+        )
     ],
     targets: [
-        .executableTarget(
+        .target(
             name: "PineappleNote",
             path: "Sources/PineappleNote"
         )
