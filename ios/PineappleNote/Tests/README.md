@@ -11,3 +11,5 @@ The native package includes regression tests for:
 The iOS Simulator workflow runs these tests on a GitHub-hosted macOS runner before launching the app. No Apple Developer signing account is required for this test stage.
 
 GitHub Actions uses per-branch concurrency groups and cancels superseded checks so only the newest native iOS revision continues through CI.
+
+The full simulator workflow runs regression tests, builds and launches the app. The separate unsigned artifact build is available manually from GitHub Actions when a packaged .app is needed.
