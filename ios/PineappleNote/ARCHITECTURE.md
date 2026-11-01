@@ -23,7 +23,7 @@
 - Pré-visualização com Quick Look e exclusão de arquivos importados.
 - Abertura e importação são locais; upload, transcrição e IA ainda não estão ligados.
 
-### Backup local\n- Exportação JSON versionada de anotações, flashcards e questões.\n- Restauração com mesclagem por UUID e validação básica de versão/tamanho.\n- Arquivos de mídia não são incorporados ao JSON; permanecem no armazenamento local.\n\n### Flashcards offline
+### Compartilhamento de anotações\n- Cada anotação pode ser compartilhada como texto simples pelo menu nativo do iOS.\n\n### Backup local\n- Exportação JSON versionada de anotações, flashcards e questões.\n- Restauração com mesclagem por UUID e validação básica de versão/tamanho.\n- Arquivos de mídia não são incorporados ao JSON; permanecem no armazenamento local.\n\n### Flashcards e repetição espaçada\n- Autoavaliação: o estudante informa se lembrou ou precisa revisar.\n- Falha: agenda nova revisão em 10 minutos e zera a sequência de acertos.\n- Acerto: agenda em 1, 3, 7, 14 e depois 30 dias.\n- O histórico de tentativas e a próxima revisão são persistidos no armazenamento local.\n\n### Flashcards offline
 - Criar, editar e excluir cartões.
 - Pergunta, resposta e matéria/categoria.
 - Revisão com mostrar/ocultar resposta, navegação e contagem de revisões.
@@ -51,3 +51,10 @@ O repositório web configura o cliente Supabase por variáveis de ambiente e pos
 
 ## Limites desta etapa
 O código foi atualizado no GitHub, mas não foi compilado nem executado em simulador ou iPhone. Persistência, permissões do seletor de arquivos, pré-visualização, navegação e fluxos de estudo precisam passar por build e testes em dispositivo antes de declarar a versão pronta para uso.
+
+
+### Regressões cobertas automaticamente
+- Exclusão de todas as notas de boas-vindas permanece vazia após reabrir o armazenamento.
+- Contagem de revisões e agendamento de flashcards persistem.
+- Backup restaura tentativas de simulado e não duplica anotações.
+- Validação de questões exige quatro alternativas preenchidas e índice correto.

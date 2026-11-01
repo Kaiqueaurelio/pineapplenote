@@ -39,3 +39,27 @@ xtool dev
 2. Upload de arquivos, armazenamento em nuvem e transcrição.
 3. Gravação e processamento de aulas.
 4. Resumos, chat e geração de materiais por IA através de backend seguro.
+
+
+## Estado da versão nativa para iOS
+
+A versão SwiftUI está sendo desenvolvida isoladamente em `feature/ios-native-swiftui`; a aplicação web em `main` não é substituída por este trabalho.
+
+### Recursos implementados localmente
+
+- Anotações com criação, edição, exclusão, pesquisa e compartilhamento em texto.
+- Biblioteca local de PDFs, documentos, imagens, áudio e vídeo, com pré-visualização suportada pelo iOS.
+- Gravação de aulas em M4A, com solicitação de permissão e suporte à gravação em segundo plano.
+- Flashcards com autoavaliação e repetição espaçada (10 minutos quando precisa revisar; 1, 3, 7, 14 e 30 dias conforme a sequência de acertos).
+- Questões de múltipla escolha, simulados e histórico de resultados.
+- Backup JSON versionado de anotações, flashcards, questões e tentativas de simulados.
+
+### Validação automatizada
+
+GitHub Actions executa análise de sintaxe Swift, build iOS sem assinatura e teste de abertura no simulador. O workflow do simulador também executa testes de regressão do armazenamento e backup.
+
+### Recursos ainda pendentes
+
+Login e sincronização Supabase, processamento/transcrição de arquivos, geração automática de resumos, chat com IA e distribuição assinada para iPhone físico. A integração Supabase aguarda acesso ao projeto original configurado no repositório; nenhum projeto diferente deve ser usado como substituto.
+
+O aplicativo permanece sem paywall e sem assinatura obrigatória. Serviços externos de hospedagem e IA podem ter custos operacionais próprios.
