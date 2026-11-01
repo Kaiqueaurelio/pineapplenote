@@ -74,6 +74,18 @@ struct StudyToolsView: View {
                     }
                     .buttonStyle(.plain)
 
+                    NavigationLink {
+                        StudySlidesView(store: store)
+                    } label: {
+                        ToolCard(
+                            title: "Criar slides",
+                            subtitle: "Monte uma apresentação a partir das suas anotações",
+                            icon: "rectangle.on.rectangle",
+                            tint: Color(red: 0.82, green: 0.88, blue: 0.96)
+                        )
+                    }
+                    .buttonStyle(.plain)
+
                     Button { showingAssistantInfo = true } label: {
                         ToolCard(
                             title: "Resumo inteligente",
