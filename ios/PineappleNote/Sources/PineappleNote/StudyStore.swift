@@ -7,6 +7,7 @@ final class StudyStore: ObservableObject {
     @Published private(set) var notes: [StudyNote]
     @Published private(set) var flashcards: [StudyFlashcard]
     @Published private(set) var questions: [StudyQuestion]
+    @Published private(set) var quizAttempts: [StudyQuizAttempt]
     @Published private(set) var materials: [StudyMaterial]
 
     private let defaults: UserDefaults
@@ -14,6 +15,7 @@ final class StudyStore: ObservableObject {
     private let legacyNotesKey = "pineapple.local-notes.v1"
     private let flashcardsKey = "pineapple.local-flashcards.v1"
     private let questionsKey = "pineapple.local-questions.v1"
+    private let quizAttemptsKey = "pineapple.local-quiz-attempts.v1"
     private let materialsKey = "pineapple.local-materials.v1"
     private let materialsFolder = "StudyMaterials"
 
@@ -44,6 +46,8 @@ final class StudyStore: ObservableObject {
             .sorted { $0.createdAt > $1.createdAt }
         questions = Self.loadArray(forKey: questionsKey, from: defaults, initial: [])
             .sorted { $0.createdAt > $1.createdAt }
+        quizAttempts = Self.loadArray(forKey: quizAttemptsKey, from: defaults, initial: [])
+            .sorted { $0.completedAt > $1.completedAt }
         materials = Self.loadArray(forKey: materialsKey, from: defaults, initial: [])
             .sorted { $0.importedAt > $1.importedAt }
     }
@@ -109,7 +113,8 @@ final class StudyStore: ObservableObject {
             exportedAt: .now,
             notes: notes,
             flashcards: flashcards,
-            questions: questions
+            questions: questions,
+            quizAttempts: quizAttempts
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -165,12 +170,41 @@ final class StudyStore: ObservableObject {
             }
         }
 
+        var mergedAttempts = quizAttempts
+        for item in backup.quizAttempts ?? [] where
+            item.totalQuestions > 0 &&
+            item.correctAnswers >= 0 &&
+            item.correctAnswers <= item.totalQuestions {
+            if let index = mergedAttempts.firstIndex(where: { $0.id == item.id }) {
+                mergedAttempts[index] = item
+            } else {
+                mergedAttempts.append(item)
+            }
+        }
+
         notes = mergedNotes.sorted { $0.updatedAt > $1.updatedAt }
         flashcards = mergedFlashcards.sorted { $0.createdAt > $1.createdAt }
         questions = mergedQuestions.sorted { $0.createdAt > $1.createdAt }
+        quizAttempts = mergedAttempts.sorted { $0.completedAt > $1.completedAt }
         persist(notes, forKey: notesKey)
         persist(flashcards, forKey: flashcardsKey)
         persist(questions, forKey: questionsKey)
+    }
+
+
+    func recordQuizAttempt(totalQuestions: Int, correctAnswers: Int, subject: String) {
+        guard totalQuestions > 0,
+              correctAnswers >= 0,
+              correctAnswers <= totalQuestions else { return }
+        let cleanSubject = subject.trimmingCharacters(in: .whitespacesAndNewlines)
+        let attempt = StudyQuizAttempt(
+            totalQuestions: totalQuestions,
+            correctAnswers: correctAnswers,
+            subject: cleanSubject.isEmpty ? "Geral" : cleanSubject
+        )
+        quizAttempts.insert(attempt, at: 0)
+        quizAttempts.sort { $0.completedAt > $1.completedAt }
+        persist(quizAttempts, forKey: quizAttemptsKey)
     }
 
     func importMaterial(from sourceURL: URL) throws {
@@ -333,6 +367,7 @@ struct StudyBackup: Codable {
     var notes: [StudyNote]
     var flashcards: [StudyFlashcard]
     var questions: [StudyQuestion]
+    var quizAttempts: [StudyQuizAttempt]?
 }
 
 enum StudyBackupError: LocalizedError {

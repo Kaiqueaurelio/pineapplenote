@@ -277,6 +277,11 @@ struct ContentView: View {
                 Label("Arquivos: \(store.materials.count)", systemImage: "folder")
                 Label("Flashcards: \(store.flashcards.count)", systemImage: "rectangle.on.rectangle")
                 Label("Questões: \(store.questions.count)", systemImage: "checkmark.circle")
+                Label("Simulados concluídos: \(store.quizAttempts.count)", systemImage: "chart.bar.fill")
+                if let bestAttempt = store.quizAttempts.max(by: { $0.percentage < $1.percentage }) {
+                    Label("Melhor resultado: \(bestAttempt.percentage)%", systemImage: "trophy.fill")
+                        .foregroundStyle(PineapplePalette.green)
+                }
                 NavigationLink {
                     StudyBackupView(store: store)
                 } label: {

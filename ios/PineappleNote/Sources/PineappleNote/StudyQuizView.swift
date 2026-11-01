@@ -74,6 +74,39 @@ struct QuizView: View {
                     .background(.white, in: RoundedRectangle(cornerRadius: 18))
                 }
 
+                if currentQuestion == nil && !isFinished {
+
+                    if !store.quizAttempts.isEmpty {
+                        VStack(alignment: .leading, spacing: 9) {
+                            Text("Histórico de simulados")
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                            ForEach(store.quizAttempts.prefix(5)) { attempt in
+                                HStack(spacing: 10) {
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(attempt.subject)
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundStyle(PineapplePalette.ink)
+                                        Text(attempt.completedAt.formatted(date: .abbreviated, time: .shortened))
+                                            .font(.system(size: 10))
+                                            .foregroundStyle(PineapplePalette.muted)
+                                    }
+                                    Spacer()
+                                    Text("\(attempt.correctAnswers)/\(attempt.totalQuestions)")
+                                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                                        .foregroundStyle(PineapplePalette.green)
+                                    Text("\(attempt.percentage)%")
+                                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                                        .foregroundStyle(PineapplePalette.green)
+                                        .frame(width: 48, alignment: .trailing)
+                                }
+                                .padding(11)
+                                .background(.white, in: RoundedRectangle(cornerRadius: 12))
+                            }
+                        }
+                    }
+
+                }
+
                 if !store.questions.isEmpty && currentQuestion == nil && !isFinished {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Banco de questões")
@@ -254,12 +287,24 @@ struct QuizView: View {
 
     private func advanceQuiz() {
         guard questionIndex + 1 < quizQuestions.count else {
-            isFinished = true
+            finishQuiz()
             return
         }
         questionIndex += 1
         selectedOption = nil
         isAnswerChecked = false
+    }
+
+    private func finishQuiz() {
+        guard !isFinished, !quizQuestions.isEmpty else { return }
+        isFinished = true
+        let subjects = Set(quizQuestions.map { $0.subject })
+        let subject = subjects.count == 1 ? (subjects.first ?? "Geral") : "Misto"
+        store.recordQuizAttempt(
+            totalQuestions: quizQuestions.count,
+            correctAnswers: score,
+            subject: subject
+        )
     }
 
     private func resetQuiz() {

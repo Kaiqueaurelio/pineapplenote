@@ -141,3 +141,31 @@ struct StudyMaterial: Identifiable, Codable, Equatable {
         self.importedAt = importedAt
     }
 }
+
+
+struct StudyQuizAttempt: Identifiable, Codable, Equatable {
+    var id: UUID
+    var completedAt: Date
+    var totalQuestions: Int
+    var correctAnswers: Int
+    var subject: String
+
+    init(
+        id: UUID = UUID(),
+        completedAt: Date = .now,
+        totalQuestions: Int,
+        correctAnswers: Int,
+        subject: String = "Geral"
+    ) {
+        self.id = id
+        self.completedAt = completedAt
+        self.totalQuestions = totalQuestions
+        self.correctAnswers = correctAnswers
+        self.subject = subject
+    }
+
+    var percentage: Int {
+        guard totalQuestions > 0 else { return 0 }
+        return Int((Double(correctAnswers) / Double(totalQuestions) * 100).rounded())
+    }
+}
