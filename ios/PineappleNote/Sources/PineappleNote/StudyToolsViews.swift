@@ -86,6 +86,18 @@ struct StudyToolsView: View {
                     }
                     .buttonStyle(.plain)
 
+                    NavigationLink {
+                        StudyMindMapView(store: store)
+                    } label: {
+                        ToolCard(
+                            title: "Mapa mental",
+                            subtitle: "Visualize os conceitos e as conexões da anotação",
+                            icon: "point.3.connected.trianglepath.dotted",
+                            tint: Color(red: 0.91, green: 0.83, blue: 0.67)
+                        )
+                    }
+                    .buttonStyle(.plain)
+
                     Button { showingAssistantInfo = true } label: {
                         ToolCard(
                             title: "Resumo inteligente",
