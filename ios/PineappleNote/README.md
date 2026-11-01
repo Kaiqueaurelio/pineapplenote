@@ -1,31 +1,35 @@
 # Pineapple Note — iOS nativo
 
-Aplicativo iOS nativo em SwiftUI, compilado como pacote SwiftPM com [xtool](https://github.com/xtool-org/xtool).
+Aplicativo nativo em SwiftUI, estruturado como pacote SwiftPM para desenvolvimento com [xtool](https://github.com/xtool-org/xtool).
 
-## Estado atual
+## Funcionalidades implementadas no código
 
-A primeira fundação visual está criada. As telas ainda usam dados demonstrativos; autenticação, sincronização Supabase, gravação, importação e IA serão conectadas nas próximas etapas.
+- Anotações: criar, editar, excluir e pesquisar.
+- Flashcards: criar, editar, excluir, revisar e contar revisões.
+- Quiz e simulados: cadastrar perguntas, definir quatro alternativas, corrigir respostas e acompanhar pontuação.
+- Armazenamento local para uso offline.
+- Interface com as abas Início, Biblioteca, Estudar e Perfil.
+
+As ferramentas offline ainda precisam passar por compilação e testes em iPhone antes de serem consideradas validadas.
 
 ## Requisitos de desenvolvimento
 
 - Linux com Swift 6.4.
 - xtool instalado e configurado.
-- SDK iOS extraído de um Xcode.xip obtido no portal oficial Apple Developer.
+- SDK iOS preparado a partir de um Xcode.xip obtido no portal oficial Apple Developer.
 - Para instalar no iPhone: usbmuxd, libimobiledevice-utils, cabo USB e dispositivo pareado.
 
-Consulte o guia oficial: https://xtool.sh/documentation/xtool/installation-linux/
+Guia oficial: https://xtool.sh/documentation/xtool/installation-linux/
 
 ## Compilar e executar
 
-Na raiz deste diretório:
+Na raiz deste diretório, depois de preparar o ambiente:
 
 ```bash
 xtool dev
 ```
 
-O xtool compila, assina e instala no dispositivo conectado, após a configuração inicial e o pareamento.
-
-## Identidade
+## Identidade e produto
 
 - Nome: Pineapple Note
 - Bundle ID: com.decodeanalytics.pineapplenote
@@ -35,8 +39,7 @@ O xtool compila, assina e instala no dispositivo conectado, após a configuraç�
 
 ## Próximas integrações
 
-1. Supabase Auth e sessão segura.
-2. Biblioteca sincronizada com os materiais do usuário.
-3. Upload de arquivos e gravação de áudio.
-4. Processamento/transcrição via serviços de backend.
-5. Resumos, chat de estudo e ferramentas de aprendizagem.
+1. Supabase Auth e sincronização das anotações, flashcards e simulados.
+2. Biblioteca de arquivos com importação de PDF, áudio e vídeo.
+3. Gravação e transcrição de aulas.
+4. Resumos, chat e geração de materiais por IA através de backend seguro.
