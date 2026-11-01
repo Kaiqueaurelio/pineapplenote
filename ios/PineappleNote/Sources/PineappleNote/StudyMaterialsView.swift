@@ -8,6 +8,7 @@ struct StudyMaterialsView: View {
     @State private var showingLinkEditor = false
     @State private var previewURL: URL?
     @State private var importError: String?
+    @State private var statusMessage: String?
     @State private var searchText = ""
     @Environment(\.openURL) private var openURL
 
@@ -69,6 +70,15 @@ struct StudyMaterialsView: View {
                             .background(PineapplePalette.green, in: Circle())
                     }
                     .accessibilityLabel("Importar arquivo")
+                }
+
+                if let statusMessage {
+                    Label(statusMessage, systemImage: "checkmark.circle.fill")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(PineapplePalette.green)
+                        .padding(11)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(PineapplePalette.lime.opacity(0.25), in: RoundedRectangle(cornerRadius: 12))
                 }
 
                 Button { showingImporter = true } label: {
@@ -169,6 +179,18 @@ struct StudyMaterialsView: View {
                         }
                         .buttonStyle(.plain)
                         .contextMenu {
+                            if material.kind == .pdf || material.kind == .text {
+                                Button {
+                                    do {
+                                        let note = try store.createNoteFromMaterial(material)
+                                        statusMessage = "Anotação criada: \(note.title)"
+                                    } catch {
+                                        importError = error.localizedDescription
+                                    }
+                                } label: {
+                                    Label("Extrair texto para anotação", systemImage: "text.quote")
+                                }
+                            }
                             Button(role: .destructive) {
                                 store.delete(material)
                             } label: {
@@ -178,7 +200,7 @@ struct StudyMaterialsView: View {
                     }
                 }
 
-                Text("Os arquivos são copiados para o armazenamento privado do aplicativo. A pré-visualização depende do suporte do iOS ao formato. Nesta versão, importação e abertura são locais; envio para a nuvem, transcrição e geração automática de conteúdo ainda serão integrados.")
+                Text("Os arquivos são copiados para o armazenamento privado do aplicativo. A pré-visualização depende do suporte do iOS ao formato. PDFs com texto selecionável e arquivos de texto também podem virar anotações offline pelo menu de contexto. PDFs escaneados, transcrição, envio para a nuvem e geração automática ainda dependem de OCR/IA e do backend.")
                     .font(.system(size: 11))
                     .foregroundStyle(PineapplePalette.muted)
             }

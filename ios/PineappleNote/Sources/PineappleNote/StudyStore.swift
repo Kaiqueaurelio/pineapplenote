@@ -1,4 +1,5 @@
 import Foundation
+import PDFKit
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -321,6 +322,44 @@ final class StudyStore: ObservableObject {
     }
 
 
+    func createNoteFromMaterial(_ material: StudyMaterial) throws -> StudyNote {
+        guard material.kind == .pdf || material.kind == .text else {
+            throw StudyMaterialStoreError.unsupportedTextExtraction
+        }
+        guard let url = localURL(for: material) else {
+            throw StudyMaterialStoreError.fileNotFound
+        }
+
+        let extractedText: String
+        if material.kind == .pdf {
+            guard let document = PDFDocument(url: url) else {
+                throw StudyMaterialStoreError.couldNotReadPDF
+            }
+            guard document.pageCount <= 500 else {
+                throw StudyMaterialStoreError.pdfTooLarge
+            }
+            extractedText = (0..<document.pageCount)
+                .compactMap { document.page(at: $0)?.string }
+                .joined(separator: "\\n\\n")
+        } else {
+            extractedText = try String(contentsOf: url, encoding: .utf8)
+        }
+
+        let cleanText = extractedText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanText.isEmpty else {
+            throw StudyMaterialStoreError.extractedTextEmpty
+        }
+
+        let title = URL(fileURLWithPath: material.name).deletingPathExtension().lastPathComponent
+        let note = StudyNote(
+            title: title.isEmpty ? material.name : title,
+            body: cleanText,
+            subject: material.kind.title
+        )
+        save(note)
+        return note
+    }
+
     func registerRecordedAudio(at fileURL: URL, displayName: String) throws {
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .standardizedFileURL
@@ -415,6 +454,10 @@ enum StudyMaterialStoreError: LocalizedError {
     case fileNotFound
     case invalidWebLink
     case duplicateWebLink
+    case unsupportedTextExtraction
+    case couldNotReadPDF
+    case extractedTextEmpty
+    case pdfTooLarge
 
     var errorDescription: String? {
         switch self {
@@ -426,6 +469,14 @@ enum StudyMaterialStoreError: LocalizedError {
             return "Informe um endereço web válido começando com http:// ou https://."
         case .duplicateWebLink:
             return "Este link já está salvo na sua biblioteca."
+        case .unsupportedTextExtraction:
+            return "A extração offline está disponível para PDFs e arquivos de texto."
+        case .couldNotReadPDF:
+            return "Não foi possível abrir este PDF."
+        case .extractedTextEmpty:
+            return "Nenhum texto selecionável foi encontrado. PDFs escaneados precisarão de OCR."
+        case .pdfTooLarge:
+            return "Este PDF tem mais de 500 páginas. Divida o documento para extrair o texto com segurança."
         }
     }
 }
