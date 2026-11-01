@@ -50,6 +50,30 @@ struct StudyToolsView: View {
                     }
                     .buttonStyle(.plain)
 
+                    NavigationLink {
+                        StudyMatchGameView(store: store)
+                    } label: {
+                        ToolCard(
+                            title: "Card Match",
+                            subtitle: "Combine perguntas e respostas dos seus flashcards",
+                            icon: "square.grid.2x2.fill",
+                            tint: Color(red: 0.89, green: 0.84, blue: 0.94)
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink {
+                        StudyPodcastView(store: store)
+                    } label: {
+                        ToolCard(
+                            title: "Podcast de estudo",
+                            subtitle: "Ouça suas anotações com voz em português",
+                            icon: "waveform",
+                            tint: Color(red: 0.85, green: 0.90, blue: 0.78)
+                        )
+                    }
+                    .buttonStyle(.plain)
+
                     Button { showingAssistantInfo = true } label: {
                         ToolCard(
                             title: "Resumo inteligente",
