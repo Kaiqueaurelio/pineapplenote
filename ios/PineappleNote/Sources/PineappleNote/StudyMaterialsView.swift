@@ -7,6 +7,17 @@ struct StudyMaterialsView: View {
     @State private var showingImporter = false
     @State private var previewURL: URL?
     @State private var importError: String?
+    @State private var searchText = ""
+
+    private var filteredMaterials: [StudyMaterial] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return store.materials }
+        return store.materials.filter {
+            $0.name.localizedCaseInsensitiveContains(query) ||
+            $0.kind.title.localizedCaseInsensitiveContains(query) ||
+            $0.fileExtension.localizedCaseInsensitiveContains(query)
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -76,14 +87,24 @@ struct StudyMaterialsView: View {
                 }
                 .buttonStyle(.plain)
 
-                if store.materials.isEmpty {
+                if !store.materials.isEmpty {
+                    TextField("Buscar por nome, tipo ou extensão", text: $searchText)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .padding(13)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 13))
+                }
+
+                if filteredMaterials.isEmpty {
                     VStack(spacing: 8) {
                         Image(systemName: "folder")
                             .font(.system(size: 31))
                             .foregroundStyle(PineapplePalette.green)
-                        Text("Nenhum arquivo importado")
+                        Text(store.materials.isEmpty ? "Nenhum arquivo importado" : "Nenhum resultado encontrado")
                             .font(.system(size: 14, weight: .bold))
-                        Text("Adicione seus materiais para acessá-los mesmo sem conexão.")
+                        Text(store.materials.isEmpty
+                             ? "Adicione seus materiais para acessá-los mesmo sem conexão."
+                             : "Tente outro nome, tipo de arquivo ou extensão.")
                             .font(.system(size: 11))
                             .foregroundStyle(PineapplePalette.muted)
                             .multilineTextAlignment(.center)
@@ -92,11 +113,11 @@ struct StudyMaterialsView: View {
                     .padding(22)
                     .background(.white, in: RoundedRectangle(cornerRadius: 17))
                 } else {
-                    Text("\(store.materials.count) arquivos")
+                    Text("\(filteredMaterials.count) de \(store.materials.count) arquivos")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(PineapplePalette.muted)
 
-                    ForEach(store.materials) { material in
+                    ForEach(filteredMaterials) { material in
                         Button {
                             guard let url = store.localURL(for: material),
                                   FileManager.default.fileExists(atPath: url.path) else {
