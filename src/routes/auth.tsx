@@ -3,7 +3,6 @@ import { CheckCircle2, Eye, EyeOff, GraduationCap, Loader2, Mail } from "lucide-
 import { type FormEvent, useEffect, useState } from "react";
 import { z } from "zod";
 
-import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -181,7 +180,7 @@ function AuthPage() {
       <section className="relative hidden overflow-hidden bg-ink p-12 text-ink-foreground lg:flex lg:flex-col lg:justify-between">
         <div className="pineapple-grid absolute inset-0 opacity-15" />
         <img
-          src={logoAsset.url}
+          src="/pineapple-note-app-icon.png"
           alt="Pineapple Note"
           className="relative h-16 max-w-[80vw] w-auto rounded-lg bg-background px-3 object-contain object-left sm:h-20"
         />
@@ -206,7 +205,7 @@ function AuthPage() {
       <section className="flex min-h-[100dvh] items-center justify-center px-4 py-[max(2rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-10">
         <div className="w-full max-w-md px-0.5">
           <img
-            src={logoAsset.url}
+            src="/pineapple-note-app-icon.png"
             alt="Pineapple Note"
             className="mx-auto mb-8 h-16 max-w-[80vw] w-auto object-contain lg:hidden sm:h-20"
           />

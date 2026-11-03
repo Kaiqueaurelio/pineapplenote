@@ -24,7 +24,6 @@ import {
   Presentation,
 } from "lucide-react";
 
-import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -217,7 +216,7 @@ function LandingPage() {
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-[72px] sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center" aria-label="Pineapple Note — início">
             <img
-              src={logoAsset.url}
+              src="/pineapple-note-app-icon.png"
               alt="Pineapple Note"
               className="h-14 w-auto origin-left scale-[1.12] object-contain mix-blend-multiply sm:h-16 sm:scale-[1.1]"
             />
@@ -733,7 +732,7 @@ function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-col gap-4 text-center text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:text-left">
           <div className="flex items-center justify-center gap-3 sm:justify-start">
             <img
-              src={logoAsset.url}
+              src="/pineapple-note-app-icon.png"
               alt=""
               className="h-10 w-auto object-contain mix-blend-multiply sm:h-11"
             />

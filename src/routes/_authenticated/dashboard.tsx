@@ -37,7 +37,6 @@ import {
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
-import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -634,7 +633,7 @@ function Index() {
             aria-label="Pineapple Note — início"
           >
             <img
-              src={logoAsset.url}
+              src="/pineapple-note-app-icon.png"
               alt="Pineapple Note"
               className="h-12 max-w-[180px] w-auto object-contain object-left mix-blend-multiply sm:h-14 sm:max-w-[210px] lg:h-16 lg:max-w-[240px]"
             />

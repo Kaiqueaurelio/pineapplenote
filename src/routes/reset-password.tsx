@@ -3,7 +3,6 @@ import { CheckCircle2, KeyRound, Loader2 } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
 import { z } from "zod";
 
-import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,7 +58,11 @@ function ResetPasswordPage() {
   return (
     <main className="grid min-h-[100dvh] place-items-center bg-background px-4 py-[max(2rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))]">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-soft sm:p-8">
-        <img src={logoAsset.url} alt="Pineapple Note" className="mx-auto h-20 w-auto" />
+        <img
+          src="/pineapple-note-app-icon.png"
+          alt="Pineapple Note"
+          className="mx-auto h-20 w-auto"
+        />
         {done ? (
           <div className="mt-8 text-center">
             <CheckCircle2 className="mx-auto text-green-strong" size={42} />
