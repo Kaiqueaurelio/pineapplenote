@@ -14,7 +14,10 @@ export const Route = createFileRoute("/_authenticated/study")({
   head: () => ({
     meta: [
       { title: "Estudar — Pineapple Note" },
-      { name: "description", content: "Revise flashcards, faça simulados e mantenha sua sequência de estudos." },
+      {
+        name: "description",
+        content: "Revise flashcards, faça simulados e mantenha sua sequência de estudos.",
+      },
       { property: "og:title", content: "Estudar — Pineapple Note" },
       { property: "og:description", content: "Sua revisão do dia, sequência de estudos e metas." },
       { property: "og:type", content: "website" },
@@ -56,17 +59,24 @@ function StudyPage() {
     };
   }, [user.id]);
 
-  const streak = useMemo(() => computeStreak(progress.map((row) => row.last_opened_at)), [progress]);
+  const streak = useMemo(
+    () => computeStreak(progress.map((row) => row.last_opened_at)),
+    [progress],
+  );
   const todayCount = useMemo(() => {
     const today = new Date().toDateString();
-    return progress.filter((row) => row.last_opened_at && new Date(row.last_opened_at).toDateString() === today).length;
+    return progress.filter(
+      (row) => row.last_opened_at && new Date(row.last_opened_at).toDateString() === today,
+    ).length;
   }, [progress]);
   const progressById = useMemo(
     () => Object.fromEntries(progress.map((row) => [row.material_id, row.progress])),
     [progress],
   );
   const goalPct = Math.min(100, Math.round((todayCount / DAILY_GOAL) * 100));
-  const queue = [...materials].sort((a, b) => (progressById[a.id] ?? 0) - (progressById[b.id] ?? 0));
+  const queue = [...materials].sort(
+    (a, b) => (progressById[a.id] ?? 0) - (progressById[b.id] ?? 0),
+  );
 
   async function openDemo() {
     setDemoLoading(true);
@@ -89,7 +99,10 @@ function StudyPage() {
           <div className="rounded-[28px] bg-[linear-gradient(150deg,var(--yellow-soft),var(--card))] p-5 shadow-sm">
             <div className="flex items-center gap-3">
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card text-brand-orange shadow-sm">
-                <Flame size={24} className={streak > 0 ? "text-[#f97316]" : "text-muted-foreground"} />
+                <Flame
+                  size={24}
+                  className={streak > 0 ? "text-[#f97316]" : "text-muted-foreground"}
+                />
               </span>
               <div>
                 <p className="text-3xl font-black tabular-nums">{loading ? "–" : streak}</p>
@@ -117,7 +130,9 @@ function StudyPage() {
               />
             </div>
             <p className="mt-3 text-sm text-foreground/80">
-              {goalPct >= 100 ? "Meta batida! Descanse ou adiante a revisão de amanhã." : `Revise ${DAILY_GOAL} materiais hoje.`}
+              {goalPct >= 100
+                ? "Meta batida! Descanse ou adiante a revisão de amanhã."
+                : `Revise ${DAILY_GOAL} materiais hoje.`}
             </p>
           </div>
         </section>
@@ -131,9 +146,14 @@ function StudyPage() {
               <span className="text-4xl">🍍</span>
               <h3 className="mt-3 text-lg font-bold">Nada para revisar ainda</h3>
               <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-                Teste tudo com uma aula pronta de Neurociência — resumo, flashcards e simulado incluídos.
+                Teste tudo com uma aula pronta de Neurociência — resumo, flashcards e simulado
+                incluídos.
               </p>
-              <Button className="mt-5 rounded-full" onClick={() => void openDemo()} disabled={demoLoading}>
+              <Button
+                className="mt-5 rounded-full"
+                onClick={() => void openDemo()}
+                disabled={demoLoading}
+              >
                 <Sparkles size={16} /> {demoLoading ? "Preparando…" : "Abrir aula exemplo"}
               </Button>
             </div>
@@ -156,13 +176,23 @@ function StudyPage() {
                       <Button
                         variant="outline"
                         className="rounded-full"
-                        onClick={() => navigate({ to: "/material/$materialId", params: { materialId: material.id } })}
+                        onClick={() =>
+                          navigate({
+                            to: "/material/$materialId",
+                            params: { materialId: material.id },
+                          })
+                        }
                       >
                         <Layers size={16} /> Flashcards
                       </Button>
                       <Button
                         className="rounded-full"
-                        onClick={() => navigate({ to: "/games/$materialId", params: { materialId: material.id } })}
+                        onClick={() =>
+                          navigate({
+                            to: "/games/$materialId",
+                            params: { materialId: material.id },
+                          })
+                        }
                       >
                         <ListChecks size={16} /> Praticar
                       </Button>

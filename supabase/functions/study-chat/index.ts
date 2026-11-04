@@ -91,14 +91,12 @@ Deno.serve(async (req) => {
       null,
       2,
     ).slice(0, 100000);
-    const { error: questionError } = await supabase
-      .from("material_chat_messages")
-      .insert({
-        material_id: materialId,
-        user_id: user.id,
-        role: "user",
-        content: message.trim().slice(0, 8000),
-      });
+    const { error: questionError } = await supabase.from("material_chat_messages").insert({
+      material_id: materialId,
+      user_id: user.id,
+      role: "user",
+      content: message.trim().slice(0, 8000),
+    });
     if (questionError) throw new Error("Não foi possível salvar sua pergunta.");
     const answer = await askGemini(
       apiKey,

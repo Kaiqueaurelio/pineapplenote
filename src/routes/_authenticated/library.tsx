@@ -195,7 +195,9 @@ function LibraryPage() {
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="text-[15px] font-semibold text-[#8e8e93]">Sua biblioteca</p>
-            <h1 className="mt-1 text-[34px] font-bold tracking-[-1.2px] sm:text-5xl">Minhas notas</h1>
+            <h1 className="mt-1 text-[34px] font-bold tracking-[-1.2px] sm:text-5xl">
+              Minhas notas
+            </h1>
           </div>
           <span className="hidden rounded-full bg-violet-soft px-3 py-1.5 text-xs font-bold text-brand-violet sm:block">
             {materials.length} {materials.length === 1 ? "nota" : "notas"}
@@ -235,7 +237,9 @@ function LibraryPage() {
               🍍
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-lg font-black text-brand-violet">Pronto para uma nova aula?</span>
+              <span className="block text-lg font-black text-brand-violet">
+                Pronto para uma nova aula?
+              </span>
               <span className="mt-0.5 block text-sm text-muted-foreground">
                 Transforme áudio, vídeo, PDF ou link em material de estudo.
               </span>
@@ -288,7 +292,9 @@ function LibraryPage() {
         )}
 
         {loading ? (
-          <div className="mt-5"><MaterialListSkeleton /></div>
+          <div className="mt-5">
+            <MaterialListSkeleton />
+          </div>
         ) : filtered.length === 0 ? (
           <div className="mt-6 rounded-2xl border border-dashed border-border px-5 py-16 text-center">
             <FileText className="mx-auto text-muted-foreground" size={28} />
@@ -302,7 +308,10 @@ function LibraryPage() {
             </p>
             {!materials.length && (
               <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
-                <Button className="rounded-full" onClick={() => navigate({ to: "/dashboard", search: { novo: true } })}>
+                <Button
+                  className="rounded-full"
+                  onClick={() => navigate({ to: "/dashboard", search: { novo: true } })}
+                >
                   Criar primeira nota
                 </Button>
                 <Button

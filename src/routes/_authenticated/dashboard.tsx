@@ -37,7 +37,6 @@ import {
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
-import logoAsset from "@/assets/pineapple-note-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -100,9 +99,17 @@ function Index() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [urlOpen, setUrlOpen] = useState(false);
   const [newNoteOpen, setNewNoteOpen] = useState(false);
-  const [noteFlow, setNoteFlow] = useState<"menu" | "record" | "audio" | "document" | "link">("menu");
-  const openNewNote = (flow: "menu" | "record" | "audio" | "document" | "link") => { setNoteFlow(flow); setNewNoteOpen(true); };
-  const closeNewNote = () => { setNewNoteOpen(false); setNoteFlow("menu"); };
+  const [noteFlow, setNoteFlow] = useState<"menu" | "record" | "audio" | "document" | "link">(
+    "menu",
+  );
+  const openNewNote = (flow: "menu" | "record" | "audio" | "document" | "link") => {
+    setNoteFlow(flow);
+    setNewNoteOpen(true);
+  };
+  const closeNewNote = () => {
+    setNewNoteOpen(false);
+    setNoteFlow("menu");
+  };
   const [audioLanguage, setAudioLanguage] = useState("inglês");
   const [recordingType, setRecordingType] = useState("Aula");
   const [multipleSpeakers, setMultipleSpeakers] = useState(false);
@@ -542,7 +549,11 @@ function Index() {
       toast.error("URL inválida.");
       return;
     }
-    if (!["http:", "https:"].includes(parsedUrl.protocol) || parsedUrl.username || parsedUrl.password) {
+    if (
+      !["http:", "https:"].includes(parsedUrl.protocol) ||
+      parsedUrl.username ||
+      parsedUrl.password
+    ) {
       toast.error("Use uma URL HTTP ou HTTPS sem credenciais.");
       return;
     }
@@ -634,7 +645,7 @@ function Index() {
             aria-label="Pineapple Note — início"
           >
             <img
-              src={logoAsset.url}
+              src="/pineapple-note-app-icon.png"
               alt="Pineapple Note"
               className="h-12 max-w-[180px] w-auto object-contain object-left mix-blend-multiply sm:h-14 sm:max-w-[210px] lg:h-16 lg:max-w-[240px]"
             />
@@ -863,7 +874,15 @@ function Index() {
                       <button
                         key={item.label}
                         type="button"
-                        onClick={() => item.label === "Colar um link" ? openNewNote("link") : item.label === "Gravar áudio" ? openNewNote("record") : item.label === "Enviar vídeo" ? chooseFile(item.label) : openNewNote("document")}
+                        onClick={() =>
+                          item.label === "Colar um link"
+                            ? openNewNote("link")
+                            : item.label === "Gravar áudio"
+                              ? openNewNote("record")
+                              : item.label === "Enviar vídeo"
+                                ? chooseFile(item.label)
+                                : openNewNote("document")
+                        }
                         className={`group flex min-h-32 flex-col items-start justify-between rounded-lg border p-4 text-left transition ${
                           selectedType === item.label
                             ? "border-primary bg-green-soft/70"
@@ -882,7 +901,9 @@ function Index() {
                         )}
                         <span>
                           <strong className="block text-sm">{item.label}</strong>
-                          <span className="mt-1 block text-xs text-muted-foreground">{item.detail}</span>
+                          <span className="mt-1 block text-xs text-muted-foreground">
+                            {item.detail}
+                          </span>
                         </span>
                       </button>
                     ))}
@@ -975,9 +996,16 @@ function Index() {
               </div>
 
               {materialsLoading ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Carregando materiais">
+                <div
+                  className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                  aria-label="Carregando materiais"
+                >
                   {[1, 2, 3, 4, 5, 6].map((item) => (
-                    <div key={item} className="rounded-xl border border-border bg-card p-5 shadow-card" aria-hidden="true">
+                    <div
+                      key={item}
+                      className="rounded-xl border border-border bg-card p-5 shadow-card"
+                      aria-hidden="true"
+                    >
                       <div className="flex items-start justify-between gap-4">
                         <div className="skeleton-shimmer h-11 w-11 rounded-full" />
                         <div className="skeleton-shimmer h-6 w-24 rounded-full" />
@@ -990,85 +1018,87 @@ function Index() {
                   ))}
                 </div>
               ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {visibleMaterials.map((material) => {
-                  const progress = dashboardProgress[material.id] ?? 0;
-                  const Icon =
-                    material.source_type === "audio"
-                      ? AudioLines
-                      : material.source_type === "video"
-                        ? Video
-                        : FileText;
-                  return (
-                    <article
-                      key={material.id}
-                      className="rounded-xl border border-border bg-card p-5 shadow-card"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="material-icon material-icon-green">
-                          <Icon size={21} />
-                        </div>
-                        <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
-                          {progress}% concluído
-                        </span>
-                      </div>
-                      <p className="mt-5 text-xs font-bold uppercase text-muted-foreground">
-                        {material.source_type === "audio"
-                          ? "Áudio"
-                          : material.source_type === "video"
-                            ? "Vídeo"
-                            : "Documento"}
-                      </p>
-                      <h3 className="mt-1 min-h-12 truncate text-base font-bold leading-snug">
-                        {material.title}
-                      </h3>
-                      {material.status === "processing" ? (
-                        <div className="mt-3 rounded-xl bg-secondary/70 p-3" aria-live="polite">
-                          <div className="flex items-center gap-2 text-xs font-bold text-foreground">
-                            <Loader2 className="animate-spin text-primary" size={14} />
-                            Organizando seu material
-                          </div>
-                          <div className="mt-2 grid grid-cols-3 gap-1.5 text-[10px] font-semibold text-muted-foreground">
-                            <span className="rounded-md bg-card px-2 py-1.5 text-primary">1 · Conteúdo</span>
-                            <span className="rounded-md bg-card px-2 py-1.5">2 · Tópicos</span>
-                            <span className="rounded-md bg-card px-2 py-1.5">3 · Revisão</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {material.status === "ready"
-                            ? "Pronto para estudar"
-                            : material.status === "failed"
-                              ? "Não foi possível organizar. Tente novamente."
-                              : "Pronto para organizar"}
-                        </p>
-                      )}
-                      <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{new Date(material.created_at).toLocaleDateString("pt-BR")}</span>
-                        <strong className="text-foreground">{progress}%</strong>
-                      </div>
-                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
-                        <div
-                          className="h-full rounded-full bg-primary transition-[width] duration-500"
-                          style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
-                        />
-                      </div>
-                      <Button
-                        variant="secondary"
-                        className="mt-5 w-full min-h-11"
-                        onClick={() =>
-                          navigate({
-                            to: "/material/$materialId",
-                            params: { materialId: material.id },
-                          })
-                        }
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {visibleMaterials.map((material) => {
+                    const progress = dashboardProgress[material.id] ?? 0;
+                    const Icon =
+                      material.source_type === "audio"
+                        ? AudioLines
+                        : material.source_type === "video"
+                          ? Video
+                          : FileText;
+                    return (
+                      <article
+                        key={material.id}
+                        className="rounded-xl border border-border bg-card p-5 shadow-card"
                       >
-                        <Play size={16} /> Continuar
-                      </Button>
-                    </article>
-                  );
-                })}
-              </div>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="material-icon material-icon-green">
+                            <Icon size={21} />
+                          </div>
+                          <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+                            {progress}% concluído
+                          </span>
+                        </div>
+                        <p className="mt-5 text-xs font-bold uppercase text-muted-foreground">
+                          {material.source_type === "audio"
+                            ? "Áudio"
+                            : material.source_type === "video"
+                              ? "Vídeo"
+                              : "Documento"}
+                        </p>
+                        <h3 className="mt-1 min-h-12 truncate text-base font-bold leading-snug">
+                          {material.title}
+                        </h3>
+                        {material.status === "processing" ? (
+                          <div className="mt-3 rounded-xl bg-secondary/70 p-3" aria-live="polite">
+                            <div className="flex items-center gap-2 text-xs font-bold text-foreground">
+                              <Loader2 className="animate-spin text-primary" size={14} />
+                              Organizando seu material
+                            </div>
+                            <div className="mt-2 grid grid-cols-3 gap-1.5 text-[10px] font-semibold text-muted-foreground">
+                              <span className="rounded-md bg-card px-2 py-1.5 text-primary">
+                                1 · Conteúdo
+                              </span>
+                              <span className="rounded-md bg-card px-2 py-1.5">2 · Tópicos</span>
+                              <span className="rounded-md bg-card px-2 py-1.5">3 · Revisão</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            {material.status === "ready"
+                              ? "Pronto para estudar"
+                              : material.status === "failed"
+                                ? "Não foi possível organizar. Tente novamente."
+                                : "Pronto para organizar"}
+                          </p>
+                        )}
+                        <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{new Date(material.created_at).toLocaleDateString("pt-BR")}</span>
+                          <strong className="text-foreground">{progress}%</strong>
+                        </div>
+                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
+                          <div
+                            className="h-full rounded-full bg-primary transition-[width] duration-500"
+                            style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+                          />
+                        </div>
+                        <Button
+                          variant="secondary"
+                          className="mt-5 w-full min-h-11"
+                          onClick={() =>
+                            navigate({
+                              to: "/material/$materialId",
+                              params: { materialId: material.id },
+                            })
+                          }
+                        >
+                          <Play size={16} /> Continuar
+                        </Button>
+                      </article>
+                    );
+                  })}
+                </div>
               )}
 
               {visibleMaterials.length === 0 && !materialsLoading && (
@@ -1204,21 +1234,55 @@ function Index() {
           <div className="relative flex max-h-[96dvh] w-full max-w-[520px] flex-col overflow-hidden rounded-t-[34px] bg-[#f2f2f7] text-black shadow-2xl sm:max-h-[900px] sm:rounded-[34px]">
             <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-[#b8b8be] sm:hidden" />
             <div className="flex items-center justify-center px-5 pb-4 pt-5">
-              <h2 className="text-[22px] font-bold tracking-[-0.5px]">{noteFlow === "menu" ? "Nova nota" : noteFlow === "record" ? "" : noteFlow === "audio" ? "Enviar áudio" : noteFlow === "document" ? "Nova nota" : "Link da web"}</h2>
-              <button type="button" onClick={closeNewNote} className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-[#d4d4d8] bg-white/80" aria-label="Fechar"><X size={25} /></button>
+              <h2 className="text-[22px] font-bold tracking-[-0.5px]">
+                {noteFlow === "menu"
+                  ? "Nova nota"
+                  : noteFlow === "record"
+                    ? ""
+                    : noteFlow === "audio"
+                      ? "Enviar áudio"
+                      : noteFlow === "document"
+                        ? "Nova nota"
+                        : "Link da web"}
+              </h2>
+              <button
+                type="button"
+                onClick={closeNewNote}
+                className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-[#d4d4d8] bg-white/80"
+                aria-label="Fechar"
+              >
+                <X size={25} />
+              </button>
             </div>
             {noteFlow === "menu" && (
               <div className="space-y-4 overflow-y-auto px-5 pb-8 pt-2">
                 {[
                   { label: "Gravar áudio", icon: Mic2, action: () => setNoteFlow("record") },
                   { label: "Enviar áudio", icon: AudioLines, action: () => setNoteFlow("audio") },
-                  { label: "PDF, arquivo ou texto", icon: FileUp, action: () => setNoteFlow("document") },
+                  {
+                    label: "PDF, arquivo ou texto",
+                    icon: FileUp,
+                    action: () => setNoteFlow("document"),
+                  },
                   { label: "Link da web", icon: Link2, action: () => setNoteFlow("link") },
-                  { label: loadingDemo ? "Preparando aula exemplo…" : "Experimentar aula exemplo", icon: Sparkles, action: () => void openDemoLesson() },
+                  {
+                    label: loadingDemo ? "Preparando aula exemplo…" : "Experimentar aula exemplo",
+                    icon: Sparkles,
+                    action: () => void openDemoLesson(),
+                  },
                 ].map((item) => (
-                  <button key={item.label} type="button" onClick={item.action} className="flex min-h-[112px] w-full min-w-0 items-center gap-4 rounded-[24px] bg-white px-4 text-left shadow-sm active:scale-[0.99] sm:gap-5 sm:px-6">
-                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f1f1f6] text-black"><item.icon size={25} strokeWidth={1.8} /></span>
-                    <span className="min-w-0 text-[18px] font-semibold tracking-[-0.4px] sm:text-[22px]">{item.label}</span>
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={item.action}
+                    className="flex min-h-[112px] w-full min-w-0 items-center gap-4 rounded-[24px] bg-white px-4 text-left shadow-sm active:scale-[0.99] sm:gap-5 sm:px-6"
+                  >
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f1f1f6] text-black">
+                      <item.icon size={25} strokeWidth={1.8} />
+                    </span>
+                    <span className="min-w-0 text-[18px] font-semibold tracking-[-0.4px] sm:text-[22px]">
+                      {item.label}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -1226,56 +1290,182 @@ function Index() {
             {noteFlow === "record" && (
               <div className="flex min-h-[min(690px,calc(100dvh-8rem))] flex-col items-center justify-between overflow-y-auto px-5 pb-8 pt-20 text-center sm:min-h-[690px] sm:px-8 sm:pt-24">
                 <div className="flex flex-1 flex-col items-center justify-center">
-                  <div className="mb-8 text-[#8e8e93]"><AudioLines size={76} strokeWidth={1.25} /></div>
+                  <div className="mb-8 text-[#8e8e93]">
+                    <AudioLines size={76} strokeWidth={1.25} />
+                  </div>
                   <h3 className="text-[22px] font-bold">Comece a gravar para criar uma nota</h3>
-                  <p className="mt-1 text-[19px] text-[#8e8e93]">Toque abaixo para começar a gravar</p>
-                  {recording && <p className="mt-5 text-2xl font-semibold tabular-nums">{formatRecordingTime(recordingSeconds)}</p>}
+                  <p className="mt-1 text-[19px] text-[#8e8e93]">
+                    Toque abaixo para começar a gravar
+                  </p>
+                  {recording && (
+                    <p className="mt-5 text-2xl font-semibold tabular-nums">
+                      {formatRecordingTime(recordingSeconds)}
+                    </p>
+                  )}
                 </div>
                 <div className="w-full">
-                  <p className="mb-5 text-center text-xs leading-5 text-[#8e8e93]">Ao gravar, você confirma que tem permissão para gravar de acordo com nossa <span className="font-medium text-black">Política de Privacidade</span> e nossos <span className="font-medium text-black">Termos de Uso</span></p>
-                  <button type="button" onClick={() => void toggleRecording()} className={`min-h-16 w-full rounded-full px-8 text-lg font-bold shadow-lg ${recording ? "bg-[#ff453a] text-white" : "bg-black text-white"}`}>
+                  <p className="mb-5 text-center text-xs leading-5 text-[#8e8e93]">
+                    Ao gravar, você confirma que tem permissão para gravar de acordo com nossa{" "}
+                    <span className="font-medium text-black">Política de Privacidade</span> e nossos{" "}
+                    <span className="font-medium text-black">Termos de Uso</span>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void toggleRecording()}
+                    className={`min-h-16 w-full rounded-full px-8 text-lg font-bold shadow-lg ${recording ? "bg-[#ff453a] text-white" : "bg-black text-white"}`}
+                  >
                     {recording ? "Parar gravação" : "Start Recording"}
                   </button>
-                  {selectedFile && !recording && <Button className="mt-3 w-full rounded-full" onClick={() => void saveMaterial()}>Salvar gravação</Button>}
+                  {selectedFile && !recording && (
+                    <Button
+                      className="mt-3 w-full rounded-full"
+                      onClick={() => void saveMaterial()}
+                    >
+                      Salvar gravação
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
             {noteFlow === "audio" && (
               <div className="overflow-y-auto px-5 pb-8">
-                <button type="button" className="mb-5 flex h-14 w-full items-center justify-between rounded-2xl bg-black px-5 text-white"><span className="flex items-center gap-3"><CircleHelp size={20} /> Como importar do Gravador</span><ChevronRight size={20} /></button>
+                <button
+                  type="button"
+                  className="mb-5 flex h-14 w-full items-center justify-between rounded-2xl bg-black px-5 text-white"
+                >
+                  <span className="flex items-center gap-3">
+                    <CircleHelp size={20} /> Como importar do Gravador
+                  </span>
+                  <ChevronRight size={20} />
+                </button>
                 <label className="block text-[17px] font-medium">Arquivo de áudio</label>
-                <button type="button" onClick={() => { setSelectedType("Gravar áudio"); fileRef.current?.click(); }} className="mt-3 flex h-16 w-full items-center justify-between rounded-2xl bg-white px-5 text-left"><span>{selectedFile?.name ?? "Selecione um arquivo"}</span><ChevronDown size={23} /></button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedType("Gravar áudio");
+                    fileRef.current?.click();
+                  }}
+                  className="mt-3 flex h-16 w-full items-center justify-between rounded-2xl bg-white px-5 text-left"
+                >
+                  <span>{selectedFile?.name ?? "Selecione um arquivo"}</span>
+                  <ChevronDown size={23} />
+                </button>
                 <label className="mt-7 block text-[17px] font-medium">Idioma do áudio</label>
-                <select value={audioLanguage} onChange={(e) => setAudioLanguage(e.target.value)} className="mt-3 h-16 w-full appearance-none rounded-2xl bg-white px-5 text-[17px] outline-none"><option>inglês</option><option>português</option><option>espanhol</option><option>francês</option></select>
+                <select
+                  value={audioLanguage}
+                  onChange={(e) => setAudioLanguage(e.target.value)}
+                  className="mt-3 h-16 w-full appearance-none rounded-2xl bg-white px-5 text-[17px] outline-none"
+                >
+                  <option>inglês</option>
+                  <option>português</option>
+                  <option>espanhol</option>
+                  <option>francês</option>
+                </select>
                 <label className="mt-7 block text-[17px] font-medium">Pasta</label>
-                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5"><span>📌 Todas as notas</span><ChevronDown size={23} /></div>
+                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5">
+                  <span>📌 Todas as notas</span>
+                  <ChevronDown size={23} />
+                </div>
                 <label className="mt-7 block text-[17px] font-medium">Tipo de gravação</label>
-                <div className="mt-3 grid grid-cols-3 rounded-full bg-[#dedee3] p-0.5">{["Aula","Reunião","Outro"].map((type) => <button key={type} type="button" onClick={() => setRecordingType(type)} className={`rounded-full py-2 text-sm ${recordingType === type ? "bg-white font-semibold shadow-sm" : ""}`}>{type}</button>)}</div>
-                <div className="mt-6 flex items-center justify-between text-[17px]"><span>Várias pessoas falando?</span><button type="button" onClick={() => setMultipleSpeakers((v) => !v)} className={`h-8 w-14 rounded-full p-1 ${multipleSpeakers ? "bg-black" : "bg-[#b8b8be]"}`}><span className={`block h-6 w-6 rounded-full bg-white transition-transform ${multipleSpeakers ? "translate-x-6" : ""}`} /></button></div>
-                {selectedFile && <Button className="mt-8 w-full min-h-14 rounded-full" onClick={() => void saveMaterial()} disabled={uploadingMaterial}>{uploadingMaterial ? "Enviando..." : "Continuar"}</Button>}
+                <div className="mt-3 grid grid-cols-3 rounded-full bg-[#dedee3] p-0.5">
+                  {["Aula", "Reunião", "Outro"].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setRecordingType(type)}
+                      className={`rounded-full py-2 text-sm ${recordingType === type ? "bg-white font-semibold shadow-sm" : ""}`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-6 flex items-center justify-between text-[17px]">
+                  <span>Várias pessoas falando?</span>
+                  <button
+                    type="button"
+                    onClick={() => setMultipleSpeakers((v) => !v)}
+                    className={`h-8 w-14 rounded-full p-1 ${multipleSpeakers ? "bg-black" : "bg-[#b8b8be]"}`}
+                  >
+                    <span
+                      className={`block h-6 w-6 rounded-full bg-white transition-transform ${multipleSpeakers ? "translate-x-6" : ""}`}
+                    />
+                  </button>
+                </div>
+                {selectedFile && (
+                  <Button
+                    className="mt-8 w-full min-h-14 rounded-full"
+                    onClick={() => void saveMaterial()}
+                    disabled={uploadingMaterial}
+                  >
+                    {uploadingMaterial ? "Enviando..." : "Continuar"}
+                  </Button>
+                )}
               </div>
             )}
             {noteFlow === "document" && (
               <div className="px-5 pb-8">
                 <label className="block text-[17px] font-medium">Tipo de nota</label>
-                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5"><span>Documento</span><ChevronDown size={23} /></div>
+                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5">
+                  <span>Documento</span>
+                  <ChevronDown size={23} />
+                </div>
                 <label className="mt-7 block text-[17px] font-medium">Documento</label>
-                <button type="button" onClick={() => { setSelectedType("Documento"); fileRef.current?.click(); }} className="mt-3 flex h-16 w-full items-center justify-between rounded-2xl bg-white px-5 text-left"><span className="truncate">{selectedFile?.name ?? "Selecione um arquivo"}</span><ChevronDown size={23} /></button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedType("Documento");
+                    fileRef.current?.click();
+                  }}
+                  className="mt-3 flex h-16 w-full items-center justify-between rounded-2xl bg-white px-5 text-left"
+                >
+                  <span className="truncate">{selectedFile?.name ?? "Selecione um arquivo"}</span>
+                  <ChevronDown size={23} />
+                </button>
                 <p className="mt-7 text-[17px] font-medium">Tipos compatíveis</p>
-                <p className="mt-2 text-[17px] leading-6 text-[#8e8e93]">txt, md, csv, docx, pptx, xlsx, epub, pdf, heic, heif, jpg, jpeg, png, webp</p>
+                <p className="mt-2 text-[17px] leading-6 text-[#8e8e93]">
+                  txt, md, csv, docx, pptx, xlsx, epub, pdf, heic, heif, jpg, jpeg, png, webp
+                </p>
                 <p className="mt-7 text-[17px] font-medium">Pasta</p>
-                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5"><span>📌 Todas as notas</span><ChevronDown size={23} /></div>
-                {selectedFile && <Button className="mt-8 w-full min-h-14 rounded-full" onClick={() => void saveMaterial()} disabled={uploadingMaterial}>{uploadingMaterial ? "Enviando..." : "Salvar nota"}</Button>}
+                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5">
+                  <span>📌 Todas as notas</span>
+                  <ChevronDown size={23} />
+                </div>
+                {selectedFile && (
+                  <Button
+                    className="mt-8 w-full min-h-14 rounded-full"
+                    onClick={() => void saveMaterial()}
+                    disabled={uploadingMaterial}
+                  >
+                    {uploadingMaterial ? "Enviando..." : "Salvar nota"}
+                  </Button>
+                )}
               </div>
             )}
             {noteFlow === "link" && (
               <div className="px-5 pb-8">
                 <label className="block text-[22px] font-medium">Cole um link da web</label>
-                <Input value={sourceUrl} onChange={(event) => setSourceUrl(event.target.value)} placeholder="https://coconote.app" inputMode="url" className="mt-5 h-16 rounded-2xl border-0 bg-white px-5 text-[17px]" />
-                <p className="mt-2 px-1 text-[17px] text-[#8e8e93]">Funciona com sites, áudio, vídeo e muito mais</p>
+                <Input
+                  value={sourceUrl}
+                  onChange={(event) => setSourceUrl(event.target.value)}
+                  placeholder="https://coconote.app"
+                  inputMode="url"
+                  className="mt-5 h-16 rounded-2xl border-0 bg-white px-5 text-[17px]"
+                />
+                <p className="mt-2 px-1 text-[17px] text-[#8e8e93]">
+                  Funciona com sites, áudio, vídeo e muito mais
+                </p>
                 <p className="mt-8 text-[17px] font-medium">Pasta</p>
-                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5"><span>📌 Todas as notas</span><ChevronDown size={23} /></div>
-                <Button className="mt-8 min-h-14 w-full rounded-full bg-black text-white hover:bg-black/90" onClick={() => void saveUrlMaterial()} disabled={uploadingMaterial || !sourceUrl.trim()}>{uploadingMaterial ? "Adicionando..." : "Continuar"}</Button>
+                <div className="mt-3 flex h-16 items-center justify-between rounded-2xl bg-white px-5">
+                  <span>📌 Todas as notas</span>
+                  <ChevronDown size={23} />
+                </div>
+                <Button
+                  className="mt-8 min-h-14 w-full rounded-full bg-black text-white hover:bg-black/90"
+                  onClick={() => void saveUrlMaterial()}
+                  disabled={uploadingMaterial || !sourceUrl.trim()}
+                >
+                  {uploadingMaterial ? "Adicionando..." : "Continuar"}
+                </Button>
               </div>
             )}
           </div>
@@ -1286,14 +1476,35 @@ function Index() {
         <DialogContent className="w-[calc(100%-1rem)] rounded-2xl sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Adicionar conteúdo por link</DialogTitle>
-            <DialogDescription>Cole uma página, artigo ou endereço de vídeo que você quer transformar em material de estudo.</DialogDescription>
+            <DialogDescription>
+              Cole uma página, artigo ou endereço de vídeo que você quer transformar em material de
+              estudo.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <Label htmlFor="source-url">URL</Label>
-            <Input id="source-url" value={sourceUrl} onChange={(event) => setSourceUrl(event.target.value)} placeholder="https://..." inputMode="url" autoComplete="url" />
-            <p className="text-xs leading-5 text-muted-foreground">O Pineapple extrai o texto acessível da página e cria resumo, tópicos, flashcards e quiz.</p>
-            <Button className="w-full" onClick={() => void saveUrlMaterial()} disabled={uploadingMaterial || !sourceUrl.trim()}>
-              {uploadingMaterial ? <Loader2 className="animate-spin" size={17} /> : <Download size={17} />}
+            <Input
+              id="source-url"
+              value={sourceUrl}
+              onChange={(event) => setSourceUrl(event.target.value)}
+              placeholder="https://..."
+              inputMode="url"
+              autoComplete="url"
+            />
+            <p className="text-xs leading-5 text-muted-foreground">
+              O Pineapple extrai o texto acessível da página e cria resumo, tópicos, flashcards e
+              quiz.
+            </p>
+            <Button
+              className="w-full"
+              onClick={() => void saveUrlMaterial()}
+              disabled={uploadingMaterial || !sourceUrl.trim()}
+            >
+              {uploadingMaterial ? (
+                <Loader2 className="animate-spin" size={17} />
+              ) : (
+                <Download size={17} />
+              )}
               {uploadingMaterial ? "Adicionando..." : "Adicionar link"}
             </Button>
           </div>

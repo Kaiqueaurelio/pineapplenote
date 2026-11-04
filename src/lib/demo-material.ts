@@ -48,7 +48,8 @@ const topics = [
 const flashcards = [
   {
     question: "Por que a atenção é considerada o portão da memória?",
-    answer: "Sem atenção focada o estímulo não é codificado, então não há traço de memória a consolidar.",
+    answer:
+      "Sem atenção focada o estímulo não é codificado, então não há traço de memória a consolidar.",
   },
   {
     question: "Qual o papel do sono na aprendizagem?",
@@ -67,7 +68,8 @@ const flashcards = [
   },
   {
     question: "Reler o resumo várias vezes é eficiente?",
-    answer: "Não. Gera familiaridade, não recuperação; flashcards e simulados produzem retenção bem maior.",
+    answer:
+      "Não. Gera familiaridade, não recuperação; flashcards e simulados produzem retenção bem maior.",
   },
 ];
 
@@ -87,7 +89,8 @@ const quiz = [
       "Ouvir a aula em velocidade dupla",
     ],
     answer: 2,
-    explanation: "Recuperação ativa combinada com espaçamento é a dupla com melhor evidência experimental.",
+    explanation:
+      "Recuperação ativa combinada com espaçamento é a dupla com melhor evidência experimental.",
   },
   {
     question: "Estudar 6 horas na véspera comparado a 1 hora por 6 dias tende a:",
@@ -98,7 +101,8 @@ const quiz = [
       "Não ter efeito mensurável",
     ],
     answer: 1,
-    explanation: "A concentração na véspera favorece desempenho imediato, mas a retenção cai rapidamente.",
+    explanation:
+      "A concentração na véspera favorece desempenho imediato, mas a retenção cai rapidamente.",
   },
 ];
 

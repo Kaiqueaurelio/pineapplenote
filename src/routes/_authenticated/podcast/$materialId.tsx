@@ -66,14 +66,27 @@ function PodcastPage() {
     if (generating || !output) return;
     setGenerating(true);
     const { data, error } = await supabase.functions.invoke("ai-tools", {
-      body: { action: "podcast", materialId, style: twoVoices ? "duas vozes, conversa natural e didática" : voice.tone },
+      body: {
+        action: "podcast",
+        materialId,
+        style: twoVoices ? "duas vozes, conversa natural e didática" : voice.tone,
+      },
     });
     setGenerating(false);
     if (error || data?.error) {
       toast.error(data?.error ?? "Não foi possível gerar o podcast.");
       return;
     }
-    setGeneratedScript(Array.isArray(data.turns) ? data.turns.map((turn: { speaker?: string; text?: string }) => `${turn.speaker ?? "Pineapple"}: ${turn.text ?? ""}`).join("\n\n") : String(data.script ?? ""));
+    setGeneratedScript(
+      Array.isArray(data.turns)
+        ? data.turns
+            .map(
+              (turn: { speaker?: string; text?: string }) =>
+                `${turn.speaker ?? "Pineapple"}: ${turn.text ?? ""}`,
+            )
+            .join("\n\n")
+        : String(data.script ?? ""),
+    );
     toast.success("Roteiro do podcast gerado.");
   }
 
@@ -81,7 +94,11 @@ function PodcastPage() {
     if (audioGenerating || !output) return;
     setAudioGenerating(true);
     const { data, error } = await supabase.functions.invoke("ai-tools", {
-      body: { action: "podcast-audio", materialId, style: twoVoices ? "conversa de estudo natural" : voice.tone },
+      body: {
+        action: "podcast-audio",
+        materialId,
+        style: twoVoices ? "conversa de estudo natural" : voice.tone,
+      },
     });
     setAudioGenerating(false);
     if (error || data?.error || !data?.audio) {
@@ -208,7 +225,10 @@ function PodcastPage() {
           </div>
           <button
             type="button"
-            onClick={() => { setTwoVoices((value) => !value); void generatePodcast(); }}
+            onClick={() => {
+              setTwoVoices((value) => !value);
+              void generatePodcast();
+            }}
             className="mt-5 w-full rounded-2xl border border-border bg-secondary p-5 text-left transition hover:border-brand-violet/30"
           >
             <div className="flex items-center gap-4">
@@ -277,7 +297,9 @@ function PodcastPage() {
           {audioUrl && (
             <div className="mt-6 rounded-2xl border border-border bg-secondary p-4">
               <p className="mb-3 text-sm font-black">Podcast gerado</p>
-              <audio controls className="w-full" src={audioUrl}>Seu navegador não suporta áudio.</audio>
+              <audio controls className="w-full" src={audioUrl}>
+                Seu navegador não suporta áudio.
+              </audio>
             </div>
           )}
         </section>
