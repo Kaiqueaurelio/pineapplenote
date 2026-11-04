@@ -1,45 +1,39 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
+  ArrowDown,
+  ArrowLeft,
   ArrowRight,
   BookOpen,
-  NotebookPen,
-  FileText,
-  Mic2,
-  Play,
-  Upload,
-  GraduationCap,
+  Check,
   ChevronDown,
-  CheckCircle2,
-  MessageCircle,
-  Languages,
+  FileAudio2,
+  FileText,
   Gamepad2,
-  Podcast,
-  Smartphone,
-  Monitor,
-  Link2,
   Headphones,
-  Share2,
-  FileStack,
-  Presentation,
+  Languages,
+  MessageCircle,
+  Mic2,
+  NotebookPen,
+  Play,
+  Podcast,
+  Sparkles,
+  Upload,
 } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Pineapple Note — Transforme conteúdo em conhecimento" },
+      { title: "Pineapple Note — Nunca mais anote tudo sozinho" },
       {
         name: "description",
         content:
-          "Pineapple Note transforma aulas, áudios, vídeos e documentos em notas, transcrições e materiais de estudo com IA.",
+          "Grave aulas, envie arquivos e transforme seu conteúdo em notas, transcrições e materiais de estudo com o Pineapple Note.",
       },
-      { property: "og:title", content: "Pineapple Note — Transforme conteúdo em conhecimento" },
+      { property: "og:title", content: "Pineapple Note — Nunca mais anote tudo sozinho" },
       {
         property: "og:description",
-        content:
-          "Grave, envie ou importe seu conteúdo. O Pineapple Note organiza, transcreve e cria materiais para você estudar.",
+        content: "Notas, transcrições e materiais de estudo organizados com IA.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -48,423 +42,376 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
-const features = [
+const previews = [
   {
-    icon: Mic2,
-    title: "Grave aulas e reuniões",
-    description:
-      "Capture o áudio direto pelo navegador e continue focado no que está sendo explicado.",
-    status: "Disponível",
-  },
-  {
-    icon: Upload,
-    title: "Envie seus materiais",
-    description:
-      "Áudios, vídeos e documentos ficam no mesmo espaço para você estudar sem espalhar seus arquivos.",
-    status: "Disponível",
-  },
-  {
+    eyebrow: "NOTAS DA AULA",
+    title: "Fundamentos de biologia celular",
+    summary:
+      "A célula é a unidade estrutural e funcional dos seres vivos. Suas organelas trabalham em conjunto para manter o metabolismo e a reprodução celular.",
+    tag: "Resumo pronto",
     icon: FileText,
-    title: "Notas e transcrições",
-    description:
-      "Transforme conteúdo bruto em transcrições, resumos, tópicos e pontos importantes.",
-    status: "Disponível",
+    cards: ["Resumo organizado", "12 flashcards", "Quiz com 8 questões"],
   },
   {
+    eyebrow: "REVISÃO INTELIGENTE",
+    title: "O que você já aprendeu",
+    summary:
+      "Revise os conceitos principais em pequenas etapas. Suas respostas ajudam a escolher o próximo tópico para estudar.",
+    tag: "Flashcards",
     icon: BookOpen,
-    title: "Quizzes e flashcards",
-    description:
-      "Crie materiais de revisão a partir do conteúdo processado e acompanhe sua evolução.",
-    status: "Disponível",
+    cards: ["Membrana plasmática", "Organelas celulares", "Síntese de proteínas"],
   },
   {
+    eyebrow: "CONVERSE COM O MATERIAL",
+    title: "Pergunte sobre a sua aula",
+    summary:
+      "Por que as mitocôndrias são chamadas de usinas de energia? Elas produzem a maior parte do ATP usado pela célula.",
+    tag: "Tutor IA",
     icon: MessageCircle,
-    title: "Converse com seu material",
-    description:
-      "Faça perguntas diretamente sobre suas notas e receba explicações baseadas no conteúdo.",
-    status: "Disponível",
-  },
-  {
-    icon: Languages,
-    title: "Mais idiomas",
-    description:
-      "Amplie o estudo para conteúdos em diferentes idiomas, com suporte de processamento e tradução.",
-    status: "Disponível",
-  },
-  {
-    icon: Gamepad2,
-    title: "Jogos de estudo",
-    description:
-      "Pratique com modos interativos baseados nos flashcards e quizzes do seu material.",
-    status: "Disponível",
-  },
-  {
-    icon: Podcast,
-    title: "Podcasts de estudo",
-    description:
-      "Transforme o resumo em uma revisão falada e escolha uma voz para ouvir o conteúdo.",
-    status: "Disponível",
-  },
-  {
-    icon: Share2,
-    title: "Compartilhe o que aprendeu",
-    description:
-      "Organize materiais de estudo em um espaço que pode evoluir para colaboração e compartilhamento.",
-    status: "Disponível",
+    cards: ["Respostas baseadas nas notas", "Citações do conteúdo", "Explicações passo a passo"],
   },
 ];
 
-const steps = [
+const workflow = [
   {
     number: "01",
     title: "Grave ou envie",
-    description: "Comece com uma aula, reunião, áudio, vídeo ou documento.",
+    description: "Use uma aula, reunião, áudio, vídeo ou documento.",
+    icon: Mic2,
   },
   {
     number: "02",
-    title: "Deixe a IA organizar",
-    description: "O conteúdo é processado e transformado em uma base de estudo mais clara.",
+    title: "Receba suas notas",
+    description: "A IA organiza o conteúdo e cria uma transcrição clara.",
+    icon: Sparkles,
   },
   {
     number: "03",
     title: "Revise e aprenda",
-    description: "Leia, revise, responda quizzes e use flashcards para fixar o conteúdo.",
+    description: "Pratique com flashcards, quizzes e seu tutor de IA.",
+    icon: BookOpen,
   },
 ];
 
-const inputTypes = [
-  { icon: Mic2, title: "Áudio", description: "Aulas, reuniões e gravações." },
-  { icon: FileText, title: "Documentos", description: "Materiais para leitura e revisão." },
-  { icon: Headphones, title: "Vídeo", description: "Conteúdo falado transformado em estudo." },
-  { icon: Link2, title: "Links", description: "Importação de conteúdos por link em evolução." },
-  { icon: FileStack, title: "Biblioteca", description: "Tudo organizado em um só lugar." },
+const featureItems = [
+  {
+    icon: Upload,
+    title: "Grave ou envie",
+    description: "Aulas, reuniões, PDFs, documentos, áudios e vídeos no mesmo lugar.",
+  },
+  {
+    icon: NotebookPen,
+    title: "Notas e transcrições",
+    description: "Conteúdo organizado para encontrar os pontos principais rapidamente.",
+  },
+  {
+    icon: MessageCircle,
+    title: "Converse com suas notas",
+    description: "Pergunte ao seu material e receba respostas baseadas no conteúdo.",
+  },
+  {
+    icon: BookOpen,
+    title: "Quizzes e flashcards",
+    description: "Transforme cada aula em atividades de revisão para praticar.",
+  },
+  {
+    icon: Podcast,
+    title: "Podcasts de estudo",
+    description: "Ouça uma revisão falada a partir do material que você enviou.",
+  },
+  {
+    icon: Languages,
+    title: "Estude em outros idiomas",
+    description: "Traduza seus materiais e continue estudando no idioma que preferir.",
+  },
+  {
+    icon: Gamepad2,
+    title: "Jogos de estudo",
+    description: "Pratique os conceitos com atividades rápidas e interativas.",
+  },
+  {
+    icon: Headphones,
+    title: "No seu ritmo",
+    description: "Acesse seus materiais pelo navegador no computador ou celular.",
+  },
 ];
 
 const faqs = [
   {
     question: "O que é o Pineapple Note?",
     answer:
-      "É uma plataforma de estudo com IA criada para transformar conteúdos como aulas, áudios, vídeos e documentos em materiais mais fáceis de entender e revisar.",
-  },
-  {
-    question: "Posso usar pelo celular?",
-    answer:
-      "Sim. A interface é responsiva e foi construída com foco em uso confortável no celular e em telas maiores.",
+      "É um espaço de estudo com IA que transforma aulas, gravações e documentos em notas, transcrições e atividades de revisão.",
   },
   {
     question: "Que tipos de conteúdo posso enviar?",
     answer:
-      "O fluxo atual trabalha com gravações de áudio, vídeos e documentos compatíveis. Você também pode importar uma página por link para transformar o conteúdo em material de estudo.",
+      "Você pode gravar áudio ou enviar arquivos de áudio, vídeo e documentos compatíveis. A importação de páginas por link ainda está em evolução.",
   },
   {
-    question: "O Pineapple Note terá chat com os materiais?",
+    question: "Posso conversar com o meu material?",
     answer:
-      "Sim. O Pineapple Tutor permite conversar diretamente com uma nota processada e fazer perguntas sobre o conteúdo.",
+      "Sim. Depois que o material for processado, você pode perguntar sobre o conteúdo e receber respostas baseadas nas suas notas.",
   },
   {
-    question: "O Pineapple Note terá jogos, podcasts e mais idiomas?",
-    answer:
-      "Sim. O Pineapple Note oferece jogos de estudo, podcasts e tradução para diferentes idiomas a partir dos materiais processados.",
+    question: "Funciona no celular?",
+    answer: "Sim. O Pineapple Note funciona no navegador do celular, tablet e computador.",
   },
-  {
-    question: "O Pineapple Note é um projeto da Decode Analytics?",
-    answer: "Sim. O Pineapple Note é desenvolvido pela Decode Analytics.",
-  },
-  {
-    question: "Preciso anotar tudo durante a aula?",
-    answer:
-      "A proposta é justamente reduzir esse trabalho manual: você captura o conteúdo e usa o Pineapple Note para organizar e revisar depois.",
-  },
-];
-
-const scrollChapters = [
-  { id: "inicio", label: "Início" },
-  { id: "como-funciona", label: "Fluxo" },
-  { id: "recursos", label: "Recursos" },
-  { id: "experiencia", label: "Experiência" },
-  { id: "perguntas", label: "Dúvidas" },
 ];
 
 function LandingPage() {
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const preview = previews[previewIndex];
+  const PreviewIcon = preview.icon;
 
-  useEffect(() => {
-    const updateScrollProgress = () => {
-      const root = document.documentElement;
-      const scrollable = root.scrollHeight - root.clientHeight;
-      setScrollProgress(scrollable > 0 ? Math.min(window.scrollY / scrollable, 1) : 0);
-    };
-
-    updateScrollProgress();
-    window.addEventListener("scroll", updateScrollProgress, { passive: true });
-    window.addEventListener("resize", updateScrollProgress);
-
-    return () => {
-      window.removeEventListener("scroll", updateScrollProgress);
-      window.removeEventListener("resize", updateScrollProgress);
-    };
-  }, []);
+  const movePreview = (direction: number) => {
+    setPreviewIndex((index) => (index + direction + previews.length) % previews.length);
+  };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-foreground scroll-smooth">
-      <div
-        aria-hidden="true"
-        className="fixed inset-x-0 top-0 z-[60] h-0.5 origin-left bg-primary transition-transform duration-100"
-        style={{ transform: `scaleX(${scrollProgress})` }}
-      />
-      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-xl">
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-[72px] sm:px-6 lg:px-8">
-          <Link to="/" className="flex items-center" aria-label="Pineapple Note — início">
+    <div className="min-h-screen overflow-x-hidden bg-[#f4f1e9] text-[#191815] selection:bg-[#d9c6ff] selection:text-[#191815]">
+      <header className="sticky top-0 z-50 border-b border-[#191815]/[0.06] bg-[#f4f1e9]/95 backdrop-blur-md">
+        <nav className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-5 sm:px-9 lg:px-14">
+          <Link to="/" className="flex items-center gap-2.5" aria-label="Pineapple Note — início">
             <img
               src="/pineapple-note-app-icon.png"
-              alt="Pineapple Note"
-              className="h-14 w-auto origin-left scale-[1.12] object-contain mix-blend-multiply sm:h-16 sm:scale-[1.1]"
+              alt=""
+              className="h-10 w-10 rounded-full object-cover"
             />
+            <span className="text-[17px] font-bold tracking-[-0.04em]">Pineapple Note</span>
           </Link>
 
-          <div className="hidden items-center gap-7 md:flex">
-            <a
-              href="#como-funciona"
-              className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
+          <div className="flex items-center gap-3">
+            <Link
+              to="/auth"
+              search={{ mode: "login" }}
+              className="hidden rounded-full px-4 py-2 text-sm font-semibold transition hover:bg-black/5 sm:inline-flex"
             >
-              Como funciona
-            </a>
-            <a
-              href="#recursos"
-              className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
-            >
-              Recursos
-            </a>
-            <a
-              href="#perguntas"
-              className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
-            >
-              Dúvidas
-            </a>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Link to="/auth" search={{ mode: "login" }}>
-              <Button variant="ghost" className="hidden sm:inline-flex">
-                Entrar
-              </Button>
+              Entrar
             </Link>
-            <Link to="/auth" search={{ mode: "signup" }}>
-              <Button className="rounded-xl px-4">
-                Começar grátis <ArrowRight size={16} />
-              </Button>
+            <Link
+              to="/auth"
+              search={{ mode: "signup" }}
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-[#171714] px-5 text-sm font-semibold text-white transition hover:bg-[#35342f]"
+            >
+              Começar grátis <ArrowRight size={15} />
             </Link>
           </div>
         </nav>
       </header>
 
       <main>
-        <nav
-          aria-label="Navegação pela página"
-          className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 rounded-full border border-border bg-card/90 p-2 shadow-card backdrop-blur-xl xl:block"
-        >
-          {scrollChapters.map((chapter) => (
-            <a
-              key={chapter.id}
-              href={`#${chapter.id}`}
-              title={chapter.label}
-              className="group flex h-9 items-center justify-end"
-            >
-              <span className="mr-2 max-w-0 overflow-hidden whitespace-nowrap text-xs font-bold text-muted-foreground opacity-0 transition-all group-hover:max-w-24 group-hover:opacity-100">
-                {chapter.label}
+        <section className="mx-auto grid min-h-[calc(100svh-76px)] max-w-[1440px] items-center gap-8 px-5 pb-14 pt-8 sm:px-9 sm:pb-20 sm:pt-12 lg:grid-cols-[1.06fr_.94fr] lg:gap-10 lg:px-14 lg:py-12">
+          <div className="relative z-10 max-w-[670px]">
+            <div className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] font-medium text-[#77746d] sm:text-sm">
+              <span className="inline-flex items-center gap-1.5">
+                <Check size={14} className="text-[#8071a2]" /> Áudios
               </span>
-              <span className="h-2.5 w-2.5 rounded-full bg-border transition group-hover:scale-125 group-hover:bg-primary" />
-            </a>
-          ))}
-        </nav>
-        <section
-          id="inicio"
-          className="relative isolate scroll-mt-24 overflow-hidden px-4 pb-20 pt-14 sm:px-6 sm:pb-28 sm:pt-24 lg:px-8 lg:pt-28"
-        >
-          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[720px] bg-[radial-gradient(circle_at_50%_-10%,hsl(var(--primary)/0.20),transparent_58%)]" />
-          <div className="pointer-events-none absolute left-1/2 top-40 -z-10 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
-
-          <div className="mx-auto max-w-5xl text-center">
-            <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3.5 py-2 text-xs font-bold text-primary shadow-sm">
-              <NotebookPen size={15} strokeWidth={2} />
-              Seu novo espaço de estudo com IA
+              <span className="inline-flex items-center gap-1.5">
+                <Check size={14} className="text-[#8071a2]" /> Notas
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Check size={14} className="text-[#8071a2]" /> Flashcards
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Check size={14} className="text-[#8071a2]" /> Quizzes
+              </span>
             </div>
 
-            <h1 className="mx-auto max-w-5xl text-balance text-4xl font-black leading-[0.98] tracking-[-0.04em] sm:text-6xl lg:text-7xl">
-              Nunca mais passe a aula inteira
-              <span className="block text-primary">tentando anotar tudo.</span>
+            <p className="mb-3 text-sm font-semibold tracking-wide text-[#736b5c] sm:text-base">
+              Seu assistente de estudos
+            </p>
+            <h1 className="max-w-[680px] text-[clamp(3.5rem,7.35vw,7.25rem)] font-medium leading-[.88] tracking-[-0.075em]">
+              Nunca mais
+              <br />
+              anote tudo.
             </h1>
-
-            <p className="mx-auto mt-7 max-w-2xl text-base leading-7 text-muted-foreground sm:text-xl sm:leading-8">
-              Grave, envie ou importe seu conteúdo. O Pineapple Note ajuda a transformar informação
-              bruta em notas, transcrições e materiais de estudo organizados.
+            <p className="mt-7 max-w-[520px] text-base leading-7 text-[#66635d] sm:mt-8 sm:text-lg sm:leading-8">
+              Grave aulas, envie seus arquivos e receba notas, transcrições e materiais para estudar
+              sem perder o fio da explicação.
             </p>
 
-            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link to="/auth" search={{ mode: "signup" }}>
-                <Button
-                  size="lg"
-                  className="h-12 w-full rounded-xl px-7 text-base font-bold shadow-lg sm:w-auto"
-                >
-                  Começar grátis
-                  <ArrowRight size={18} />
-                </Button>
+            <div className="mt-8 flex flex-col gap-3 min-[420px]:flex-row">
+              <Link
+                to="/auth"
+                search={{ mode: "signup" }}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#171714] px-6 text-sm font-semibold text-white transition hover:bg-[#35342f]"
+              >
+                Começar grátis <ArrowRight size={16} />
               </Link>
-              <a href="#como-funciona">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-12 w-full rounded-xl px-7 text-base sm:w-auto"
-                >
-                  <Play size={17} />
-                  Conhecer o Pineapple Note
-                </Button>
-              </a>
+              <Link
+                to="/auth"
+                search={{ mode: "login" }}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-[#191815]/15 px-6 text-sm font-semibold transition hover:bg-white/60"
+              >
+                <Play size={14} fill="currentColor" /> Entrar na minha conta
+              </Link>
             </div>
 
-            <p className="mt-5 text-xs text-muted-foreground">
-              Desenvolvido pela <strong className="text-foreground">Decode Analytics</strong>.
-            </p>
+            <div className="mt-5 flex items-center gap-2 text-xs text-[#77746d]">
+              <Sparkles size={14} className="text-[#8b6cc2]" />
+              Feito para você prestar atenção na aula.
+            </div>
           </div>
 
-          <div className="mx-auto mt-14 max-w-6xl sm:mt-20">
-            <div className="relative rounded-[30px] border border-border bg-card p-1.5 shadow-[0_30px_90px_-35px_hsl(var(--foreground)/0.35)] sm:p-2.5">
-              <div className="overflow-hidden rounded-[24px] border border-border/70 bg-background">
-                <div className="flex h-10 items-center gap-2 border-b border-border px-4">
-                  <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-brand-yellow" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-                  <div className="ml-4 h-6 flex-1 rounded-md bg-secondary" />
+          <div className="relative mx-auto w-full max-w-[550px] lg:ml-auto">
+            <div
+              aria-hidden="true"
+              className="absolute -inset-5 rounded-[42%] bg-[#e7dfcf] blur-3xl"
+            />
+            <div className="relative overflow-hidden rounded-[28px] border border-[#29251f]/10 bg-[#fffefa] p-3 shadow-[0_28px_90px_-38px_rgba(35,30,20,.32)] sm:rounded-[34px] sm:p-4">
+              <div className="flex items-center justify-between gap-4 px-2 pb-3 pt-1 sm:px-3 sm:pb-4">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f0ebf7] text-[#74638e]">
+                    <PreviewIcon size={17} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-[11px] font-bold tracking-wide text-[#827f77]">
+                      {preview.eyebrow}
+                    </p>
+                    <p className="truncate text-sm font-semibold">Seu material de estudo</p>
+                  </div>
                 </div>
-                <div className="grid min-h-[330px] md:grid-cols-[210px_1fr]">
-                  <aside className="hidden border-r border-border bg-secondary/35 p-5 md:block">
-                    <div className="mb-7 flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-xl bg-primary/15" />
-                      <div className="h-4 w-24 rounded bg-foreground/10" />
-                    </div>
-                    <div className="space-y-2.5">
-                      <div className="h-10 rounded-xl bg-primary/10" />
-                      <div className="h-10 rounded-xl bg-muted" />
-                      <div className="h-10 rounded-xl bg-muted" />
-                      <div className="h-10 rounded-xl bg-muted" />
-                    </div>
-                  </aside>
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#edf3e9] px-2.5 py-1.5 text-[10px] font-semibold text-[#58684d] sm:text-xs">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#779568]" /> Pronto
+                </span>
+              </div>
 
-                  <div className="p-5 sm:p-8">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                      <div>
-                        <div className="h-3 w-24 rounded bg-primary/20" />
-                        <div className="mt-3 h-8 w-72 max-w-full rounded bg-foreground/10" />
-                      </div>
-                      <div className="rounded-lg bg-primary px-3 py-2 text-xs font-bold text-primary-foreground">
-                        Material pronto
-                      </div>
-                    </div>
+              <div className="relative overflow-hidden rounded-[21px] bg-[#f5f2ea] p-4 sm:min-h-[410px] sm:p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="max-w-[330px]">
+                    <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#827c70]">
+                      {preview.tag}
+                    </p>
+                    <h2 className="mt-2 text-xl font-semibold leading-tight tracking-[-.04em] sm:text-[27px]">
+                      {preview.title}
+                    </h2>
+                  </div>
+                  <span className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#74638e] shadow-sm sm:flex">
+                    <Sparkles size={16} />
+                  </span>
+                </div>
 
-                    <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                      {[
-                        { icon: FileText, label: "Notas organizadas" },
-                        { icon: BookOpen, label: "Resumo com IA" },
-                        { icon: CheckCircle2, label: "Revisão e progresso" },
-                      ].map(({ icon: Icon, label }) => (
-                        <div
-                          key={label}
-                          className="rounded-2xl border border-border bg-card p-4 shadow-sm"
-                        >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                            <Icon size={20} />
-                          </div>
-                          <div className="mt-4 h-3 w-28 rounded bg-foreground/10" />
-                          <div className="mt-3 h-2 w-full rounded bg-muted" />
-                          <div className="mt-2 h-2 w-4/5 rounded bg-muted" />
-                        </div>
-                      ))}
-                    </div>
+                <div className="mt-5 rounded-2xl bg-white p-4 shadow-[0_8px_25px_-20px_rgba(0,0,0,.45)] sm:mt-6 sm:p-5">
+                  <div className="mb-3 flex items-center gap-2 text-xs font-semibold text-[#5d5850]">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#f2edf8] text-[#74638e]">
+                      <NotebookPen size={14} />
+                    </span>
+                    Resumo inteligente
+                  </div>
+                  <p className="text-[13px] leading-[1.7] text-[#706c65] sm:text-sm sm:leading-6">
+                    {preview.summary}
+                  </p>
+                  <div className="mt-4 flex items-center gap-2 border-t border-[#eeeae2] pt-3 text-[10px] font-medium text-[#8a857a]">
+                    <FileAudio2 size={13} /> Transcrição e tópicos organizados
+                  </div>
+                </div>
 
-                    <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_.6fr]">
-                      <div className="rounded-2xl border border-border p-5">
-                        <div className="flex items-center justify-between">
-                          <div className="h-3 w-32 rounded bg-foreground/10" />
-                          <div className="h-7 w-20 rounded-lg bg-primary/10" />
-                        </div>
-                        <div className="mt-5 space-y-2.5">
-                          <div className="h-2.5 w-full rounded bg-muted" />
-                          <div className="h-2.5 w-11/12 rounded bg-muted" />
-                          <div className="h-2.5 w-4/5 rounded bg-muted" />
-                          <div className="h-2.5 w-9/12 rounded bg-muted" />
-                        </div>
-                      </div>
-                      <div className="rounded-2xl border border-border p-5">
-                        <div className="h-3 w-20 rounded bg-foreground/10" />
-                        <div className="mt-4 flex items-end gap-2">
-                          <div className="h-16 w-3 rounded-t bg-primary/20" />
-                          <div className="h-24 w-3 rounded-t bg-primary/35" />
-                          <div className="h-20 w-3 rounded-t bg-primary/25" />
-                          <div className="h-28 w-3 rounded-t bg-primary/45" />
-                          <div className="h-32 w-3 rounded-t bg-primary" />
-                        </div>
-                      </div>
+                <div className="mt-3 grid gap-2 sm:mt-4 sm:grid-cols-3">
+                  {preview.cards.map((card, index) => (
+                    <div key={card} className="rounded-xl border border-[#eae6dd] bg-white/85 p-3">
+                      <span className="text-[10px] font-bold text-[#8b7ca5]">0{index + 1}</span>
+                      <p className="mt-1.5 text-[11px] font-semibold leading-4 text-[#514e48]">
+                        {card}
+                      </p>
                     </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex items-center justify-between border-t border-[#e5dfd3] pt-3">
+                  <div className="flex items-center gap-1.5">
+                    {previews.map((item, index) => (
+                      <button
+                        key={item.eyebrow}
+                        type="button"
+                        aria-label={`Mostrar prévia ${index + 1}`}
+                        aria-current={index === previewIndex}
+                        onClick={() => setPreviewIndex(index)}
+                        className={`h-1.5 rounded-full transition-all ${index === previewIndex ? "w-7 bg-[#77658f]" : "w-1.5 bg-[#d3cec3] hover:bg-[#a9a294]"}`}
+                      />
+                    ))}
+                    <span className="ml-2 text-[10px] text-[#827d72]">
+                      {previewIndex + 1} / {previews.length}
+                    </span>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      aria-label="Prévia anterior"
+                      onClick={() => movePreview(-1)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d8d2c8] bg-white transition hover:bg-[#f8f6f1]"
+                    >
+                      <ArrowLeft size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Próxima prévia"
+                      onClick={() => movePreview(1)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d8d2c8] bg-white transition hover:bg-[#f8f6f1]"
+                    >
+                      <ArrowRight size={14} />
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <a
-            href="#como-funciona"
-            className="mx-auto mt-10 flex w-fit flex-col items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground transition hover:text-primary"
-          >
-            <span>Continue explorando</span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-primary">
-              ↓
-            </span>
-          </a>
-        </section>
-
-        <section className="border-y border-border bg-secondary/30 px-4 py-12 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-6xl text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-              Feito para acompanhar sua rotina
-            </p>
-            <div className="mt-6 grid grid-cols-2 gap-3 text-sm font-semibold text-muted-foreground sm:grid-cols-5">
-              {inputTypes.map(({ icon: Icon, title, description }) => (
-                <div
-                  key={title}
-                  className="rounded-xl border border-border bg-card px-4 py-4 text-left"
-                >
-                  <Icon size={18} className="text-primary" />
-                  <div className="mt-3 text-foreground">{title}</div>
-                  <div className="mt-1 text-xs font-normal leading-5">{description}</div>
-                </div>
-              ))}
+            <div className="absolute -bottom-5 -left-3 hidden items-center gap-3 rounded-2xl border border-[#2b251c]/[0.08] bg-white px-4 py-3 shadow-[0_15px_45px_-25px_rgba(0,0,0,.4)] sm:flex lg:-left-10">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f1edf7] text-[#74638e]">
+                <Check size={17} />
+              </span>
+              <span>
+                <span className="block text-xs font-semibold">Material organizado</span>
+                <span className="mt-0.5 block text-[10px] text-[#827d72]">Pronto para revisar</span>
+              </span>
             </div>
           </div>
         </section>
 
-        <section id="como-funciona" className="px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-          <div className="mx-auto max-w-6xl">
-            <div className="max-w-2xl">
-              <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">
-                Como funciona
-              </span>
-              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">
-                O processo é simples.
+        <section className="border-y border-[#201e19]/[0.08] bg-[#eeeae0] px-5 py-7 sm:px-9 sm:py-9 lg:px-14">
+          <div className="mx-auto flex max-w-[1260px] flex-wrap items-center justify-center gap-x-10 gap-y-4 text-center sm:justify-between">
+            <p className="w-full text-xs font-semibold text-[#827d72] sm:w-auto sm:text-left">
+              Tudo para estudar melhor
+            </p>
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-[#59564f]">
+              <Mic2 size={16} className="text-[#82709e]" /> Grave aulas
+            </span>
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-[#59564f]">
+              <Upload size={16} className="text-[#82709e]" /> Envie arquivos
+            </span>
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-[#59564f]">
+              <BookOpen size={16} className="text-[#82709e]" /> Revise com IA
+            </span>
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-[#59564f]">
+              <Languages size={16} className="text-[#82709e]" /> Estude em outros idiomas
+            </span>
+          </div>
+        </section>
+
+        <section id="como-funciona" className="scroll-mt-24 px-5 py-20 sm:px-9 sm:py-28 lg:px-14">
+          <div className="mx-auto max-w-[1260px]">
+            <div className="max-w-[620px]">
+              <p className="text-sm font-semibold text-[#82709e]">Como funciona</p>
+              <h2 className="mt-3 text-4xl font-medium leading-[1.04] tracking-[-.06em] sm:text-6xl">
+                Do conteúdo à revisão, sem complicar.
               </h2>
-              <p className="mt-4 text-base leading-7 text-muted-foreground">
-                A experiência foi pensada para acompanhar o caminho natural do estudo: capturar o
-                conteúdo, organizar o que importa e voltar para revisar.
+              <p className="mt-5 max-w-[520px] leading-7 text-[#706c65]">
+                Capture o que está sendo explicado. O Pineapple Note organiza o material para você
+                voltar, praticar e aprender no seu ritmo.
               </p>
             </div>
-
-            <div className="mt-12 grid gap-5 md:grid-cols-3">
-              {steps.map((step) => (
+            <div className="mt-12 grid gap-3 md:grid-cols-3 md:gap-4">
+              {workflow.map(({ number, title, description, icon: Icon }) => (
                 <article
-                  key={step.number}
-                  className="relative rounded-3xl border border-border bg-card p-7 shadow-sm"
+                  key={number}
+                  className="rounded-[22px] border border-[#25221d]/[0.09] bg-[#faf8f3] p-6 sm:p-7"
                 >
-                  <span className="text-sm font-black text-primary">{step.number}</span>
-                  <h3 className="mt-10 text-2xl font-extrabold">{step.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{step.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[#8c877d]">{number}</span>
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#eee9f5] text-[#74638e]">
+                      <Icon size={18} />
+                    </span>
+                  </div>
+                  <h3 className="mt-8 text-xl font-semibold tracking-[-.035em]">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#706c65]">{description}</p>
                 </article>
               ))}
             </div>
@@ -473,236 +420,76 @@ function LandingPage() {
 
         <section
           id="recursos"
-          className="border-y border-border bg-secondary/30 px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+          className="scroll-mt-24 bg-[#ebe7dd] px-5 py-20 sm:px-9 sm:py-28 lg:px-14"
         >
-          <div className="mx-auto max-w-6xl">
-            <div className="mx-auto max-w-2xl text-center">
-              <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">
-                Tudo em um só lugar
-              </span>
-              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">
-                Do conteúdo bruto ao estudo.
-              </h2>
-              <p className="mt-4 text-muted-foreground">
-                A experiência reúne captura, organização e revisão em uma única jornada. O que já
-                está disponível aparece pronto para usar; o restante entra no roadmap do produto.
+          <div className="mx-auto max-w-[1260px]">
+            <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+              <div className="max-w-[680px]">
+                <p className="text-sm font-semibold text-[#82709e]">Recursos</p>
+                <h2 className="mt-3 text-4xl font-medium leading-[1.04] tracking-[-.06em] sm:text-6xl">
+                  Capture, organize e aprenda.
+                </h2>
+              </div>
+              <p className="max-w-[390px] leading-7 text-[#706c65]">
+                Suas aulas viram uma base de estudo que você pode consultar de vários jeitos.
               </p>
             </div>
 
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => {
-                const Icon = feature.icon;
-                const available = feature.status === "Disponível";
-                return (
-                  <article
-                    key={feature.title}
-                    className="group rounded-3xl border border-border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <Icon size={21} />
-                      </div>
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${available ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
-                      >
-                        {feature.status}
-                      </span>
-                    </div>
-                    <h3 className="mt-5 font-extrabold">{feature.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      {feature.description}
-                    </p>
-                  </article>
-                );
-              })}
+            <div className="mt-10 grid gap-x-8 sm:grid-cols-2 lg:mt-14 lg:grid-cols-4">
+              {featureItems.map(({ icon: Icon, title, description }) => (
+                <article key={title} className="border-t border-[#24211c]/15 py-6 sm:py-7">
+                  <Icon size={19} strokeWidth={1.7} className="text-[#77658f]" />
+                  <h3 className="mt-5 text-base font-semibold tracking-[-.02em]">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#706c65]">{description}</p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
 
-        <section id="experiencia" className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-          <div className="mx-auto max-w-6xl">
-            <div className="grid items-center gap-8 lg:grid-cols-[.85fr_1.15fr]">
-              <div>
-                <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">
-                  Experiência de estudo
-                </span>
-                <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">
-                  Um material. Várias formas de aprender.
-                </h2>
-                <p className="mt-5 leading-7 text-muted-foreground">
-                  O conteúdo não precisa terminar na transcrição. A ideia do Pineapple Note é levar
-                  você da captura até a revisão, com notas, flashcards, quizzes e progresso no mesmo
-                  fluxo.
-                </p>
-                <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                  {[
-                    ["01", "Capturar", "Grave ou envie o conteúdo."],
-                    ["02", "Organizar", "Receba notas e transcrição."],
-                    ["03", "Praticar", "Use quiz e flashcards."],
-                    ["04", "Revisar", "Acompanhe seu progresso."],
-                  ].map(([number, title, description]) => (
-                    <div key={number} className="rounded-2xl border border-border bg-card p-4">
-                      <span className="text-xs font-black text-primary">{number}</span>
-                      <h3 className="mt-2 font-extrabold">{title}</h3>
-                      <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-[30px] border border-border bg-card p-4 shadow-[0_30px_90px_-35px_hsl(var(--foreground)/0.28)] sm:p-6">
-                <div className="rounded-2xl border border-border bg-background p-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <FileText size={19} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-extrabold">Aula de Ciência da Computação</p>
-                      <p className="text-xs text-muted-foreground">Material pronto para revisão</p>
-                    </div>
-                  </div>
-                  <div className="mt-5 rounded-xl bg-secondary/60 p-4">
-                    <div className="h-2.5 w-11/12 rounded bg-foreground/10" />
-                    <div className="mt-2.5 h-2.5 w-full rounded bg-muted" />
-                    <div className="mt-2.5 h-2.5 w-4/5 rounded bg-muted" />
-                  </div>
-                  <div className="mt-4 grid grid-cols-3 gap-3">
-                    {[
-                      { icon: FileText, label: "Notas" },
-                      { icon: BookOpen, label: "Flashcards" },
-                      { icon: CheckCircle2, label: "Quiz" },
-                    ].map(({ icon: Icon, label }) => (
-                      <div key={label} className="rounded-xl border border-border p-3 text-center">
-                        <Icon size={18} className="mx-auto text-primary" />
-                        <p className="mt-2 text-xs font-bold">{label}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 rounded-xl border border-primary/15 bg-primary/5 p-4">
-                    <div className="flex items-center justify-between text-xs font-bold">
-                      <span>Progresso de revisão</span>
-                      <span className="text-primary">78%</span>
-                    </div>
-                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-primary/10">
-                      <div className="h-full w-[78%] rounded-full bg-primary" />
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <section id="dispositivos" className="px-5 py-20 sm:px-9 sm:py-28 lg:px-14">
+          <div className="mx-auto grid max-w-[1260px] items-center gap-10 rounded-[28px] bg-[#1d1c19] px-6 py-9 text-[#f4f1e9] sm:px-10 sm:py-12 lg:grid-cols-[1fr_auto] lg:px-14 lg:py-14">
+            <div className="max-w-[680px]">
+              <p className="text-sm font-medium text-[#c5b4e1]">Para computador e celular</p>
+              <h2 className="mt-3 text-4xl font-medium leading-[1.03] tracking-[-.06em] sm:text-6xl">
+                Sua atenção fica na aula. Suas notas ficam com você.
+              </h2>
+              <p className="mt-5 max-w-[560px] leading-7 text-white/65">
+                Acesse seus materiais pelo navegador e continue de onde parou, no seu próprio ritmo.
+              </p>
             </div>
-          </div>
-        </section>
-
-        <section className="border-y border-border bg-secondary/30 px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-          <div className="mx-auto max-w-6xl">
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="rounded-3xl border border-border bg-card p-7 sm:p-8">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <Smartphone size={22} />
-                </div>
-                <h2 className="mt-5 text-2xl font-black">Estude no celular.</h2>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                  O Pineapple Note já foi construído com interface responsiva para funcionar bem no
-                  celular, tablet e desktop pelo navegador.
-                </p>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {["Celular", "Tablet", "Web"].map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-bold"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-border bg-card p-7 sm:p-8">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <Monitor size={22} />
-                </div>
-                <h2 className="mt-5 text-2xl font-black">Uma experiência que cresce com você.</h2>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                  O acesso web é o centro da experiência hoje. Aplicativos nativos e recursos
-                  avançados entram como evolução do produto.
-                </p>
-                <div className="mt-6 flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                  <CheckCircle2 size={15} className="text-primary" />
-                  Web responsivo disponível
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-          <div className="mx-auto max-w-6xl overflow-hidden rounded-[32px] border border-border bg-foreground px-6 py-12 text-background sm:px-12 sm:py-16">
-            <div className="grid items-center gap-10 lg:grid-cols-[1fr_auto]">
-              <div className="max-w-2xl">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-background/15 bg-background/10 px-3 py-1.5 text-xs font-bold">
-                  <ArrowRight size={14} />
-                  Menos trabalho. Mais foco.
-                </div>
-                <h2 className="text-3xl font-black tracking-tight sm:text-5xl">
-                  Sua atenção deve estar na aula — não no bloco de notas.
-                </h2>
-                <p className="mt-5 leading-7 text-background/70">
-                  Capture o que importa e volte depois para revisar com calma. O Pineapple Note foi
-                  pensado para transformar informação em uma experiência de estudo.
-                </p>
-              </div>
-              <Link to="/auth" search={{ mode: "signup" }}>
-                <Button
-                  size="lg"
-                  className="h-12 w-full rounded-xl bg-background px-7 text-foreground hover:bg-background/90 sm:w-auto"
-                >
-                  Criar minha conta
-                  <ArrowRight size={18} />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="overflow-hidden border-y border-border bg-primary px-4 py-6 text-primary-foreground sm:px-6 lg:px-8">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-2 text-center text-sm font-black uppercase tracking-[0.18em] sm:justify-between">
-            <span>Capture</span>
-            <span className="opacity-60">→</span>
-            <span>Organize</span>
-            <span className="opacity-60">→</span>
-            <span>Pratique</span>
-            <span className="opacity-60">→</span>
-            <span>Revise</span>
-            <span className="opacity-60">→</span>
-            <span>Aprenda</span>
+            <Link
+              to="/auth"
+              search={{ mode: "signup" }}
+              className="inline-flex h-12 items-center justify-center gap-2 self-start rounded-full bg-[#f4f1e9] px-6 text-sm font-semibold text-[#191815] transition hover:bg-white lg:self-center"
+            >
+              Criar minha conta <ArrowRight size={16} />
+            </Link>
           </div>
         </section>
 
         <section
           id="perguntas"
-          className="border-t border-border px-4 py-20 sm:px-6 sm:py-28 lg:px-8"
+          className="scroll-mt-24 border-t border-[#201e19]/[0.08] px-5 py-20 sm:px-9 sm:py-24 lg:px-14"
         >
-          <div className="mx-auto max-w-4xl">
-            <div className="text-center">
-              <span className="text-sm font-bold uppercase tracking-[0.16em] text-primary">
-                Perguntas frequentes
-              </span>
-              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">
-                Antes de começar.
+          <div className="mx-auto grid max-w-[1260px] gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-20">
+            <div>
+              <p className="text-sm font-semibold text-[#82709e]">Dúvidas</p>
+              <h2 className="mt-3 text-4xl font-medium leading-[1.04] tracking-[-.06em] sm:text-6xl">
+                Perguntas frequentes.
               </h2>
             </div>
-
-            <div className="mt-10 divide-y divide-border rounded-3xl border border-border bg-card">
+            <div className="divide-y divide-[#201e19]/[0.12] border-y border-[#201e19]/[0.12]">
               {faqs.map((faq) => (
-                <details key={faq.question} className="group p-5 sm:p-6">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-5 font-bold">
+                <details key={faq.question} className="group py-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-[15px] font-semibold">
                     <span>{faq.question}</span>
                     <ChevronDown
-                      size={19}
-                      className="shrink-0 text-muted-foreground transition group-open:rotate-180"
+                      size={18}
+                      className="shrink-0 text-[#77736c] transition-transform group-open:rotate-180"
                     />
                   </summary>
-                  <p className="mt-4 max-w-3xl pr-8 text-sm leading-6 text-muted-foreground">
+                  <p className="mt-3 max-w-[700px] pr-8 text-sm leading-6 text-[#706c65]">
                     {faq.answer}
                   </p>
                 </details>
@@ -710,35 +497,27 @@ function LandingPage() {
             </div>
           </div>
         </section>
-
-        <section
-          id="decode-analytics"
-          className="border-t border-border bg-secondary/30 px-4 py-16 sm:px-6 lg:px-8"
-        >
-          <div className="mx-auto max-w-5xl text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <BookOpen size={22} />
-            </div>
-            <h2 className="mt-5 text-2xl font-black">Desenvolvido pela Decode Analytics.</h2>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-              O Pineapple Note faz parte do ecossistema de projetos da Decode Analytics, unindo
-              tecnologia, dados e inteligência artificial para criar experiências digitais úteis.
-            </p>
-          </div>
-        </section>
       </main>
 
-      <footer className="border-t border-border px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 text-center text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:text-left">
-          <div className="flex items-center justify-center gap-3 sm:justify-start">
+      <footer className="border-t border-[#201e19]/[0.08] px-5 py-7 sm:px-9 lg:px-14">
+        <div className="mx-auto flex max-w-[1260px] flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <Link to="/" className="flex items-center gap-2.5" aria-label="Pineapple Note — início">
             <img
               src="/pineapple-note-app-icon.png"
               alt=""
-              className="h-10 w-auto object-contain mix-blend-multiply sm:h-11"
+              className="h-8 w-8 rounded-full object-cover"
             />
-            <span>© {new Date().getFullYear()} Pineapple Note</span>
-          </div>
-          <span>Desenvolvido pela Decode Analytics.</span>
+            <span className="text-sm font-semibold tracking-[-.03em]">Pineapple Note</span>
+          </Link>
+          <span className="text-xs text-[#77736c]">
+            © {new Date().getFullYear()} Pineapple Note · Desenvolvido pela Decode Analytics
+          </span>
+          <a
+            href="#inicio"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[#5c5952] transition hover:text-black"
+          >
+            Voltar ao topo <ArrowDown size={13} className="rotate-180" />
+          </a>
         </div>
       </footer>
     </div>
