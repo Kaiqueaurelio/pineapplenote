@@ -79,21 +79,39 @@ const studySchema = {
 
 function isPrivateOrReservedHostname(hostname: string): boolean {
   const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
-  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host === "metadata.google.internal") return true;
-  if (/^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^169\.254\./.test(host)) return true;
+  if (
+    host === "localhost" ||
+    host.endsWith(".localhost") ||
+    host.endsWith(".local") ||
+    host === "metadata.google.internal"
+  )
+    return true;
+  if (
+    /^127\./.test(host) ||
+    /^10\./.test(host) ||
+    /^192\.168\./.test(host) ||
+    /^169\.254\./.test(host)
+  )
+    return true;
   const octets = host.split(".");
   if (octets.length === 4 && octets.every((part) => /^\d+$/.test(part))) {
     const [a, b] = octets.map(Number);
-    if (a === 0 || a === 100 && b >= 64 && b <= 127 || a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 0 || (a === 100 && b >= 64 && b <= 127) || (a === 172 && b >= 16 && b <= 31))
+      return true;
   }
-  return host === "::1" || host.startsWith("fc") || host.startsWith("fd") || host.startsWith("fe80:");
+  return (
+    host === "::1" || host.startsWith("fc") || host.startsWith("fd") || host.startsWith("fe80:")
+  );
 }
 
 function validateImportUrl(rawUrl: string): URL {
   const parsed = new URL(rawUrl);
-  if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("Apenas URLs HTTP e HTTPS são aceitas.");
-  if (parsed.username || parsed.password) throw new Error("URLs com credenciais embutidas não são permitidas.");
-  if (isPrivateOrReservedHostname(parsed.hostname)) throw new Error("Esta URL aponta para um endereço de rede privado ou reservado.");
+  if (!["http:", "https:"].includes(parsed.protocol))
+    throw new Error("Apenas URLs HTTP e HTTPS são aceitas.");
+  if (parsed.username || parsed.password)
+    throw new Error("URLs com credenciais embutidas não são permitidas.");
+  if (isPrivateOrReservedHostname(parsed.hostname))
+    throw new Error("Esta URL aponta para um endereço de rede privado ou reservado.");
   return parsed;
 }
 
@@ -123,7 +141,12 @@ async function readLimitedText(response: Response, maxBytes: number): Promise<st
   return new TextDecoder().decode(bytes);
 }
 
-async function uploadToGemini(apiKey: string, bytes: Uint8Array, mimeType: string, displayName: string) {
+async function uploadToGemini(
+  apiKey: string,
+  bytes: Uint8Array,
+  mimeType: string,
+  displayName: string,
+) {
   const start = await fetch("https://generativelanguage.googleapis.com/upload/v1beta/files", {
     method: "POST",
     headers: {
@@ -140,7 +163,8 @@ async function uploadToGemini(apiKey: string, bytes: Uint8Array, mimeType: strin
     const error = await start.text();
     throw new Error(`Falha ao iniciar upload no Gemini: ${error.slice(0, 500)}`);
   }
-  const uploadUrl = start.headers.get("x-goog-upload-url") ?? start.headers.get("X-Goog-Upload-URL");
+  const uploadUrl =
+    start.headers.get("x-goog-upload-url") ?? start.headers.get("X-Goog-Upload-URL");
   if (!uploadUrl) throw new Error("O Gemini não retornou a URL de upload.");
 
   const upload = await fetch(uploadUrl, {
@@ -193,16 +217,26 @@ Deno.serve(async (req) => {
     global: { headers: { Authorization: authHeader } },
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
   if (userError || !user) return json({ error: "Sessão inválida." }, 401);
 
-  const { data: actor } = await supabase.from("profiles").select("role").eq("user_id", user.id).maybeSingle();
+  const { data: actor } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .maybeSingle();
   const isAdmin = actor?.role === "admin";
   const secretKeys = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? secretKeys.default;
-  const db = isAdmin && serviceRoleKey
-    ? createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } })
-    : supabase;
+  const db =
+    isAdmin && serviceRoleKey
+      ? createClient(supabaseUrl, serviceRoleKey, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        })
+      : supabase;
 
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) return json({ error: "GEMINI_API_KEY não configurada no servidor." }, 503);
@@ -244,7 +278,8 @@ Deno.serve(async (req) => {
         pageUrl = validateImportUrl(new URL(location, pageUrl).toString());
       }
       if (!pageResponse) throw new Error("Não foi possível acessar a URL.");
-      if (![200, 204].includes(pageResponse.status)) throw new Error(`Não foi possível acessar a URL (${pageResponse.status}).`);
+      if (![200, 204].includes(pageResponse.status))
+        throw new Error(`Não foi possível acessar a URL (${pageResponse.status}).`);
       const contentType = pageResponse.headers.get("content-type") ?? "";
       if (!contentType.includes("text/html") && !contentType.includes("text/plain")) {
         throw new Error("Esta URL não retornou uma página de texto compatível.");
@@ -262,17 +297,21 @@ Deno.serve(async (req) => {
         .trim()
         .slice(0, 180000);
       if (!textContent) throw new Error("Não encontramos texto suficiente nesta página.");
-      contents = [{
-        role: "user",
-        parts: [{
-          text: `Transforme o conteúdo abaixo em um material de estudo completo. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. O campo transcript deve conter o texto-fonte quando aplicável. Preserve fatos e não invente informações. Responda em português brasileiro.
+      contents = [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `Transforme o conteúdo abaixo em um material de estudo completo. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. O campo transcript deve conter o texto-fonte quando aplicável. Preserve fatos e não invente informações. Responda em português brasileiro.
 
 URL: ${url}
 
 CONTEÚDO:
 ${textContent}`,
-        }],
-      }];
+            },
+          ],
+        },
+      ];
     } else {
       const { data: signed, error: signedError } = await db.storage
         .from("study-materials")
@@ -290,26 +329,29 @@ ${textContent}`,
       );
       if (!fileUri) throw new Error("O Gemini não retornou o arquivo processado.");
 
-      const kind = material.source_type === "audio"
-        ? "áudio"
-        : material.source_type === "video"
-          ? "vídeo"
-          : "documento";
+      const kind =
+        material.source_type === "audio"
+          ? "áudio"
+          : material.source_type === "video"
+            ? "vídeo"
+            : "documento";
 
-      contents = [{
-        role: "user",
-        parts: [
-          {
-            file_data: {
-              mime_type: material.mime_type || "application/octet-stream",
-              file_uri: fileUri,
+      contents = [
+        {
+          role: "user",
+          parts: [
+            {
+              file_data: {
+                mime_type: material.mime_type || "application/octet-stream",
+                file_uri: fileUri,
+              },
             },
-          },
-          {
-            text: `Analise este ${kind} como material acadêmico. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. Se houver fala, transcreva-a no campo transcript. Preserve fatos, nomes, fórmulas e termos técnicos; não invente informações. Responda em português brasileiro.`,
-          },
-        ],
-      }];
+            {
+              text: `Analise este ${kind} como material acadêmico. Gere um resumo claro, 5 a 10 tópicos, 8 a 15 flashcards e 5 a 10 questões de múltipla escolha. Se houver fala, transcreva-a no campo transcript. Preserve fatos, nomes, fórmulas e termos técnicos; não invente informações. Responda em português brasileiro.`,
+            },
+          ],
+        },
+      ];
     }
 
     const output = await generateStudy(apiKey, contents);

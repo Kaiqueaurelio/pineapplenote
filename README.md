@@ -46,4 +46,3 @@ Para concluir a publicação no Supabase:
 
 Para desenvolvimento local, copie `supabase/functions/.env.example` para
 `supabase/functions/.env` e preencha a chave apenas na sua máquina. Esse arquivo é ignorado pelo Git.
-

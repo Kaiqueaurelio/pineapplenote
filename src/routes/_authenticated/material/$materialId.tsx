@@ -969,9 +969,20 @@ function MaterialPage() {
                 list="pineapple-language-suggestions"
               />
               <datalist id="pineapple-language-suggestions">
-                {["English", "Español", "Français", "Deutsch", "Italiano", "日本語", "한국어", "中文", "العربية", "Português"].map(
-                  (item) => <option key={item} value={item} />,
-                )}
+                {[
+                  "English",
+                  "Español",
+                  "Français",
+                  "Deutsch",
+                  "Italiano",
+                  "日本語",
+                  "한국어",
+                  "中文",
+                  "العربية",
+                  "Português",
+                ].map((item) => (
+                  <option key={item} value={item} />
+                ))}
               </datalist>
               <Button className="mt-4 w-full" onClick={() => void translateNote()}>
                 Traduzir com IA

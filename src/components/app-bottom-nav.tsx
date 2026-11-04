@@ -61,15 +61,7 @@ export function AppBottomNav({ onCreate }: { onCreate?: () => void }) {
   );
 }
 
-function TabButton({
-  tab,
-  active,
-  onSelect,
-}: {
-  tab: Tab;
-  active: boolean;
-  onSelect: () => void;
-}) {
+function TabButton({ tab, active, onSelect }: { tab: Tab; active: boolean; onSelect: () => void }) {
   return (
     <button
       type="button"

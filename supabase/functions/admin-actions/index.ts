@@ -44,7 +44,8 @@ Deno.serve(async (req) => {
     .eq("user_id", auth.user.id)
     .maybeSingle();
 
-  if (actorError || actor?.role !== "admin") return json({ error: "Acesso administrativo negado." }, 403);
+  if (actorError || actor?.role !== "admin")
+    return json({ error: "Acesso administrativo negado." }, 403);
 
   const adminClient = createClient(url, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -59,7 +60,10 @@ Deno.serve(async (req) => {
       const role = body?.role === "admin" ? "admin" : body?.role === "user" ? "user" : "";
       if (!userId || !role) return json({ error: "Usuário e função são obrigatórios." }, 400);
       if (userId === auth.user.id && role !== "admin") {
-        return json({ error: "Você não pode remover sua própria permissão de administrador." }, 400);
+        return json(
+          { error: "Você não pode remover sua própria permissão de administrador." },
+          400,
+        );
       }
 
       const { error } = await adminClient.from("profiles").update({ role }).eq("user_id", userId);
@@ -69,7 +73,9 @@ Deno.serve(async (req) => {
 
     if (action === "delete_materials") {
       const materialIds = Array.isArray(body?.materialIds)
-        ? body.materialIds.filter((id: unknown): id is string => typeof id === "string").slice(0, 100)
+        ? body.materialIds
+            .filter((id: unknown): id is string => typeof id === "string")
+            .slice(0, 100)
         : [];
       if (!materialIds.length) return json({ error: "Nenhum material selecionado." }, 400);
 

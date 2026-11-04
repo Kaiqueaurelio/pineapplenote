@@ -38,7 +38,10 @@ function createSupabaseAdminClient() {
     process.env["SUPABASE_SECRET_KEY"] ??
     (() => {
       try {
-        const keys = JSON.parse(process.env["SUPABASE_SECRET_KEYS"] ?? "{}") as Record<string, string>;
+        const keys = JSON.parse(process.env["SUPABASE_SECRET_KEYS"] ?? "{}") as Record<
+          string,
+          string
+        >;
         return keys.default;
       } catch {
         return undefined;
